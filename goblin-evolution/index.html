@@ -48,6 +48,7 @@
         <div class="coin-pill-icon"></div>
         <div class="coin-pill-amount" id="coinAmount">0</div>
       </div>
+      <div class="rate-note" id="rateNote">0 / сек</div>
       <button class="icon-btn settings-btn" id="settingsBtn" title="Настройки">⚙</button>
     </div>
 
@@ -56,6 +57,25 @@
 
     <!-- Тост -->
     <div class="toast" id="toast"></div>
+
+    <!-- Приветственный оверлей -->
+    <div class="intro-backdrop" id="introOverlay">
+      <div class="intro-card">
+        <div class="intro-title">Эволюция<br/><span>Гоблина</span></div>
+        <div class="intro-story">
+          В глухом лесу стоит маленькая гоблинская деревушка. Самый младший
+          гоблинёнок выбрался из колыбели и отправился искать своё золото —
+          от первой монетки до короны Короля гоблинов.
+        </div>
+        <div class="intro-rules">
+          <div class="intro-rule"><span class="intro-rule-ico">👆</span><span>Тапай гоблина (или любую точку экрана, или пробел) — сыплются монетки.</span></div>
+          <div class="intro-rule"><span class="intro-rule-ico">💰</span><span>Собирай монеты и покупай улучшения в правом меню.</span></div>
+          <div class="intro-rule"><span class="intro-rule-ico">⚡</span><span>Улучшения увеличивают доход за клик и автоматический доход в секунду.</span></div>
+          <div class="intro-rule"><span class="intro-rule-ico">🏰</span><span>10 уровней эволюции — чем больше золота добыл всего, тем круче гоблин.</span></div>
+        </div>
+        <button class="btn btn-primary intro-go" id="introGo">Поехали!</button>
+      </div>
+    </div>
 
     <!-- Модалка настроек -->
     <div class="modal-backdrop" id="settingsModal" hidden>

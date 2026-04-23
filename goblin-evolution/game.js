@@ -327,26 +327,47 @@ function goblinSvg(level /* 1..10 */) {
     `,
     4: () => `
       ${defs}
-      <!-- Разбойник: капюшон, кинжал -->
-      <ellipse cx="215" cy="472" rx="26" ry="16" fill="#25430f"/>
-      <ellipse cx="285" cy="472" rx="26" ry="16" fill="#25430f"/>
-      <path d="M160 330 Q250 280 340 330 L335 445 Q250 455 165 445 Z" fill="url(#skin)"/>
-      <!-- куртка -->
-      <path d="M150 340 Q250 315 350 340 L355 445 Q250 460 145 445 Z" fill="#4a3828" stroke="#1f1608" stroke-width="3"/>
-      <path d="M250 318 L250 448" stroke="#1f1608" stroke-width="2"/>
-      <!-- пояс -->
-      <rect x="150" y="395" width="200" height="14" fill="#2d1e10" rx="4"/>
-      <rect x="243" y="394" width="16" height="18" fill="url(#gold)" rx="2"/>
+      <!-- Разбойник: короткий плащ, повязка на глаз, кинжал в руке -->
+      <ellipse cx="215" cy="472" rx="26" ry="16" fill="#1b1208"/>
+      <ellipse cx="285" cy="472" rx="26" ry="16" fill="#1b1208"/>
+      <!-- штаны -->
+      <path d="M175 400 L205 470 L245 470 L240 395 Z" fill="#3a2a18" stroke="#1a1008" stroke-width="3"/>
+      <path d="M325 400 L295 470 L255 470 L260 395 Z" fill="#3a2a18" stroke="#1a1008" stroke-width="3"/>
+      <!-- тело -->
+      <path d="M160 330 Q250 280 340 330 L335 430 Q250 440 165 430 Z" fill="url(#skin)"/>
+      <!-- куртка кожаная -->
+      <path d="M150 340 Q250 315 350 340 L355 435 Q250 448 145 435 Z" fill="#5b3f22" stroke="#231608" stroke-width="3"/>
+      <path d="M250 318 L250 440" stroke="#231608" stroke-width="2"/>
+      <!-- шнуровка -->
+      <g stroke="#c6a363" stroke-width="2" fill="none">
+        <path d="M235 335 L265 345 M235 355 L265 365 M235 375 L265 385 M235 395 L265 405"/>
+      </g>
+      <!-- пояс с пряжкой -->
+      <rect x="150" y="395" width="200" height="14" fill="#221508" rx="4"/>
+      <rect x="243" y="394" width="16" height="18" fill="url(#gold)" stroke="#6a4f1a" stroke-width="2" rx="2"/>
+      <!-- плечевой ремень через грудь -->
+      <path d="M170 330 L300 420" stroke="#c2a56b" stroke-width="8" stroke-linecap="round" opacity=".9"/>
+      <path d="M170 330 L300 420" stroke="#3a2a18" stroke-width="2" fill="none" opacity=".6"/>
       <!-- ручки -->
       <path d="M160 330 Q110 390 130 435 Q155 440 175 425 Q180 370 190 345 Z" fill="url(#skin)"/>
       <path d="M340 330 Q390 390 370 435 Q345 440 325 425 Q320 370 310 345 Z" fill="url(#skin)"/>
       ${baseFace}
-      <!-- капюшон поверх -->
-      <path d="M130 180 Q250 70 370 180 Q395 230 370 280 L330 280 Q370 200 250 170 Q130 200 170 280 L130 280 Q105 230 130 180 Z" fill="#2a2a35" stroke="#0a0a10" stroke-width="3"/>
-      <ellipse cx="250" cy="210" rx="125" ry="60" fill="#0a0a10" opacity=".35"/>
-      <!-- кинжал -->
-      <rect x="355" y="410" width="10" height="45" fill="#3d2810"/>
-      <path d="M345 410 L375 410 L360 348 Z" fill="url(#armor)" stroke="#22252e" stroke-width="2"/>
+      <!-- бандана поверх головы (верхняя часть волос) -->
+      <path d="M130 110 Q250 70 370 110 L380 145 Q250 130 120 145 Z" fill="#8a1f1f" stroke="#3a0a0a" stroke-width="3"/>
+      <!-- узел банданы сбоку -->
+      <path d="M380 130 Q420 115 430 150 Q410 165 385 160 Z" fill="#8a1f1f" stroke="#3a0a0a" stroke-width="3"/>
+      <path d="M380 155 Q395 175 385 190 Q365 180 375 160 Z" fill="#8a1f1f" stroke="#3a0a0a" stroke-width="2"/>
+      <!-- повязка на правый глаз -->
+      <rect x="200" y="170" width="45" height="14" fill="#1a1a1a" rx="2"/>
+      <path d="M198 177 L155 195" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <path d="M245 177 L280 195" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <!-- ухмылка: перекрываем стандартный рот клыком побольше -->
+      <path d="M225 252 L230 282 L238 252 Z" fill="#fff"/>
+      <!-- кинжал в правой руке -->
+      <rect x="355" y="410" width="12" height="48" fill="#3d2810" stroke="#1f1608" stroke-width="2" rx="2"/>
+      <rect x="345" y="408" width="32" height="8" fill="#6a4f1a" stroke="#3d2810" stroke-width="2" rx="2"/>
+      <path d="M349 408 L373 408 L361 335 Z" fill="url(#armor)" stroke="#22252e" stroke-width="2"/>
+      <path d="M361 360 L361 400" stroke="#5a606a" stroke-width="1.5" opacity=".6"/>
     `,
     5: () => `
       ${defs}
@@ -557,6 +578,7 @@ function recalcRates() {
 const $ = (sel) => document.querySelector(sel);
 const gameEl = $('#game');
 const coinAmountEl = $('#coinAmount');
+const rateNoteEl = $('#rateNote');
 const levelLabelEl = $('#levelLabel');
 const levelProgressEl = $('#levelProgress');
 const levelProgressTextEl = $('#levelProgressText');
@@ -574,6 +596,15 @@ const settingsClose = $('#settingsClose');
 const sfxToggle = $('#sfxToggle');
 const musicToggle = $('#musicToggle');
 const resetBtn = $('#resetBtn');
+const introOverlay = $('#introOverlay');
+const introGoBtn = $('#introGo');
+
+let introOpen = true;
+function fmtRate(v) {
+  if (v === 0) return '0';
+  if (v < 10) return (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, '');
+  return fmt(v);
+}
 
 let currentGoblinLevel = 0;
 function setGoblinLevel(lv) {
@@ -600,9 +631,9 @@ function renderUpgrades() {
       </div>
       <div class="up-side">
         <div class="up-icon">${u.icon}</div>
-        <div class="up-cost" data-cost>0</div>
         <div class="up-level" data-level>Ур. 0</div>
       </div>
+      <div class="up-cost"><span data-cost>0</span></div>
     `;
     el.addEventListener('click', (ev) => { ev.stopPropagation(); tryBuy(u.id); });
     upgradesEl.appendChild(el);
@@ -653,6 +684,7 @@ function getCurrentLevel() { return levelForXp(state.totalCoins) + 1; }
 let lastDisplayedLevel = 0;
 function refreshHud() {
   coinAmountEl.textContent = fmt(state.coins);
+  rateNoteEl.textContent = `${fmtRate(perSec)} / сек`;
 
   const lp = levelProgress(state.totalCoins);
   const lv = lp.idx + 1;
@@ -740,20 +772,30 @@ function spawnCoinsAt(clientX, clientY, gain, burst) {
 // Глобальный обработчик: любой клик по экрану, кроме элементов меню.
 function isInteractive(target) {
   if (!target) return false;
-  return !!target.closest('.upgrade, .icon-btn, .coin-pill, .modal, .toggle, .btn, #upgrades');
+  return !!target.closest('.upgrade, .icon-btn, .coin-pill, .modal, .toggle, .btn, #upgrades, .intro-backdrop, .intro-card');
 }
 
 function onScreenClick(ev) {
+  if (introOpen) return;
   if (isInteractive(ev.target)) return;
-  // пропускаем клики по самим кнопкам/модалкам (обработают свои handler'ы)
+  if (!settingsModal.hidden) return;
   doClick(ev.clientX, ev.clientY, null);
 }
 
 function onSpaceClick() {
-  // Монетки сыплются из случайной точки экрана.
+  if (introOpen || !settingsModal.hidden) return;
   const x = 120 + Math.random() * (window.innerWidth - 240);
   const y = 120 + Math.random() * (window.innerHeight - 240);
   doClick(x, y, 10 + Math.floor(Math.random() * 6));
+}
+
+function hideIntro() {
+  if (!introOpen) return;
+  introOpen = false;
+  introOverlay.classList.add('hidden');
+  Sound.ensure(); Sound.resume();
+  if (state.music) Sound.startMusic();
+  setTimeout(() => { introOverlay.style.display = 'none'; }, 600);
 }
 
 // ---- Тост ----
@@ -827,6 +869,9 @@ function init() {
   });
   resetBtn.addEventListener('click', (e) => { e.stopPropagation(); resetProgress(); });
 
+  // Приветственный оверлей
+  introGoBtn.addEventListener('click', (e) => { e.stopPropagation(); hideIntro(); });
+
   // Клики по всему экрану
   window.addEventListener('click', onScreenClick);
   // Тач: дублируем, чтобы анимации ловили точку касания
@@ -837,8 +882,13 @@ function init() {
     ev.preventDefault();
   }, { passive: false });
 
-  // Пробел
+  // Пробел / Enter / Escape
   window.addEventListener('keydown', (ev) => {
+    if (introOpen && (ev.code === 'Space' || ev.code === 'Enter' || ev.code === 'NumpadEnter')) {
+      ev.preventDefault();
+      hideIntro();
+      return;
+    }
     if (ev.code === 'Space' && !ev.repeat) {
       ev.preventDefault();
       onSpaceClick();
