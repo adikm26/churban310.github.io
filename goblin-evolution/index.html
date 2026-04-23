@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+<title>Эволюция Гоблина</title>
+<link rel="stylesheet" href="styles.css" />
+<!-- Yandex.Games SDK. За пределами платформы просто не загрузится — код это корректно отлавливает. -->
+<script src="https://yandex.ru/games/sdk/v2"></script>
+</head>
+<body>
+  <div id="game">
+    <!-- Фон -->
+    <div class="bg" id="bg">
+      <div class="bg-sky"></div>
+      <div class="bg-sun"></div>
+      <div class="bg-clouds"></div>
+      <div class="bg-hills"></div>
+      <div class="bg-trees"></div>
+      <div class="bg-village"></div>
+      <div class="bg-ground"></div>
+      <div class="bg-fireflies"></div>
+    </div>
+
+    <!-- HUD -->
+    <div class="hud-top">
+      <div class="coin-counter" title="Монеты">
+        <div class="coin-icon"></div>
+        <div class="coin-stats">
+          <div class="coin-amount" id="coinAmount">0</div>
+          <div class="coin-rate">
+            <span id="perClick">+1</span> / клик ·
+            <span id="perSec">0</span> / сек
+          </div>
+        </div>
+      </div>
+      <div class="level-bar" title="Уровень гоблина">
+        <div class="level-bar-label">
+          <span id="levelLabel">Level 1</span>
+          <span id="levelProgressText">0 / 500 XP</span>
+        </div>
+        <div class="level-bar-track">
+          <div class="level-bar-fill" id="levelProgress"></div>
+        </div>
+      </div>
+      <button class="sound-toggle" id="soundToggle" title="Звук">
+        <span class="ico on">🔊</span>
+        <span class="ico off">🔇</span>
+      </button>
+    </div>
+
+    <!-- Меню апгрейдов слева -->
+    <aside class="upgrades" id="upgrades"></aside>
+
+    <!-- Центр — гоблин -->
+    <div class="stage" id="stage">
+      <div class="goblin-shadow"></div>
+      <div class="goblin-wrap" id="goblinWrap">
+        <div class="goblin" id="goblin"></div>
+        <div class="goblin-level" id="goblinLevel">Level 1</div>
+      </div>
+      <div class="floaters" id="floaters"></div>
+      <div class="particles" id="particles"></div>
+    </div>
+
+    <!-- Нижний тост -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="sdk.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
