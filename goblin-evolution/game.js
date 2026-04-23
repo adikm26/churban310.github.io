@@ -876,7 +876,9 @@ function init() {
   window.addEventListener('click', onScreenClick);
   // Тач: дублируем, чтобы анимации ловили точку касания
   window.addEventListener('touchstart', (ev) => {
+    if (introOpen) return;
     if (isInteractive(ev.target)) return;
+    if (!settingsModal.hidden) return;
     const t = ev.touches[0]; if (!t) return;
     doClick(t.clientX, t.clientY, null);
     ev.preventDefault();
