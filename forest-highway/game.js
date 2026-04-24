@@ -71,34 +71,35 @@
   }
 
   // ---------- Скины зайца ----------
+  // У каждого скина помимо цвета своя форма: shape описывает уникальные детали.
   const SKINS = {
     white: {
-      name: 'Беляк', cost: 0,
+      name: 'Беляк', cost: 0, shape: 'classic',
       body: '#f3f6ef', belly: '#ffffff', ear: '#ffd9e0',
       nose: '#ff8c9e', accent: null,
     },
     brown: {
-      name: 'Русак', cost: 10,
+      name: 'Русак', cost: 10, shape: 'chubby',
       body: '#a37149', belly: '#e9cdaa', ear: '#c08e63',
       nose: '#4a2310', accent: null,
     },
     grey: {
-      name: 'Серый капюшон', cost: 25,
+      name: 'Серый капюшон', cost: 25, shape: 'hoodie',
       body: '#7a8490', belly: '#c8d1da', ear: '#5f6672',
-      nose: '#2a2e35', accent: null,
+      nose: '#2a2e35', accent: '#3c4551',
     },
     ninja: {
-      name: 'Ушастый ниндзя', cost: 50,
+      name: 'Ушастый ниндзя', cost: 50, shape: 'ninja',
       body: '#2a2e35', belly: '#44495a', ear: '#1b1e25',
       nose: '#ff4b4b', accent: '#ff4b4b',
     },
     gold: {
-      name: 'Золотой', cost: 120,
+      name: 'Золотой', cost: 120, shape: 'royal',
       body: '#f5cb4b', belly: '#fff0a6', ear: '#d69a1e',
       nose: '#7a4a07', accent: '#fff7d1',
     },
     cosmic: {
-      name: 'Космический', cost: 280,
+      name: 'Космический', cost: 280, shape: 'cosmic',
       body: '#6640c9', belly: '#b89cff', ear: '#3c1f8c',
       nose: '#ffd0ff', accent: '#8be0ff',
     },
@@ -120,9 +121,29 @@
   }
 
   // Кролик (вид сверху) — голова сверху, тело снизу, уши торчат вверх.
+  // Форма варьируется по c.shape: разная ширина тела, высота/наклон ушей, акценты.
   function drawBunny(ctx, w, h, skin) {
     const cx = w / 2, cy = h / 2;
     const c = SKINS[skin] || SKINS.white;
+    const shape = c.shape || 'classic';
+    // параметры формы по скину
+    const P = (() => {
+      switch (shape) {
+        case 'chubby': // Русак — толстенький, широкое тело, короткие уши
+          return { bodyRx: 0.40, bodyRy: 0.36, bodyY: 0.14, headRx: 0.27, headRy: 0.24, headY: -0.04, earW: 0.10, earH: 0.26, earX: 0.13, earY: -0.24, earTilt: 0.08 };
+        case 'hoodie': // Серый капюшон — капюшон вокруг головы, уши поменьше
+          return { bodyRx: 0.36, bodyRy: 0.36, bodyY: 0.12, headRx: 0.25, headRy: 0.23, headY: -0.06, earW: 0.09, earH: 0.28, earX: 0.12, earY: -0.28, earTilt: 0.05 };
+        case 'ninja': // Ниндзя — узкие длинные заострённые уши, стройное тело
+          return { bodyRx: 0.32, bodyRy: 0.36, bodyY: 0.12, headRx: 0.23, headRy: 0.22, headY: -0.06, earW: 0.08, earH: 0.42, earX: 0.13, earY: -0.34, earTilt: 0.02, earPointy: true };
+        case 'royal': // Золотой — корона над головой, округлая «царская» форма
+          return { bodyRx: 0.37, bodyRy: 0.36, bodyY: 0.12, headRx: 0.26, headRy: 0.23, headY: -0.06, earW: 0.10, earH: 0.30, earX: 0.14, earY: -0.28, earTilt: 0.06 };
+        case 'cosmic': // Космический — звёздочки-искры, уши слегка разведены
+          return { bodyRx: 0.35, bodyRy: 0.36, bodyY: 0.12, headRx: 0.25, headRy: 0.23, headY: -0.06, earW: 0.10, earH: 0.34, earX: 0.15, earY: -0.30, earTilt: 0.14 };
+        case 'classic':
+        default:
+          return { bodyRx: 0.36, bodyRy: 0.36, bodyY: 0.12, headRx: 0.25, headRy: 0.23, headY: -0.06, earW: 0.11, earH: 0.34, earX: 0.14, earY: -0.28, earTilt: 0.06 };
+      }
+    })();
     ctx.save();
     ctx.translate(cx, cy);
     // Тень под зайцем
@@ -130,7 +151,7 @@
     ctx.beginPath();
     ctx.ellipse(0, h * 0.38, w * 0.34, h * 0.07, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Хвостик-пом-помом (раньше тела — чтобы аккуратно выглядывал)
+    // Хвостик-пом-помом
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(0, h * 0.32, w * 0.11, 0, Math.PI * 2);
@@ -139,48 +160,68 @@
     ctx.beginPath();
     ctx.arc(w * 0.03, h * 0.29, w * 0.045, 0, Math.PI * 2);
     ctx.fill();
-    // Уши (длинные, почти вертикальные)
-    const earW = w * 0.11, earH = h * 0.34;
+    // Уши — форма зависит от скина
+    const earW = w * P.earW, earH = h * P.earH;
     for (const side of [-1, 1]) {
       ctx.save();
-      ctx.translate(side * w * 0.14, -h * 0.28);
-      ctx.rotate(side * 0.06);
-      // Внешняя часть
+      ctx.translate(side * w * P.earX, h * P.earY);
+      ctx.rotate(side * P.earTilt);
       const earGrad = ctx.createLinearGradient(0, -earH, 0, earH);
       earGrad.addColorStop(0, lighten(c.body, 0.14));
       earGrad.addColorStop(1, c.body);
       ctx.fillStyle = earGrad;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, earW, earH, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // Внутренняя розовая вкладка
+      if (P.earPointy) {
+        // ниндзя — вытянутый треугольный контур
+        ctx.beginPath();
+        ctx.moveTo(0, -earH);
+        ctx.quadraticCurveTo(earW * 1.1, 0, 0, earH);
+        ctx.quadraticCurveTo(-earW * 1.1, 0, 0, -earH);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, earW, earH, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Внутренняя вкладка
       ctx.fillStyle = c.ear;
       ctx.beginPath();
       ctx.ellipse(0, h * 0.02, earW * 0.55, earH * 0.72, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
-    // Тело — яйцевидная форма
+    // Тело
     const bodyGrad = ctx.createRadialGradient(-w * 0.08, -h * 0.05, w * 0.04, 0, 0, w * 0.44);
     bodyGrad.addColorStop(0, lighten(c.body, 0.26));
     bodyGrad.addColorStop(1, c.body);
     ctx.fillStyle = bodyGrad;
     ctx.beginPath();
-    ctx.ellipse(0, h * 0.12, w * 0.36, h * 0.36, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, h * P.bodyY, w * P.bodyRx, h * P.bodyRy, 0, 0, Math.PI * 2);
     ctx.fill();
     // Брюшко
     ctx.fillStyle = c.belly;
     ctx.beginPath();
-    ctx.ellipse(0, h * 0.18, w * 0.20, h * 0.22, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, h * (P.bodyY + 0.06), w * 0.20, h * 0.22, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Голова — круглая, ближе к телу
+    // Голова
     const headGrad = ctx.createRadialGradient(-w * 0.05, -h * 0.18, w * 0.04, 0, -h * 0.08, w * 0.32);
     headGrad.addColorStop(0, lighten(c.body, 0.3));
     headGrad.addColorStop(1, c.body);
     ctx.fillStyle = headGrad;
     ctx.beginPath();
-    ctx.ellipse(0, -h * 0.06, w * 0.25, h * 0.23, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, h * P.headY, w * P.headRx, h * P.headRy, 0, 0, Math.PI * 2);
     ctx.fill();
+    // Капюшон — серый скин: полукружие над головой
+    if (shape === 'hoodie') {
+      ctx.fillStyle = c.accent;
+      ctx.beginPath();
+      ctx.ellipse(0, h * (P.headY - 0.04), w * 0.30, h * 0.17, 0, Math.PI, Math.PI * 2);
+      ctx.fill();
+      // Затенение внутри капюшона
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      ctx.beginPath();
+      ctx.ellipse(0, h * (P.headY - 0.12), w * 0.18, h * 0.06, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
     // Щёчки — круглые светлые пятна
     ctx.fillStyle = 'rgba(255,182,193,0.55)';
     for (const side of [-1, 1]) {
@@ -240,220 +281,375 @@
       ctx.ellipse(side * w * 0.14, h * 0.36, w * 0.07, h * 0.07, 0, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Акцент (шарф/платок)
-    if (c.accent) {
+    // Форменные акценты по скину
+    if (shape === 'ninja') {
+      // Чёрная маска поверх глаз
+      ctx.fillStyle = '#0f1116';
+      ctx.beginPath();
+      ctx.ellipse(0, -h * 0.12, w * 0.23, h * 0.06, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Красные прорези-глаза
+      ctx.fillStyle = c.accent;
+      for (const dx of [-w * 0.085, w * 0.085]) {
+        ctx.beginPath();
+        ctx.ellipse(dx, -h * 0.12, w * 0.028, h * 0.012, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Красная повязка-лента за головой
       ctx.fillStyle = c.accent;
       ctx.beginPath();
-      ctx.moveTo(-w * 0.22, h * 0.06);
-      ctx.quadraticCurveTo(0, h * 0.18, w * 0.22, h * 0.06);
-      ctx.quadraticCurveTo(0, h * 0.26, -w * 0.22, h * 0.06);
+      ctx.ellipse(0, -h * 0.20, w * 0.26, h * 0.03, 0, 0, Math.PI * 2);
       ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  // Волк (вид сверху, морда вперёд)
-  function drawWolf(ctx, w, h) {
-    const body = '#5e6672', bellyCol = '#9ba3ae', dark = '#33373f';
-    ctx.save();
-    ctx.translate(w / 2, h / 2);
-    // Тень
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath();
-    ctx.ellipse(0, h * 0.32, w * 0.38, h * 0.10, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Хвост
-    ctx.fillStyle = body;
-    ctx.beginPath();
-    ctx.ellipse(-w * 0.42, h * 0.05, w * 0.14, h * 0.07, -0.35, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ccc';
-    ctx.beginPath();
-    ctx.ellipse(-w * 0.48, h * 0.04, w * 0.05, h * 0.05, -0.35, 0, Math.PI * 2);
-    ctx.fill();
-    // Туловище
-    const g = ctx.createLinearGradient(0, -h * 0.2, 0, h * 0.25);
-    g.addColorStop(0, lighten(body, 0.12)); g.addColorStop(1, body);
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.ellipse(-w * 0.05, 0, w * 0.30, h * 0.22, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Живот
-    ctx.fillStyle = bellyCol;
-    ctx.beginPath();
-    ctx.ellipse(-w * 0.05, h * 0.04, w * 0.18, h * 0.14, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Лапы
-    ctx.fillStyle = dark;
-    for (const [dx, dy] of [[-0.22, -0.16], [0.08, -0.18], [-0.22, 0.18], [0.08, 0.20]]) {
+      // Развевающиеся концы ленты
       ctx.beginPath();
-      ctx.ellipse(dx * w, dy * h, w * 0.06, h * 0.07, 0, 0, Math.PI * 2);
+      ctx.moveTo(w * 0.22, -h * 0.20);
+      ctx.quadraticCurveTo(w * 0.34, -h * 0.18, w * 0.36, -h * 0.10);
+      ctx.quadraticCurveTo(w * 0.28, -h * 0.16, w * 0.22, -h * 0.14);
+      ctx.fill();
+    } else if (shape === 'royal') {
+      // Маленькая корона из треугольников над головой
+      const crownY = -h * 0.32;
+      ctx.fillStyle = '#ffd94a';
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.13, crownY + h * 0.04);
+      ctx.lineTo(-w * 0.13, crownY - h * 0.02);
+      ctx.lineTo(-w * 0.07, crownY + h * 0.01);
+      ctx.lineTo(-w * 0.03, crownY - h * 0.05);
+      ctx.lineTo(0, crownY + h * 0.01);
+      ctx.lineTo(w * 0.03, crownY - h * 0.05);
+      ctx.lineTo(w * 0.07, crownY + h * 0.01);
+      ctx.lineTo(w * 0.13, crownY - h * 0.02);
+      ctx.lineTo(w * 0.13, crownY + h * 0.04);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#a07000';
+      ctx.lineWidth = Math.max(1, w * 0.006);
+      ctx.stroke();
+      // Драгоценные камни
+      ctx.fillStyle = c.accent;
+      ctx.beginPath(); ctx.arc(0, crownY - h * 0.01, w * 0.02, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ff4b4b';
+      ctx.beginPath(); ctx.arc(-w * 0.08, crownY - h * 0.01, w * 0.012, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(w * 0.08, crownY - h * 0.01, w * 0.012, 0, Math.PI * 2); ctx.fill();
+    } else if (shape === 'cosmic') {
+      // Звёздочки-искры на теле и вокруг
+      ctx.fillStyle = c.accent;
+      const sparkles = [[-0.22, 0.02], [0.18, 0.14], [-0.10, 0.20], [0.24, -0.05], [-0.28, -0.18]];
+      for (const [dx, dy] of sparkles) {
+        drawSpark(ctx, dx * w, dy * h, w * 0.022);
+      }
+      // Светлый полумесяц на голове
+      ctx.fillStyle = '#fff7d1';
+      ctx.beginPath();
+      ctx.arc(0, -h * 0.14, w * 0.05, 0.2, Math.PI - 0.2);
+      ctx.arc(0, -h * 0.14, w * 0.035, Math.PI - 0.2, 0.2, true);
+      ctx.closePath();
+      ctx.fill();
+    } else if (shape === 'chubby') {
+      // Русак — тёплая «подпалина» на спине
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.beginPath();
+      ctx.ellipse(0, h * 0.18, w * 0.28, h * 0.08, 0, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Голова
-    ctx.fillStyle = body;
-    ctx.beginPath();
-    ctx.ellipse(w * 0.22, 0, w * 0.20, h * 0.18, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Морда
-    ctx.fillStyle = dark;
-    ctx.beginPath();
-    ctx.ellipse(w * 0.37, 0, w * 0.10, h * 0.08, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Нос
-    ctx.fillStyle = '#0d0d0f';
-    ctx.beginPath();
-    ctx.ellipse(w * 0.44, 0, w * 0.028, h * 0.025, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Уши
-    ctx.fillStyle = dark;
-    ctx.beginPath(); ctx.moveTo(w * 0.10, -h * 0.12); ctx.lineTo(w * 0.18, -h * 0.28); ctx.lineTo(w * 0.22, -h * 0.12); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(w * 0.10,  h * 0.12); ctx.lineTo(w * 0.18,  h * 0.28); ctx.lineTo(w * 0.22,  h * 0.12); ctx.closePath(); ctx.fill();
-    // Глаза — жёлтые
-    ctx.fillStyle = '#ffd14a';
-    ctx.beginPath(); ctx.ellipse(w * 0.26, -h * 0.06, w * 0.022, h * 0.025, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(w * 0.26,  h * 0.06, w * 0.022, h * 0.025, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.fillRect(w * 0.258, -h * 0.075, w * 0.005, h * 0.03);
-    ctx.fillRect(w * 0.258,  h * 0.045, w * 0.005, h * 0.03);
     ctx.restore();
   }
 
-  // Медведь — массивный, крупный.
-  function drawBear(ctx, w, h) {
-    const body = '#6b4326', belly = '#a97a50', dark = '#3a2311';
+  // Маленькая четырёхконечная звезда
+  function drawSpark(ctx, x, y, r) {
+    ctx.beginPath();
+    ctx.moveTo(x, y - r);
+    ctx.lineTo(x + r * 0.25, y - r * 0.25);
+    ctx.lineTo(x + r, y);
+    ctx.lineTo(x + r * 0.25, y + r * 0.25);
+    ctx.lineTo(x, y + r);
+    ctx.lineTo(x - r * 0.25, y + r * 0.25);
+    ctx.lineTo(x - r, y);
+    ctx.lineTo(x - r * 0.25, y - r * 0.25);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // ---------- Хищники (вид сверху, морда вправо) ----------
+  // Общие принципы: длинная горизонтальная ось, 4 лапы симметрично, хвост сзади,
+  // голова впереди с ушами, носом и глазами. Все пропорции без искажений.
+
+  function drawWolf(ctx, w, h) {
+    const body = '#6a707a', back = '#3b4148', belly = '#b2b8c1', dark = '#24272c';
     ctx.save();
     ctx.translate(w / 2, h / 2);
     // Тень
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
     ctx.beginPath();
-    ctx.ellipse(0, h * 0.34, w * 0.42, h * 0.12, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, h * 0.34, w * 0.40, h * 0.09, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Туловище
-    const g = ctx.createRadialGradient(-w * 0.1, -h * 0.08, w * 0.1, 0, 0, w * 0.42);
-    g.addColorStop(0, lighten(body, 0.18)); g.addColorStop(1, body);
-    ctx.fillStyle = g;
+    // Хвост — изогнутый, серый с белым кончиком
+    ctx.fillStyle = back;
     ctx.beginPath();
-    ctx.ellipse(-w * 0.05, 0, w * 0.38, h * 0.30, 0, 0, Math.PI * 2);
+    ctx.moveTo(-w * 0.30, -h * 0.02);
+    ctx.quadraticCurveTo(-w * 0.48, -h * 0.20, -w * 0.50, h * 0.02);
+    ctx.quadraticCurveTo(-w * 0.46, h * 0.12, -w * 0.30, h * 0.08);
+    ctx.closePath();
     ctx.fill();
-    // Живот
+    ctx.fillStyle = '#e4e6ea';
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.48, -h * 0.10, w * 0.05, h * 0.04, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    // Задние лапы
+    ctx.fillStyle = dark;
+    ctx.beginPath(); ctx.ellipse(-w * 0.20, -h * 0.24, w * 0.06, h * 0.08, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-w * 0.20,  h * 0.24, w * 0.06, h * 0.08, -0.2, 0, Math.PI * 2); ctx.fill();
+    // Туловище — вытянутый овал
+    const bodyGrad = ctx.createLinearGradient(0, -h * 0.25, 0, h * 0.25);
+    bodyGrad.addColorStop(0, back);
+    bodyGrad.addColorStop(0.55, body);
+    bodyGrad.addColorStop(1, belly);
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.05, 0, w * 0.32, h * 0.24, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Тёмный полосный хребет
+    ctx.fillStyle = back;
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.05, -h * 0.09, w * 0.28, h * 0.05, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Светлое брюшко
     ctx.fillStyle = belly;
     ctx.beginPath();
-    ctx.ellipse(-w * 0.03, h * 0.03, w * 0.22, h * 0.20, 0, 0, Math.PI * 2);
+    ctx.ellipse(-w * 0.05, h * 0.12, w * 0.22, h * 0.07, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Лапы
+    // Передние лапы
     ctx.fillStyle = dark;
-    for (const [dx, dy] of [[-0.30, -0.22], [0.08, -0.24], [-0.30, 0.24], [0.08, 0.26]]) {
-      ctx.beginPath();
-      ctx.ellipse(dx * w, dy * h, w * 0.08, h * 0.09, 0, 0, Math.PI * 2);
-      ctx.fill();
+    ctx.beginPath(); ctx.ellipse(w * 0.14, -h * 0.20, w * 0.055, h * 0.08, 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(w * 0.14,  h * 0.20, w * 0.055, h * 0.08, -0.1, 0, Math.PI * 2); ctx.fill();
+    // Шея (плавное соединение к голове)
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.20, 0, w * 0.13, h * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Голова — ромбо-овал, морда чуть заострена
+    const headGrad = ctx.createRadialGradient(w * 0.30, -h * 0.05, w * 0.02, w * 0.32, 0, w * 0.22);
+    headGrad.addColorStop(0, lighten(body, 0.15));
+    headGrad.addColorStop(1, body);
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.32, 0, w * 0.17, h * 0.17, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Уши — острые треугольники, стоячие, тёмные снаружи, светлые внутри
+    ctx.fillStyle = back;
+    ctx.beginPath(); ctx.moveTo(w * 0.20, -h * 0.12); ctx.lineTo(w * 0.26, -h * 0.30); ctx.lineTo(w * 0.32, -h * 0.10); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(w * 0.20,  h * 0.12); ctx.lineTo(w * 0.26,  h * 0.30); ctx.lineTo(w * 0.32,  h * 0.10); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#d6b59a';
+    ctx.beginPath(); ctx.moveTo(w * 0.23, -h * 0.14); ctx.lineTo(w * 0.26, -h * 0.24); ctx.lineTo(w * 0.29, -h * 0.12); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(w * 0.23,  h * 0.14); ctx.lineTo(w * 0.26,  h * 0.24); ctx.lineTo(w * 0.29,  h * 0.12); ctx.closePath(); ctx.fill();
+    // Морда — светлое «пятно» вокруг носа
+    ctx.fillStyle = belly;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.42, 0, w * 0.09, h * 0.07, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Нос
+    ctx.fillStyle = '#0b0b0f';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.48, 0, w * 0.03, h * 0.028, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Глаза — жёлто-золотые с чёрным зрачком
+    for (const dy of [-h * 0.065, h * 0.065]) {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.ellipse(w * 0.29, dy, w * 0.028, h * 0.028, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f4c028';
+      ctx.beginPath(); ctx.ellipse(w * 0.29, dy, w * 0.022, h * 0.022, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.ellipse(w * 0.295, dy, w * 0.007, h * 0.016, 0, 0, Math.PI * 2); ctx.fill();
     }
-    // Когти
-    ctx.fillStyle = '#f2e8c9';
-    for (const [dx, dy] of [[0.14, -0.25], [0.14, 0.27]]) {
+    ctx.restore();
+  }
+
+  function drawBear(ctx, w, h) {
+    const body = '#6e4321', back = '#472612', belly = '#a9794d', dark = '#2c1708';
+    ctx.save();
+    ctx.translate(w / 2, h / 2);
+    // Тень — большая
+    ctx.fillStyle = 'rgba(0,0,0,0.32)';
+    ctx.beginPath();
+    ctx.ellipse(0, h * 0.36, w * 0.44, h * 0.11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Задние лапы
+    ctx.fillStyle = dark;
+    ctx.beginPath(); ctx.ellipse(-w * 0.28, -h * 0.26, w * 0.08, h * 0.10, 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-w * 0.28,  h * 0.26, w * 0.08, h * 0.10, -0.15, 0, Math.PI * 2); ctx.fill();
+    // Туловище — массивный круглый овал
+    const bg = ctx.createRadialGradient(-w * 0.08, -h * 0.12, w * 0.06, 0, 0, w * 0.46);
+    bg.addColorStop(0, lighten(body, 0.20));
+    bg.addColorStop(0.65, body);
+    bg.addColorStop(1, back);
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.05, 0, w * 0.40, h * 0.32, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Мех — блики на спине
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.lineWidth = Math.max(1, w * 0.004);
+    for (let i = 0; i < 5; i++) {
+      const y = -h * 0.18 + i * h * 0.04;
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.34, y);
+      ctx.quadraticCurveTo(-w * 0.05, y + h * 0.01, w * 0.24, y + h * 0.005);
+      ctx.stroke();
+    }
+    // Брюшко
+    ctx.fillStyle = belly;
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.03, h * 0.12, w * 0.24, h * 0.13, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Передние лапы (крупные)
+    ctx.fillStyle = dark;
+    ctx.beginPath(); ctx.ellipse(w * 0.14, -h * 0.26, w * 0.085, h * 0.10, 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(w * 0.14,  h * 0.26, w * 0.085, h * 0.10, -0.1, 0, Math.PI * 2); ctx.fill();
+    // Когти на передних лапах
+    ctx.fillStyle = '#eadfbd';
+    for (const dy of [-0.28, 0.28]) {
       for (let i = -1; i <= 1; i++) {
         ctx.beginPath();
-        ctx.arc(dx * w + i * w * 0.018, dy * h, w * 0.01, 0, Math.PI * 2);
+        ctx.ellipse(w * 0.22 + i * w * 0.014, dy * h, w * 0.009, h * 0.018, 0, 0, Math.PI * 2);
         ctx.fill();
       }
     }
-    // Голова — большая
+    // Шея → голова
     ctx.fillStyle = body;
     ctx.beginPath();
-    ctx.ellipse(w * 0.30, 0, w * 0.22, h * 0.20, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.22, 0, w * 0.13, h * 0.22, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Уши (круглые)
-    ctx.fillStyle = body;
-    ctx.beginPath(); ctx.arc(w * 0.20, -h * 0.18, w * 0.06, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w * 0.20,  h * 0.18, w * 0.06, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = dark;
-    ctx.beginPath(); ctx.arc(w * 0.20, -h * 0.18, w * 0.035, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w * 0.20,  h * 0.18, w * 0.035, 0, Math.PI * 2); ctx.fill();
-    // Морда
+    // Голова — большая, округлая
+    const hg = ctx.createRadialGradient(w * 0.34, -h * 0.06, w * 0.04, w * 0.36, 0, w * 0.26);
+    hg.addColorStop(0, lighten(body, 0.16));
+    hg.addColorStop(1, body);
+    ctx.fillStyle = hg;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.36, 0, w * 0.22, h * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Уши — круглые, маленькие
+    ctx.fillStyle = back;
+    ctx.beginPath(); ctx.arc(w * 0.24, -h * 0.22, w * 0.07, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(w * 0.24,  h * 0.22, w * 0.07, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#c38a5a';
+    ctx.beginPath(); ctx.arc(w * 0.245, -h * 0.215, w * 0.038, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(w * 0.245,  h * 0.215, w * 0.038, 0, Math.PI * 2); ctx.fill();
+    // Морда — большое овальное пятно
     ctx.fillStyle = belly;
     ctx.beginPath();
-    ctx.ellipse(w * 0.44, 0, w * 0.11, h * 0.08, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.48, 0, w * 0.12, h * 0.09, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Нос
-    ctx.fillStyle = '#0d0d0f';
+    // Нос — округлый чёрный
+    ctx.fillStyle = '#0b0b0f';
     ctx.beginPath();
-    ctx.ellipse(w * 0.52, 0, w * 0.035, h * 0.03, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.56, 0, w * 0.038, h * 0.036, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Глаза
-    ctx.fillStyle = '#0d0d0f';
-    ctx.beginPath(); ctx.arc(w * 0.32, -h * 0.05, w * 0.02, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w * 0.32,  h * 0.05, w * 0.02, 0, Math.PI * 2); ctx.fill();
+    // Маленький рот
+    ctx.strokeStyle = '#1a0d05';
+    ctx.lineWidth = Math.max(1, w * 0.008);
+    ctx.beginPath();
+    ctx.moveTo(w * 0.50, h * 0.03);
+    ctx.quadraticCurveTo(w * 0.47, h * 0.055, w * 0.44, h * 0.035);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w * 0.50, -h * 0.03);
+    ctx.quadraticCurveTo(w * 0.47, -h * 0.055, w * 0.44, -h * 0.035);
+    ctx.stroke();
+    // Глаза — маленькие чёрные
+    ctx.fillStyle = '#0b0b0f';
+    ctx.beginPath(); ctx.arc(w * 0.36, -h * 0.07, w * 0.022, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(w * 0.36,  h * 0.07, w * 0.022, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(w * 0.365, -h * 0.08, w * 0.007, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(w * 0.365,  h * 0.06, w * 0.007, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
-  // Лиса — меньше, рыжая.
   function drawFox(ctx, w, h) {
-    const body = '#d26a2e', belly = '#ffd8af', dark = '#3b1a08';
+    const body = '#e07432', back = '#b8561f', belly = '#ffe5c4', dark = '#2a1208';
     ctx.save();
     ctx.translate(w / 2, h / 2);
     // Тень
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillStyle = 'rgba(0,0,0,0.24)';
     ctx.beginPath();
     ctx.ellipse(0, h * 0.32, w * 0.34, h * 0.08, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Пушистый хвост
+    // Пушистый хвост — изогнутый, с большим белым кончиком
     ctx.fillStyle = body;
     ctx.beginPath();
-    ctx.ellipse(-w * 0.38, -h * 0.02, w * 0.18, h * 0.08, -0.25, 0, Math.PI * 2);
+    ctx.moveTo(-w * 0.26, -h * 0.05);
+    ctx.quadraticCurveTo(-w * 0.50, -h * 0.30, -w * 0.52, -h * 0.10);
+    ctx.quadraticCurveTo(-w * 0.40, h * 0.10, -w * 0.26, h * 0.05);
+    ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.ellipse(-w * 0.48, -h * 0.06, w * 0.06, h * 0.05, -0.25, 0, Math.PI * 2);
+    ctx.ellipse(-w * 0.50, -h * 0.22, w * 0.08, h * 0.06, -0.4, 0, Math.PI * 2);
     ctx.fill();
-    // Туловище
-    const g = ctx.createLinearGradient(0, -h * 0.2, 0, h * 0.2);
-    g.addColorStop(0, lighten(body, 0.15)); g.addColorStop(1, body);
-    ctx.fillStyle = g;
+    // Задние лапы (в конце тела)
+    ctx.fillStyle = dark;
+    ctx.beginPath(); ctx.ellipse(-w * 0.18, -h * 0.20, w * 0.05, h * 0.07, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-w * 0.18,  h * 0.20, w * 0.05, h * 0.07, -0.2, 0, Math.PI * 2); ctx.fill();
+    // Туловище — тонкое, изящное
+    const bg = ctx.createLinearGradient(0, -h * 0.2, 0, h * 0.2);
+    bg.addColorStop(0, back);
+    bg.addColorStop(0.5, body);
+    bg.addColorStop(1, lighten(body, 0.1));
+    ctx.fillStyle = bg;
     ctx.beginPath();
-    ctx.ellipse(-w * 0.05, 0, w * 0.26, h * 0.18, 0, 0, Math.PI * 2);
+    ctx.ellipse(-w * 0.04, 0, w * 0.26, h * 0.18, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Живот
+    // Светлое брюшко
     ctx.fillStyle = belly;
     ctx.beginPath();
-    ctx.ellipse(-w * 0.05, h * 0.04, w * 0.14, h * 0.10, 0, 0, Math.PI * 2);
+    ctx.ellipse(-w * 0.04, h * 0.10, w * 0.18, h * 0.08, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Лапы
+    // Передние лапы
     ctx.fillStyle = dark;
-    for (const [dx, dy] of [[-0.20, -0.14], [0.06, -0.16], [-0.20, 0.16], [0.06, 0.18]]) {
-      ctx.beginPath();
-      ctx.ellipse(dx * w, dy * h, w * 0.045, h * 0.055, 0, 0, Math.PI * 2);
-      ctx.fill();
+    ctx.beginPath(); ctx.ellipse(w * 0.14, -h * 0.15, w * 0.04, h * 0.065, 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(w * 0.14,  h * 0.15, w * 0.04, h * 0.065, -0.1, 0, Math.PI * 2); ctx.fill();
+    // Голова — треугольно-овальная, вытянутая к носу
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.08, -h * 0.18);
+    ctx.quadraticCurveTo(w * 0.50, -h * 0.05, w * 0.52, 0);
+    ctx.quadraticCurveTo(w * 0.50, h * 0.05, w * 0.08, h * 0.18);
+    ctx.quadraticCurveTo(-w * 0.02, 0, w * 0.08, -h * 0.18);
+    ctx.fill();
+    // Белая маска по центру морды
+    ctx.fillStyle = belly;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.16, -h * 0.08);
+    ctx.quadraticCurveTo(w * 0.42, -h * 0.02, w * 0.48, 0);
+    ctx.quadraticCurveTo(w * 0.42, h * 0.02, w * 0.16, h * 0.08);
+    ctx.quadraticCurveTo(w * 0.22, 0, w * 0.16, -h * 0.08);
+    ctx.fill();
+    // Уши — длинные треугольники, с чёрными кончиками
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.moveTo(w * 0.10, -h * 0.16); ctx.lineTo(w * 0.18, -h * 0.36); ctx.lineTo(w * 0.24, -h * 0.10); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(w * 0.10,  h * 0.16); ctx.lineTo(w * 0.18,  h * 0.36); ctx.lineTo(w * 0.24,  h * 0.10); ctx.closePath(); ctx.fill();
+    // Чёрные кончики ушей
+    ctx.fillStyle = dark;
+    ctx.beginPath(); ctx.moveTo(w * 0.14, -h * 0.24); ctx.lineTo(w * 0.18, -h * 0.36); ctx.lineTo(w * 0.22, -h * 0.22); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(w * 0.14,  h * 0.24); ctx.lineTo(w * 0.18,  h * 0.36); ctx.lineTo(w * 0.22,  h * 0.22); ctx.closePath(); ctx.fill();
+    // Внутренняя часть уха (розовая)
+    ctx.fillStyle = '#ffc9a8';
+    ctx.beginPath(); ctx.moveTo(w * 0.14, -h * 0.16); ctx.lineTo(w * 0.17, -h * 0.26); ctx.lineTo(w * 0.21, -h * 0.14); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(w * 0.14,  h * 0.16); ctx.lineTo(w * 0.17,  h * 0.26); ctx.lineTo(w * 0.21,  h * 0.14); ctx.closePath(); ctx.fill();
+    // Нос — маленький чёрный треугольник
+    ctx.fillStyle = '#0b0b0f';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.50, 0, w * 0.028, h * 0.024, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Глаза — узкие, хитрые, с жёлтой радужкой
+    for (const dy of [-h * 0.06, h * 0.06]) {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.ellipse(w * 0.26, dy, w * 0.025, h * 0.018, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#e8a820';
+      ctx.beginPath(); ctx.ellipse(w * 0.26, dy, w * 0.020, h * 0.014, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0b0b0f';
+      ctx.beginPath(); ctx.ellipse(w * 0.265, dy, w * 0.007, h * 0.012, 0, 0, Math.PI * 2); ctx.fill();
     }
-    // Голова — треугольная
-    ctx.fillStyle = body;
-    ctx.beginPath();
-    ctx.moveTo(w * 0.08, -h * 0.14);
-    ctx.quadraticCurveTo(w * 0.50, 0, w * 0.08, h * 0.14);
-    ctx.quadraticCurveTo(w * 0.0, 0, w * 0.08, -h * 0.14);
-    ctx.fill();
-    // Белая маска
-    ctx.fillStyle = '#fff2e2';
-    ctx.beginPath();
-    ctx.moveTo(w * 0.16, -h * 0.07);
-    ctx.quadraticCurveTo(w * 0.44, 0, w * 0.16, h * 0.07);
-    ctx.quadraticCurveTo(w * 0.22, 0, w * 0.16, -h * 0.07);
-    ctx.fill();
-    // Уши (острые, треугольные)
-    ctx.fillStyle = body;
-    ctx.beginPath(); ctx.moveTo(w * 0.08, -h * 0.14); ctx.lineTo(w * 0.14, -h * 0.32); ctx.lineTo(w * 0.22, -h * 0.10); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(w * 0.08,  h * 0.14); ctx.lineTo(w * 0.14,  h * 0.32); ctx.lineTo(w * 0.22,  h * 0.10); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = dark;
-    ctx.beginPath(); ctx.moveTo(w * 0.12, -h * 0.16); ctx.lineTo(w * 0.16, -h * 0.28); ctx.lineTo(w * 0.20, -h * 0.14); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(w * 0.12,  h * 0.16); ctx.lineTo(w * 0.16,  h * 0.28); ctx.lineTo(w * 0.20,  h * 0.14); ctx.closePath(); ctx.fill();
-    // Нос
-    ctx.fillStyle = '#0d0d0f';
-    ctx.beginPath();
-    ctx.ellipse(w * 0.46, 0, w * 0.028, h * 0.022, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Глаза
-    ctx.fillStyle = '#0d0d0f';
-    ctx.beginPath(); ctx.arc(w * 0.22, -h * 0.05, w * 0.018, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w * 0.22,  h * 0.05, w * 0.018, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
@@ -651,9 +847,9 @@
       SPRITES.bunny[key] = c;
     }
     const mkSized = (w, h, fn) => { const c = newOffscreen(w, h); fn(c.getContext('2d'), w, h); return c; };
-    SPRITES.wolf   = mkSized(320, 220, drawWolf);
-    SPRITES.bear   = mkSized(480, 280, drawBear);   // крупный, длинный (на "две полосы")
-    SPRITES.fox    = mkSized(260, 180, drawFox);
+    SPRITES.wolf   = mkSized(400, 260, drawWolf);
+    SPRITES.bear   = mkSized(560, 320, drawBear);   // крупный, длинный (на "две полосы")
+    SPRITES.fox    = mkSized(340, 220, drawFox);
     SPRITES.coin   = mkSized(160, 160, drawCoin);
     SPRITES.bush   = mkSized(240, 240, drawBush);
     SPRITES.tree   = mkSized(280, 280, drawTree);
@@ -763,10 +959,12 @@
 
   // Типы животных, которые рандомно выбегают на любой тропе.
   // speed — в клетках/сек (абсолютное значение), size — длина в клетках, height — вертикал.
+  // Скорости подобраны так, чтобы разница была ощутимой, но не драматичной:
+  // медведь самый медленный, волк средний, лиса самая быстрая.
   const PREDATORS = [
-    { kind: 'wolf', weight: 40, speed: [0.80, 1.10], size: 1.0, height: 0.85 },
-    { kind: 'fox',  weight: 28, speed: [1.30, 1.70], size: 0.8, height: 0.70 },
-    { kind: 'bear', weight: 16, speed: [0.45, 0.65], size: 2.0, height: 1.00 },
+    { kind: 'wolf', weight: 40, speed: [0.95, 1.20], size: 1.0, height: 0.85 },
+    { kind: 'fox',  weight: 28, speed: [1.20, 1.50], size: 0.8, height: 0.70 },
+    { kind: 'bear', weight: 16, speed: [0.70, 0.95], size: 2.0, height: 1.00 },
   ];
   function pickPredator() {
     const total = PREDATORS.reduce((s, p) => s + p.weight, 0);
@@ -949,11 +1147,11 @@
     S.vw = Math.round(w * dpr); S.vh = Math.round(h * dpr);
     S.canvas.width = S.vw; S.canvas.height = S.vh;
     S.canvas.style.width = w + 'px'; S.canvas.style.height = h + 'px';
-    // Размер клетки: стараемся занять как можно больше ширины экрана,
-    // чтобы «шторки» по бокам были узкие.
-    const tByW = w / (COLS + 0.3);
-    const tByH = h / 8.5;
-    S.tile = Math.max(48, Math.min(128, Math.floor(Math.min(tByW, tByH))));
+    // Размер клетки: поле занимает почти весь экран, «шторки» сведены к минимуму,
+    // оставляя узкую полосу для декоративных деревьев по краям.
+    const tByW = w / (COLS + 0.2);
+    const tByH = h / 6.2;
+    S.tile = Math.max(56, Math.min(200, Math.floor(Math.min(tByW, tByH))));
   }
 
   // ---------- Обновление мира ----------
@@ -1126,26 +1324,29 @@
       ctx.fillStyle = g;
       ctx.fillRect(rightX, 0, rightW, h);
     }
-    // Деревьев минимум — только пара штук на каждой стороне ряда, самые ближние к полю.
+    // Узкие боковины: масштаб дерева под ширину, чтобы оно аккуратно вписывалось.
     const rowH = t * 2.0;
     const startRow = Math.floor(cam) - 12;
     const endRow = Math.floor(cam) + 14;
+    // Масштаб деревьев: не больше чем в ~1.2 стороны и не больше 0.8 тайла.
+    const leftSize = Math.min(t * 0.8, Math.max(t * 0.35, leftW * 1.1));
+    const rightSize = Math.min(t * 0.8, Math.max(t * 0.35, rightW * 1.1));
     for (let r = startRow; r <= endRow; r++) {
       const y = (r - cam) * t + h * 0.62;
-      if (leftW > t * 0.6) {
+      if (leftW > 4) {
         const seed = ((r * 73) ^ 0x1311) & 0xffff;
         const rnd = (seed % 1000) / 1000;
-        const tx = leftW - t * 0.5 - rnd * t * 0.4;
+        const size = leftSize * (0.85 + rnd * 0.3);
+        const tx = Math.max(size * 0.4, leftW - size * 0.4);
         const ty = y + ((seed % 100) / 100 - 0.5) * rowH * 0.3;
-        const size = t * (0.55 + rnd * 0.2);
         ctx.drawImage(SPRITES.tree, tx - size / 2, ty - size * 0.7, size, size * 1.1);
       }
-      if (rightW > t * 0.6) {
+      if (rightW > 4) {
         const seed = ((r * 97) ^ 0x2111) & 0xffff;
         const rnd = (seed % 1000) / 1000;
-        const tx = rightX + t * 0.5 + rnd * t * 0.4;
+        const size = rightSize * (0.85 + rnd * 0.3);
+        const tx = Math.min(rightX + rightW - size * 0.4, rightX + size * 0.4);
         const ty = y + ((seed % 100) / 100 - 0.5) * rowH * 0.3;
-        const size = t * (0.55 + rnd * 0.2);
         ctx.drawImage(SPRITES.tree, tx - size / 2, ty - size * 0.7, size, size * 1.1);
       }
     }
