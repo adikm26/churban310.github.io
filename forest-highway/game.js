@@ -728,12 +728,24 @@
   // Для удобства рендера используем y-координату экрана: screenY = (row - camera) * tile + baseline.
 
   const ROW_TYPES = {
-    grass: { safe: true, weight: 40 },
-    coin:  { safe: true, weight: 14 },   // ряд с несколькими монетами подряд
-    wolf:  { safe: false, weight: 22 },
-    fox:   { safe: false, weight: 18 },
-    bear:  { safe: false, weight: 14 },
+    grass: { safe: true, weight: 46 },
+    coin:  { safe: true, weight: 8 },    // ряд с несколькими монетами подряд
+    road:  { safe: false, weight: 46 },  // единая тропа — любое животное может бежать
   };
+
+  // Типы животных, которые рандомно выбегают на любой тропе.
+  // speed — в клетках/сек (абсолютное значение), size — длина в клетках, height — вертикал.
+  const PREDATORS = [
+    { kind: 'wolf', weight: 40, speed: [0.80, 1.10], size: 1.0, height: 0.85 },
+    { kind: 'fox',  weight: 28, speed: [1.30, 1.70], size: 0.8, height: 0.70 },
+    { kind: 'bear', weight: 16, speed: [0.45, 0.65], size: 2.0, height: 1.00 },
+  ];
+  function pickPredator() {
+    const total = PREDATORS.reduce((s, p) => s + p.weight, 0);
+    let r = Math.random() * total;
+    for (const p of PREDATORS) { r -= p.weight; if (r <= 0) return p; }
+    return PREDATORS[0];
+  }
 
   function pickRowType(prev, streakUnsafe) {
     // Не даём слишком длинные серии опасных и подряд одинаковых.
@@ -779,48 +791,27 @@
         if (Math.random() < 0.25) row.decor.push({ x, kind: 'flower', ox: (Math.random() - 0.5) * 0.6, oy: (Math.random() - 0.5) * 0.6 });
       }
       // Иногда монета в траве
-      if (!tooClose && Math.random() < 0.3) {
+      if (!tooClose && Math.random() < 0.15) {
         const candidates = [];
         for (let x = 0; x < COLS; x++) if (!row.obstacles.find((o) => o.x === x)) candidates.push(x);
         if (candidates.length) row.coins.push({ x: candidates[(Math.random() * candidates.length) | 0], collected: false });
       }
     } else if (type === 'coin') {
-      // Ряд монет по диагонали/шашечкой
+      // Ряд монет по диагонали/шашечкой (реже и реже внутри)
       const offset = (Math.random() * 2) | 0;
       for (let x = 0; x < COLS; x++) {
-        if (((x + offset) % 2 === 0) && Math.random() < 0.8) row.coins.push({ x, collected: false });
+        if (((x + offset) % 2 === 0) && Math.random() < 0.55) row.coins.push({ x, collected: false });
       }
-    } else if (type === 'wolf') {
+    } else if (type === 'road') {
+      // Единая тропа: направление случайное, животное пикается на каждом спауне.
       row.dir = Math.random() < 0.5 ? -1 : 1;
-      row.speed = (1.2 + Math.random() * 0.6) * row.dir; // tiles per sec (signed)
-      const gap = 3 + Math.random() * 2.0;
-      const baseOffset = Math.random() * gap;
-      // Спавним периодически — создадим стартовую пачку, далее будем спавнить в update
-      row.spawnGap = gap;
-      row.spawnTimer = baseOffset / Math.abs(row.speed);
-      row.kind = 'wolf';
-      row.size = 1.0;     // длина в клетках
-      row.height = 0.85;  // высота для рисования (на клетку)
-      // Небольшой шанс монеты посреди тропы
-      if (Math.random() < 0.25) row.coins.push({ x: (Math.random() * COLS) | 0, collected: false });
-    } else if (type === 'fox') {
-      row.dir = Math.random() < 0.5 ? -1 : 1;
-      row.speed = (2.4 + Math.random() * 0.8) * row.dir;
-      row.spawnGap = 2 + Math.random() * 1.2;
-      row.spawnTimer = Math.random() * row.spawnGap / Math.abs(row.speed);
-      row.kind = 'fox';
-      row.size = 0.8;
-      row.height = 0.7;
-      if (Math.random() < 0.3) row.coins.push({ x: (Math.random() * COLS) | 0, collected: false });
-    } else if (type === 'bear') {
-      row.dir = Math.random() < 0.5 ? -1 : 1;
-      row.speed = (0.7 + Math.random() * 0.35) * row.dir;
-      row.spawnGap = 4.5 + Math.random() * 1.5;
-      row.spawnTimer = Math.random() * row.spawnGap / Math.abs(row.speed);
-      row.kind = 'bear';
-      row.size = 2.0;   // занимает 2 клетки (длинный/крупный)
-      row.height = 1.0;
-      if (Math.random() < 0.22) row.coins.push({ x: (Math.random() * COLS) | 0, collected: false });
+      // Фиксированный интервал спауна в секундах — предсказуемо и не «дёргается».
+      row.spawnEvery = 2.2 + Math.random() * 1.6; // 2.2–3.8 сек
+      // Небольшой рандом только на стартовое смещение, чтобы соседние тропы
+      // не плевались зверями «в унисон».
+      row.spawnTimer = Math.random() * row.spawnEvery;
+      // Небольшой шанс одинокой монеты прямо на тропе.
+      if (Math.random() < 0.10) row.coins.push({ x: (Math.random() * COLS) | 0, collected: false });
     }
     return row;
   }
@@ -940,19 +931,25 @@
   // ---------- Обновление мира ----------
   function updateRow(row, dt) {
     if (row.safe) return;
-    // Спавним новых врагов
+    // Спавним новых врагов с фиксированным интервалом в секундах.
     row.spawnTimer -= dt;
     if (row.spawnTimer <= 0) {
-      const size = row.size || 1;
-      const start = row.dir > 0 ? -size - 1 : COLS + 1;
-      row.enemies.push({ x: start, kind: row.kind, size, height: row.height || 1 });
-      row.spawnTimer = row.spawnGap / Math.abs(row.speed) * (0.8 + Math.random() * 0.4);
+      const pred = pickPredator();
+      const spd = pred.speed[0] + Math.random() * (pred.speed[1] - pred.speed[0]);
+      const start = row.dir > 0 ? -pred.size - 1 : COLS + 1;
+      row.enemies.push({
+        x: start,
+        kind: pred.kind,
+        size: pred.size,
+        height: pred.height,
+        speed: spd * row.dir, // знаковая скорость в клетках/сек
+      });
+      row.spawnTimer = row.spawnEvery;
     }
-    // Двигаем
-    const speed = row.speed;
-    row.enemies.forEach((e) => { e.x += speed * dt; });
-    // Убираем ушедших
-    row.enemies = row.enemies.filter((e) => (speed > 0 ? e.x < COLS + 3 : e.x > -e.size - 3));
+    // Двигаем каждого зверя по его собственной скорости.
+    for (const e of row.enemies) { e.x += e.speed * dt; }
+    // Убираем ушедших за край.
+    row.enemies = row.enemies.filter((e) => (e.speed > 0 ? e.x < COLS + 3 : e.x > -e.size - 3));
   }
 
   function checkCollision() {
@@ -1072,7 +1069,9 @@
     const rightX = offsetX + fieldW;
     const rightW = w - rightX;
     if (leftW < 10 && rightW < 10) return;
-    const rowH = t * 0.9;
+    // Шаг — в 2 раза больше, чем было (t*0.9 → t*1.8) → в 2 раза меньше деревьев
+    // по горизонтали, больше дороги видно слева/справа.
+    const rowH = t * 1.8;
     const startRow = Math.floor(cam) - 12;
     const endRow = Math.floor(cam) + 14;
     for (let r = startRow; r <= endRow; r++) {
@@ -1083,7 +1082,7 @@
         const rnd = (seed % 1000) / 1000;
         const tx = i * rowH + (rnd * 0.4) * rowH;
         const ty = y + ((seed % 100) / 100 - 0.5) * rowH * 0.3;
-        const size = rowH * (0.85 + (rnd * 0.3));
+        const size = rowH * (0.55 + (rnd * 0.2));
         ctx.drawImage(SPRITES.tree, tx - size / 2, ty - size * 0.7, size, size * 1.1);
       }
       // Правая сторона
@@ -1092,7 +1091,7 @@
         const rnd = (seed % 1000) / 1000;
         const tx = rightX + i * rowH + (rnd * 0.4) * rowH;
         const ty = y + ((seed % 100) / 100 - 0.5) * rowH * 0.3;
-        const size = rowH * (0.85 + (rnd * 0.3));
+        const size = rowH * (0.55 + (rnd * 0.2));
         ctx.drawImage(SPRITES.tree, tx - size / 2, ty - size * 0.7, size, size * 1.1);
       }
     }
