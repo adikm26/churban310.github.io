@@ -429,10 +429,9 @@
     const level = LEVELS[gameState.levelIndex];
     const queue = level.rocks;
     const idx = gameState.currentRockIndex;
-    if (gameState.bonusRocks > 0 && idx >= queue.length) {
-      return 'stone';
-    }
-    return queue[idx] || null;
+    if (idx < queue.length) return queue[idx];
+    if (idx < queue.length + gameState.bonusRocks) return 'stone';
+    return null;
   }
 
   function spawnRock() {
@@ -609,9 +608,9 @@
       case 'chandelier': return ['#ffe9a6', '#ffd15c', '#fff7d0'];
       case 'tv': return ['#2a2f39', '#8aa9d8', '#dfe8f6'];
       case 'diamond': return ['#b9ecff', '#7fd6ff', '#e6faff'];
-      case 'wood': case 'woodL': case 'woodV': return ['#7a4a20', '#b3753a', '#e5b377'];
-      case 'stone': case 'stoneL': case 'stoneV': return ['#8e8e8e', '#5a5a5a', '#c1c1c1'];
-      case 'glass': case 'glassV': return ['#cfe9f4', '#88bed3', '#ecf7fb'];
+      case 'wood': case 'woodL': case 'woodV': case 'woodXL': return ['#7a4a20', '#b3753a', '#e5b377'];
+      case 'stone': case 'stoneL': case 'stoneV': case 'stoneXL': return ['#8e8e8e', '#5a5a5a', '#c1c1c1'];
+      case 'glass': case 'glassV': case 'glassL': return ['#cfe9f4', '#88bed3', '#ecf7fb'];
       default: return ['#aaa', '#666', '#ddd'];
     }
   }
@@ -717,7 +716,7 @@
     ctx.moveTo(-w*0.35, -h*0.45);
     ctx.bezierCurveTo(-w*0.55,  h*0.05, -w*0.55, h*0.3, -w*0.28, h*0.5);
     ctx.lineTo(w*0.28, h*0.5);
-    ctx.bezierCurveTo(w*0.55, h*0.3, w*0.55, 0.05, w*0.35, -h*0.45);
+    ctx.bezierCurveTo(w*0.55, h*0.3, w*0.55, h*0.05, w*0.35, -h*0.45);
     ctx.closePath();
     ctx.fill();
     // Горло
