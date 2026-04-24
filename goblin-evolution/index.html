@@ -5,66 +5,101 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
 <title>Эволюция Гоблина</title>
 <link rel="stylesheet" href="styles.css" />
-<!-- Yandex.Games SDK. За пределами платформы просто не загрузится — код это корректно отлавливает. -->
 <script src="https://yandex.ru/games/sdk/v2"></script>
 </head>
 <body>
   <div id="game">
     <!-- Фон -->
-    <div class="bg" id="bg">
-      <div class="bg-sky"></div>
-      <div class="bg-sun"></div>
-      <div class="bg-clouds"></div>
-      <div class="bg-hills"></div>
-      <div class="bg-trees"></div>
-      <div class="bg-village"></div>
-      <div class="bg-ground"></div>
-      <div class="bg-fireflies"></div>
+    <div class="scene" aria-hidden="true">
+      <div class="sky"></div>
+      <div class="sun"></div>
+      <div class="clouds"></div>
+      <div class="hills-far"></div>
+      <div class="hills-near"></div>
+      <div class="ground"></div>
+      <div class="spots"></div>
     </div>
 
-    <!-- HUD -->
-    <div class="hud-top">
-      <div class="coin-counter" title="Монеты">
-        <div class="coin-icon"></div>
-        <div class="coin-stats">
-          <div class="coin-amount" id="coinAmount">0</div>
-          <div class="coin-rate">
-            <span id="perClick">+1</span> / клик ·
-            <span id="perSec">0</span> / сек
-          </div>
-        </div>
-      </div>
-      <div class="level-bar" title="Уровень гоблина">
-        <div class="level-bar-label">
-          <span id="levelLabel">Level 1</span>
-          <span id="levelProgressText">0 / 500 XP</span>
-        </div>
-        <div class="level-bar-track">
-          <div class="level-bar-fill" id="levelProgress"></div>
-        </div>
-      </div>
-      <button class="sound-toggle" id="soundToggle" title="Звук">
-        <span class="ico on">🔊</span>
-        <span class="ico off">🔇</span>
-      </button>
-    </div>
-
-    <!-- Меню апгрейдов слева -->
-    <aside class="upgrades" id="upgrades"></aside>
-
-    <!-- Центр — гоблин -->
-    <div class="stage" id="stage">
+    <!-- Гоблин в центре -->
+    <main class="stage" id="stage">
+      <div class="goblin-name" id="goblinName">Малыш гоблин</div>
       <div class="goblin-shadow"></div>
       <div class="goblin-wrap" id="goblinWrap">
         <div class="goblin" id="goblin"></div>
-        <div class="goblin-level" id="goblinLevel">Level 1</div>
       </div>
-      <div class="floaters" id="floaters"></div>
-      <div class="particles" id="particles"></div>
+      <div class="level-pill" title="Уровень гоблина">
+        <div class="level-pill-text">
+          <span id="levelLabel">Уровень 1</span>
+          <span id="levelProgressText">0 / 50</span>
+        </div>
+        <div class="level-pill-track">
+          <div class="level-pill-fill" id="levelProgress"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Слой частиц/флоатеров (через всю сцену) -->
+    <div class="particles" id="particles" aria-hidden="true"></div>
+    <div class="floaters" id="floaters" aria-hidden="true"></div>
+
+    <!-- Левые плитки -->
+    <div class="top-left">
+      <div class="coin-pill" id="coinPill">
+        <div class="coin-pill-icon"></div>
+        <div class="coin-pill-amount" id="coinAmount">0</div>
+      </div>
+      <div class="rate-note" id="rateNote">0 / сек</div>
+      <button class="icon-btn settings-btn" id="settingsBtn" title="Настройки">⚙</button>
     </div>
 
-    <!-- Нижний тост -->
+    <!-- Апгрейды справа -->
+    <aside class="upgrades" id="upgrades"></aside>
+
+    <!-- Тост -->
     <div class="toast" id="toast"></div>
+
+    <!-- Приветственный оверлей -->
+    <div class="intro-backdrop" id="introOverlay">
+      <div class="intro-card">
+        <div class="intro-title">Эволюция<br/><span>Гоблина</span></div>
+        <div class="intro-story">
+          В глухом лесу стоит маленькая гоблинская деревушка. Самый младший
+          гоблинёнок выбрался из колыбели и отправился искать своё золото —
+          от первой монетки до короны Короля гоблинов.
+        </div>
+        <div class="intro-rules">
+          <div class="intro-rule"><span class="intro-rule-ico">👆</span><span>Тапай гоблина (или любую точку экрана, или пробел) — сыплются монетки.</span></div>
+          <div class="intro-rule"><span class="intro-rule-ico">💰</span><span>Собирай монеты и покупай улучшения в правом меню.</span></div>
+          <div class="intro-rule"><span class="intro-rule-ico">⚡</span><span>Улучшения увеличивают доход за клик и автоматический доход в секунду.</span></div>
+          <div class="intro-rule"><span class="intro-rule-ico">🏰</span><span>10 уровней эволюции — чем больше золота добыл всего, тем круче гоблин.</span></div>
+        </div>
+        <button class="btn btn-primary intro-go" id="introGo">Поехали!</button>
+      </div>
+    </div>
+
+    <!-- Модалка настроек -->
+    <div class="modal-backdrop" id="settingsModal" hidden>
+      <div class="modal">
+        <div class="modal-head">
+          <div class="modal-title">Настройки</div>
+          <button class="icon-btn" id="settingsClose" title="Закрыть">✕</button>
+        </div>
+        <div class="modal-body">
+          <label class="toggle">
+            <span class="toggle-label">Звуковые эффекты</span>
+            <input type="checkbox" id="sfxToggle" checked />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+          <label class="toggle">
+            <span class="toggle-label">Фоновая музыка</span>
+            <input type="checkbox" id="musicToggle" checked />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+          <button class="btn btn-danger" id="resetBtn">Сбросить прогресс</button>
+          <p class="hint">Клики считаются по всему экрану, пробел — тоже.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="sdk.js"></script>

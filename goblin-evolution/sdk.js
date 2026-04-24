@@ -16,9 +16,6 @@
       state.ysdk = await YaGames.init();
       state.ready = true;
       console.info('[YSDK] SDK инициализирован.');
-      try {
-        await state.ysdk.features.LoadingAPI?.ready();
-      } catch (_) {}
     } catch (e) {
       console.warn('[YSDK] init error:', e);
     }
@@ -66,7 +63,8 @@
 
   // Оповестить платформу, что игра готова принимать пользовательский ввод.
   async function gameReady() {
-    if (!state.ready) return;
+    if (!state.ready || state.readyCalled) return;
+    state.readyCalled = true;
     try {
       state.ysdk.features.LoadingAPI?.ready();
       state.ysdk.features.GameplayAPI?.start();
