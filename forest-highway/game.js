@@ -37,6 +37,7 @@
     soundOn: true, musicOn: true,
     lastFrame: 0,
     menuOpen: 'main',             // main|skins|pause|over|none
+    previousMenu: null,           // откуда был открыт menuSkins (для кнопки «Назад»)
     topRow: 0,                    // самая "высокая" сгенерированная строка (минимальный rowIndex, т.к. дальше = меньше)
     bottomRow: 0,                 // самая нижняя сгенерированная строка
     frontestRow: 0,               // лучший (меньший) rowIndex куда прыгал игрок — для счёта
@@ -1385,15 +1386,16 @@
 
   function bindUI() {
     document.getElementById('btnPlay').addEventListener('click', () => { Audio.resume(); startGame(); });
-    document.getElementById('btnSkins').addEventListener('click', () => showOverlay('menuSkins'));
+    document.getElementById('btnSkins').addEventListener('click', () => { S.previousMenu = S.menuOpen; showOverlay('menuSkins'); });
     document.getElementById('btnSkinsBack').addEventListener('click', () => {
-      showOverlay(S.menuOpen === 'over' ? 'menuOver' : 'menuMain');
+      showOverlay(S.previousMenu === 'over' ? 'menuOver' : 'menuMain');
+      S.previousMenu = null;
     });
     document.getElementById('btnResume').addEventListener('click', () => togglePause());
     document.getElementById('btnRestartFromPause').addEventListener('click', () => startGame());
     document.getElementById('btnPauseToMenu').addEventListener('click', () => { S.running = false; Audio.musicStop(); showOverlay('menuMain'); });
     document.getElementById('btnRetry').addEventListener('click', () => startGame());
-    document.getElementById('btnOverSkins').addEventListener('click', () => showOverlay('menuSkins'));
+    document.getElementById('btnOverSkins').addEventListener('click', () => { S.previousMenu = S.menuOpen; showOverlay('menuSkins'); });
     document.getElementById('btnOverMenu').addEventListener('click', () => { Audio.musicStop(); showOverlay('menuMain'); });
     document.getElementById('btnPause').addEventListener('click', () => togglePause());
     document.getElementById('btnSound').addEventListener('click', () => {
