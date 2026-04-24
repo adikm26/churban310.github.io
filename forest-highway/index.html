@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#10331a" />
+<title>Лесная магистраль — перебеги зайцем через звериные тропы</title>
+<link rel="stylesheet" href="styles.css" />
+<!-- Yandex.Games SDK. Вне платформы не подключится — sdk.js это корректно ловит. -->
+<script src="https://yandex.ru/games/sdk/v2"></script>
+</head>
+<body>
+  <div id="game">
+    <canvas id="stage" aria-label="Игровая сцена"></canvas>
+
+    <!-- HUD -->
+    <div class="hud" id="hud">
+      <div class="hud-left">
+        <div class="panel coin-panel" title="Монеты">
+          <div class="coin-ico">◎</div>
+          <div class="panel-value" id="coinsValue">0</div>
+        </div>
+        <div class="panel score-panel" title="Счёт — каждая перепрыгнутая тропа">
+          <div class="panel-title">Счёт</div>
+          <div class="panel-value" id="scoreValue">0</div>
+          <div class="panel-sub">Рекорд: <span id="bestValue">0</span></div>
+        </div>
+      </div>
+      <div class="hud-right">
+        <button class="hud-btn" id="btnMusic" title="Музыка">
+          <span class="ico-on">🎵</span><span class="ico-off">🎵</span>
+        </button>
+        <button class="hud-btn" id="btnSound" title="Звуки">
+          <span class="ico-on">🔊</span><span class="ico-off">🔇</span>
+        </button>
+        <button class="hud-btn" id="btnPause" title="Пауза">⏸</button>
+      </div>
+    </div>
+
+    <div class="floaters" id="floaters"></div>
+
+    <!-- Главное меню -->
+    <div class="overlay show" id="menuMain">
+      <div class="dialog">
+        <h1 class="title">ЛЕСНАЯ <span>МАГИСТРАЛЬ</span></h1>
+        <p class="subtitle">Перепрыгни зайчонком через тропы лесных хищников. Собирай монеты и открывай новые скины.</p>
+        <div class="row">
+          <button class="btn primary" id="btnPlay">Играть</button>
+          <button class="btn" id="btnSkins">Скины</button>
+        </div>
+        <div class="hints">
+          <span>Стрелки / WASD</span>
+          <span>Свайпы на сенсоре</span>
+          <span>Избегай волка, медведя и лису</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Скины -->
+    <div class="overlay" id="menuSkins">
+      <div class="dialog wide">
+        <h2 class="title small">Скины зайчонка</h2>
+        <p class="subtitle">Копи монеты и наряжай своего героя. Нажми на карточку, чтобы выбрать или купить.</p>
+        <div class="skins-grid" id="skinsGrid"></div>
+        <div class="row">
+          <button class="btn" id="btnSkinsBack">Назад</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Пауза -->
+    <div class="overlay" id="menuPause">
+      <div class="dialog">
+        <h2 class="title small">Пауза</h2>
+        <div class="col">
+          <button class="btn primary" id="btnResume">Продолжить</button>
+          <button class="btn" id="btnRestartFromPause">Переиграть</button>
+          <button class="btn" id="btnPauseToMenu">В главное меню</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over -->
+    <div class="overlay" id="menuOver">
+      <div class="dialog">
+        <h2 class="title small">Тебя съели</h2>
+        <p class="subtitle" id="overCause">Хищник оказался быстрее.</p>
+        <div class="result-row">
+          <div>Счёт: <b id="overScore">0</b></div>
+          <div>+<b id="overCoins">0</b> <span class="coin-ico">◎</span></div>
+        </div>
+        <div class="result-row">
+          <div>Рекорд: <b id="overBest">0</b></div>
+        </div>
+        <div class="col">
+          <button class="btn primary" id="btnRetry">Ещё раз</button>
+          <button class="btn" id="btnOverSkins">Скины</button>
+          <button class="btn" id="btnOverMenu">Главное меню</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="sdk.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
