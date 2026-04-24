@@ -13,7 +13,7 @@
   const COLS = 9;                 // ширина поля в клетках
   const HOP_MS = 120;             // длительность прыжка
   const CAMERA_LERP = 0.12;       // плавность камеры
-  const MAX_BEHIND_ROWS = 5;      // сколько клеток игрок может отстать от "переднего фронта"
+  const MAX_BEHIND_ROWS = 9;      // сколько клеток игрок может отстать от камеры (можно возвращаться вниз)
   const COIN_CHANCE = 0.22;       // шанс монеты на безопасной клетке
   const SPAWN_PAD_ROWS = 18;      // буфер вперёд
   const DESPAWN_BEHIND = 10;      // столько рядов сохраняем позади
@@ -125,78 +125,111 @@
     const c = SKINS[skin] || SKINS.white;
     ctx.save();
     ctx.translate(cx, cy);
-    // Тень
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    // Тень под зайцем
+    ctx.fillStyle = 'rgba(0,0,0,0.24)';
     ctx.beginPath();
-    ctx.ellipse(0, h * 0.34, w * 0.36, h * 0.08, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, h * 0.38, w * 0.34, h * 0.07, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Тело
-    const bodyGrad = ctx.createRadialGradient(-w * 0.08, -h * 0.05, w * 0.05, 0, 0, w * 0.42);
-    bodyGrad.addColorStop(0, lighten(c.body, 0.22));
-    bodyGrad.addColorStop(1, c.body);
-    ctx.fillStyle = bodyGrad;
-    roundedEllipse(ctx, 0, h * 0.08, w * 0.38, h * 0.42);
-    ctx.fill();
-    // Живот/брюшко
-    ctx.fillStyle = c.belly;
+    // Хвостик-пом-помом (раньше тела — чтобы аккуратно выглядывал)
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.ellipse(0, h * 0.14, w * 0.18, h * 0.24, 0, 0, Math.PI * 2);
+    ctx.arc(0, h * 0.32, w * 0.11, 0, Math.PI * 2);
     ctx.fill();
-    // Уши (два вытянутых овала)
-    const earW = w * 0.12, earH = h * 0.30;
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.beginPath();
+    ctx.arc(w * 0.03, h * 0.29, w * 0.045, 0, Math.PI * 2);
+    ctx.fill();
+    // Уши (длинные, почти вертикальные)
+    const earW = w * 0.11, earH = h * 0.34;
     for (const side of [-1, 1]) {
       ctx.save();
-      ctx.translate(side * w * 0.16, -h * 0.28);
-      ctx.rotate(side * 0.18);
+      ctx.translate(side * w * 0.14, -h * 0.28);
+      ctx.rotate(side * 0.06);
+      // Внешняя часть
       const earGrad = ctx.createLinearGradient(0, -earH, 0, earH);
-      earGrad.addColorStop(0, lighten(c.body, 0.1));
+      earGrad.addColorStop(0, lighten(c.body, 0.14));
       earGrad.addColorStop(1, c.body);
       ctx.fillStyle = earGrad;
       ctx.beginPath();
       ctx.ellipse(0, 0, earW, earH, 0, 0, Math.PI * 2);
       ctx.fill();
-      // внутренняя часть уха
+      // Внутренняя розовая вкладка
       ctx.fillStyle = c.ear;
       ctx.beginPath();
-      ctx.ellipse(0, 0, earW * 0.55, earH * 0.7, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, h * 0.02, earW * 0.55, earH * 0.72, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
-    // Голова
-    const headGrad = ctx.createRadialGradient(-w * 0.05, -h * 0.22, w * 0.04, 0, -h * 0.1, w * 0.3);
-    headGrad.addColorStop(0, lighten(c.body, 0.28));
+    // Тело — яйцевидная форма
+    const bodyGrad = ctx.createRadialGradient(-w * 0.08, -h * 0.05, w * 0.04, 0, 0, w * 0.44);
+    bodyGrad.addColorStop(0, lighten(c.body, 0.26));
+    bodyGrad.addColorStop(1, c.body);
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.ellipse(0, h * 0.12, w * 0.36, h * 0.36, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Брюшко
+    ctx.fillStyle = c.belly;
+    ctx.beginPath();
+    ctx.ellipse(0, h * 0.18, w * 0.20, h * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Голова — круглая, ближе к телу
+    const headGrad = ctx.createRadialGradient(-w * 0.05, -h * 0.18, w * 0.04, 0, -h * 0.08, w * 0.32);
+    headGrad.addColorStop(0, lighten(c.body, 0.3));
     headGrad.addColorStop(1, c.body);
     ctx.fillStyle = headGrad;
     ctx.beginPath();
-    ctx.ellipse(0, -h * 0.08, w * 0.26, h * 0.26, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -h * 0.06, w * 0.25, h * 0.23, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Глаза
-    const eyeOffsetX = w * 0.09, eyeY = -h * 0.12;
-    ctx.fillStyle = '#111';
-    for (const dx of [-eyeOffsetX, eyeOffsetX]) {
+    // Щёчки — круглые светлые пятна
+    ctx.fillStyle = 'rgba(255,182,193,0.55)';
+    for (const side of [-1, 1]) {
       ctx.beginPath();
-      ctx.ellipse(dx, eyeY, w * 0.033, h * 0.04, 0, 0, Math.PI * 2);
+      ctx.ellipse(side * w * 0.16, -h * 0.04, w * 0.05, h * 0.04, 0, 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.fillStyle = '#fff';
+    // Глаза — аккуратные большие с бликом
+    const eyeOffsetX = w * 0.085, eyeY = -h * 0.12;
+    const eyeRx = w * 0.036, eyeRy = h * 0.045;
+    ctx.fillStyle = '#1a1a1f';
     for (const dx of [-eyeOffsetX, eyeOffsetX]) {
       ctx.beginPath();
-      ctx.arc(dx + w * 0.012, eyeY - h * 0.012, w * 0.012, 0, Math.PI * 2);
+      ctx.ellipse(dx, eyeY, eyeRx, eyeRy, 0, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Нос
+    ctx.fillStyle = '#ffffff';
+    for (const dx of [-eyeOffsetX, eyeOffsetX]) {
+      ctx.beginPath();
+      ctx.arc(dx + w * 0.014, eyeY - h * 0.014, w * 0.014, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Нос-сердечко
     ctx.fillStyle = c.nose;
     ctx.beginPath();
-    ctx.ellipse(0, -h * 0.02, w * 0.03, h * 0.025, 0, 0, Math.PI * 2);
+    ctx.moveTo(0, -h * 0.005);
+    ctx.quadraticCurveTo(-w * 0.035, -h * 0.035, 0, -h * 0.05);
+    ctx.quadraticCurveTo(w * 0.035, -h * 0.035, 0, -h * 0.005);
     ctx.fill();
-    // Усы
-    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-    ctx.lineWidth = Math.max(1, w * 0.01);
+    // Ротик — маленькая «y»-линия
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = Math.max(1, w * 0.012);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, -h * 0.005);
+    ctx.lineTo(0, h * 0.015);
+    ctx.moveTo(0, h * 0.015);
+    ctx.lineTo(-w * 0.025, h * 0.03);
+    ctx.moveTo(0, h * 0.015);
+    ctx.lineTo(w * 0.025, h * 0.03);
+    ctx.stroke();
+    // Усы — короче и тоньше (меньше шума)
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = Math.max(1, w * 0.008);
     for (const side of [-1, 1]) {
-      for (let i = -1; i <= 1; i++) {
+      for (let i = 0; i <= 1; i++) {
         ctx.beginPath();
-        ctx.moveTo(side * w * 0.04, -h * 0.01 + i * h * 0.015);
-        ctx.lineTo(side * w * 0.2, -h * 0.01 + i * h * 0.03);
+        ctx.moveTo(side * w * 0.05, h * 0.005 + i * h * 0.02);
+        ctx.lineTo(side * w * 0.17, h * 0.005 + i * h * 0.035);
         ctx.stroke();
       }
     }
@@ -204,21 +237,16 @@
     ctx.fillStyle = c.belly;
     for (const side of [-1, 1]) {
       ctx.beginPath();
-      ctx.ellipse(side * w * 0.14, h * 0.32, w * 0.07, h * 0.08, 0, 0, Math.PI * 2);
+      ctx.ellipse(side * w * 0.14, h * 0.36, w * 0.07, h * 0.07, 0, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Хвостик (пушок) — виден у нижнего края
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(0, h * 0.42, w * 0.07, 0, Math.PI * 2);
-    ctx.fill();
     // Акцент (шарф/платок)
     if (c.accent) {
       ctx.fillStyle = c.accent;
       ctx.beginPath();
-      ctx.moveTo(-w * 0.22, h * 0.02);
-      ctx.quadraticCurveTo(0, h * 0.14, w * 0.22, h * 0.02);
-      ctx.quadraticCurveTo(0, h * 0.24, -w * 0.22, h * 0.02);
+      ctx.moveTo(-w * 0.22, h * 0.06);
+      ctx.quadraticCurveTo(0, h * 0.18, w * 0.22, h * 0.06);
+      ctx.quadraticCurveTo(0, h * 0.26, -w * 0.22, h * 0.06);
       ctx.fill();
     }
     ctx.restore();
@@ -728,18 +756,30 @@
   // Для удобства рендера используем y-координату экрана: screenY = (row - camera) * tile + baseline.
 
   const ROW_TYPES = {
-    grass: { safe: true, weight: 40 },
-    coin:  { safe: true, weight: 14 },   // ряд с несколькими монетами подряд
-    wolf:  { safe: false, weight: 22 },
-    fox:   { safe: false, weight: 18 },
-    bear:  { safe: false, weight: 14 },
+    grass: { safe: true, weight: 62 },
+    coin:  { safe: true, weight: 6 },    // ряд с несколькими монетами подряд
+    road:  { safe: false, weight: 32 },  // единая тропа — любое животное может бежать
   };
 
+  // Типы животных, которые рандомно выбегают на любой тропе.
+  // speed — в клетках/сек (абсолютное значение), size — длина в клетках, height — вертикал.
+  const PREDATORS = [
+    { kind: 'wolf', weight: 40, speed: [0.80, 1.10], size: 1.0, height: 0.85 },
+    { kind: 'fox',  weight: 28, speed: [1.30, 1.70], size: 0.8, height: 0.70 },
+    { kind: 'bear', weight: 16, speed: [0.45, 0.65], size: 2.0, height: 1.00 },
+  ];
+  function pickPredator() {
+    const total = PREDATORS.reduce((s, p) => s + p.weight, 0);
+    let r = Math.random() * total;
+    for (const p of PREDATORS) { r -= p.weight; if (r <= 0) return p; }
+    return PREDATORS[0];
+  }
+
   function pickRowType(prev, streakUnsafe) {
-    // Не даём слишком длинные серии опасных и подряд одинаковых.
+    // Не даём слишком длинные серии опасных (не более 2 подряд) и подряд одинаковых.
     const entries = Object.entries(ROW_TYPES);
     const filtered = entries.filter(([k, v]) => {
-      if (streakUnsafe >= 3 && !v.safe) return false;
+      if (streakUnsafe >= 2 && !v.safe) return false;
       if (prev && prev.type === k && Math.random() < 0.6) return false;
       return true;
     });
@@ -779,48 +819,27 @@
         if (Math.random() < 0.25) row.decor.push({ x, kind: 'flower', ox: (Math.random() - 0.5) * 0.6, oy: (Math.random() - 0.5) * 0.6 });
       }
       // Иногда монета в траве
-      if (!tooClose && Math.random() < 0.3) {
+      if (!tooClose && Math.random() < 0.15) {
         const candidates = [];
         for (let x = 0; x < COLS; x++) if (!row.obstacles.find((o) => o.x === x)) candidates.push(x);
         if (candidates.length) row.coins.push({ x: candidates[(Math.random() * candidates.length) | 0], collected: false });
       }
     } else if (type === 'coin') {
-      // Ряд монет по диагонали/шашечкой
+      // Ряд монет по диагонали/шашечкой (реже и реже внутри)
       const offset = (Math.random() * 2) | 0;
       for (let x = 0; x < COLS; x++) {
-        if (((x + offset) % 2 === 0) && Math.random() < 0.8) row.coins.push({ x, collected: false });
+        if (((x + offset) % 2 === 0) && Math.random() < 0.55) row.coins.push({ x, collected: false });
       }
-    } else if (type === 'wolf') {
+    } else if (type === 'road') {
+      // Единая тропа: направление случайное, животное пикается на каждом спауне.
       row.dir = Math.random() < 0.5 ? -1 : 1;
-      row.speed = (1.2 + Math.random() * 0.6) * row.dir; // tiles per sec (signed)
-      const gap = 3 + Math.random() * 2.0;
-      const baseOffset = Math.random() * gap;
-      // Спавним периодически — создадим стартовую пачку, далее будем спавнить в update
-      row.spawnGap = gap;
-      row.spawnTimer = baseOffset / Math.abs(row.speed);
-      row.kind = 'wolf';
-      row.size = 1.0;     // длина в клетках
-      row.height = 0.85;  // высота для рисования (на клетку)
-      // Небольшой шанс монеты посреди тропы
-      if (Math.random() < 0.25) row.coins.push({ x: (Math.random() * COLS) | 0, collected: false });
-    } else if (type === 'fox') {
-      row.dir = Math.random() < 0.5 ? -1 : 1;
-      row.speed = (2.4 + Math.random() * 0.8) * row.dir;
-      row.spawnGap = 2 + Math.random() * 1.2;
-      row.spawnTimer = Math.random() * row.spawnGap / Math.abs(row.speed);
-      row.kind = 'fox';
-      row.size = 0.8;
-      row.height = 0.7;
-      if (Math.random() < 0.3) row.coins.push({ x: (Math.random() * COLS) | 0, collected: false });
-    } else if (type === 'bear') {
-      row.dir = Math.random() < 0.5 ? -1 : 1;
-      row.speed = (0.7 + Math.random() * 0.35) * row.dir;
-      row.spawnGap = 4.5 + Math.random() * 1.5;
-      row.spawnTimer = Math.random() * row.spawnGap / Math.abs(row.speed);
-      row.kind = 'bear';
-      row.size = 2.0;   // занимает 2 клетки (длинный/крупный)
-      row.height = 1.0;
-      if (Math.random() < 0.22) row.coins.push({ x: (Math.random() * COLS) | 0, collected: false });
+      // Стартовый трафик — плющий (4–6с); с ростом счёта постепенно сжимается.
+      const difficulty = Math.min(2.2, (S.score || 0) * 0.025);
+      row.spawnEvery = Math.max(1.8, (4.0 + Math.random() * 2.0) - difficulty);
+      // Небольшой рандом на стартовое смещение, чтобы соседние тропы не плевались «в унисон».
+      row.spawnTimer = Math.random() * row.spawnEvery;
+      // Редкая монета на тропе.
+      if (Math.random() < 0.08) row.coins.push({ x: (Math.random() * COLS) | 0, collected: false });
     }
     return row;
   }
@@ -930,29 +949,49 @@
     S.vw = Math.round(w * dpr); S.vh = Math.round(h * dpr);
     S.canvas.width = S.vw; S.canvas.height = S.vh;
     S.canvas.style.width = w + 'px'; S.canvas.style.height = h + 'px';
-    // Размер клетки — чтобы COLS клеток помещались по ширине с небольшим отступом
-    const hf = Math.min(1, h / 700); // меньше экран — уменьшаем масштаб
-    const tByW = w / (COLS + 0.5);
-    const tByH = h / 10;
-    S.tile = Math.max(40, Math.min(96, Math.floor(Math.min(tByW, tByH) * Math.max(0.85, hf))));
+    // Размер клетки: стараемся занять как можно больше ширины экрана,
+    // чтобы «шторки» по бокам были узкие.
+    const tByW = w / (COLS + 0.3);
+    const tByH = h / 8.5;
+    S.tile = Math.max(48, Math.min(128, Math.floor(Math.min(tByW, tByH))));
   }
 
   // ---------- Обновление мира ----------
   function updateRow(row, dt) {
     if (row.safe) return;
-    // Спавним новых врагов
+    // Спавним новых врагов с фиксированным интервалом в секундах.
     row.spawnTimer -= dt;
     if (row.spawnTimer <= 0) {
-      const size = row.size || 1;
-      const start = row.dir > 0 ? -size - 1 : COLS + 1;
-      row.enemies.push({ x: start, kind: row.kind, size, height: row.height || 1 });
-      row.spawnTimer = row.spawnGap / Math.abs(row.speed) * (0.8 + Math.random() * 0.4);
+      const pred = pickPredator();
+      // Анти-overlap: проверяем, что в зоне спауна нет другого зверя ближе полосы безопасности.
+      const safetyGap = pred.size + 1.3;
+      const blocked = row.enemies.some((e) => {
+        if (row.dir > 0) return e.x < safetyGap; // последний слева ещё не отошёл
+        return e.x + e.size > COLS - safetyGap;   // последний справа ещё не отошёл
+      });
+      if (blocked) {
+        // подождём ещё чуть и попробуем позже — зверь не вылезает в спину другому.
+        row.spawnTimer = 0.4;
+      } else {
+        const spd = pred.speed[0] + Math.random() * (pred.speed[1] - pred.speed[0]);
+        const start = row.dir > 0 ? -pred.size - 0.5 : COLS + 0.5;
+        row.enemies.push({
+          x: start,
+          kind: pred.kind,
+          size: pred.size,
+          height: pred.height,
+          speed: spd * row.dir, // знаковая скорость в клетках/сек
+        });
+        // Динамический трафик: чем выше счёт, тем короче интервал (мин. 1.8с).
+        const difficulty = Math.min(2.2, (S.score || 0) * 0.025);
+        row.spawnEvery = Math.max(1.8, (4.0 + Math.random() * 2.0) - difficulty);
+        row.spawnTimer = row.spawnEvery;
+      }
     }
-    // Двигаем
-    const speed = row.speed;
-    row.enemies.forEach((e) => { e.x += speed * dt; });
-    // Убираем ушедших
-    row.enemies = row.enemies.filter((e) => (speed > 0 ? e.x < COLS + 3 : e.x > -e.size - 3));
+    // Двигаем каждого зверя по его собственной скорости.
+    for (const e of row.enemies) { e.x += e.speed * dt; }
+    // Убираем ушедших за край.
+    row.enemies = row.enemies.filter((e) => (e.speed > 0 ? e.x < COLS + 3 : e.x > -e.size - 3));
   }
 
   function checkCollision() {
@@ -1064,35 +1103,49 @@
   }
 
   function drawSideDecor(ctx, w, h, t, offsetX, fieldW, cam) {
-    // Рисуем ряд из деревьев вдоль левого и правого края поля,
-    // чтобы заполнить чёрные боковины. Используем детерминированные
-    // позиции, чтобы деревья не "шатались".
+    // Рисуем лёгкую лесную заливку по бокам + редкие деревья, чтобы «шторки»
+    // не были тёмными и не закрывали дорогу. Позиции детерминированные.
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     const leftW = offsetX;
     const rightX = offsetX + fieldW;
     const rightW = w - rightX;
-    if (leftW < 10 && rightW < 10) return;
-    const rowH = t * 0.9;
+    if (leftW < 2 && rightW < 2) return;
+    // Заливка боковин мягким лесным градиентом — имитация опушки, чтобы не было
+    // чёрных «шторок», но при этом край визуально отделялся от поля.
+    if (leftW > 2) {
+      const g = ctx.createLinearGradient(0, 0, leftW, 0);
+      g.addColorStop(0, '#2f4a2d');
+      g.addColorStop(1, '#55743a');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, leftW, h);
+    }
+    if (rightW > 2) {
+      const g = ctx.createLinearGradient(rightX, 0, rightX + rightW, 0);
+      g.addColorStop(0, '#55743a');
+      g.addColorStop(1, '#2f4a2d');
+      ctx.fillStyle = g;
+      ctx.fillRect(rightX, 0, rightW, h);
+    }
+    // Деревьев минимум — только пара штук на каждой стороне ряда, самые ближние к полю.
+    const rowH = t * 2.0;
     const startRow = Math.floor(cam) - 12;
     const endRow = Math.floor(cam) + 14;
     for (let r = startRow; r <= endRow; r++) {
       const y = (r - cam) * t + h * 0.62;
-      // Левая сторона
-      for (let i = 0; i < Math.ceil(leftW / rowH); i++) {
-        const seed = ((r * 73) ^ (i * 131)) & 0xffff;
+      if (leftW > t * 0.6) {
+        const seed = ((r * 73) ^ 0x1311) & 0xffff;
         const rnd = (seed % 1000) / 1000;
-        const tx = i * rowH + (rnd * 0.4) * rowH;
+        const tx = leftW - t * 0.5 - rnd * t * 0.4;
         const ty = y + ((seed % 100) / 100 - 0.5) * rowH * 0.3;
-        const size = rowH * (0.85 + (rnd * 0.3));
+        const size = t * (0.55 + rnd * 0.2);
         ctx.drawImage(SPRITES.tree, tx - size / 2, ty - size * 0.7, size, size * 1.1);
       }
-      // Правая сторона
-      for (let i = 0; i < Math.ceil(rightW / rowH); i++) {
-        const seed = ((r * 97) ^ (i * 211)) & 0xffff;
+      if (rightW > t * 0.6) {
+        const seed = ((r * 97) ^ 0x2111) & 0xffff;
         const rnd = (seed % 1000) / 1000;
-        const tx = rightX + i * rowH + (rnd * 0.4) * rowH;
+        const tx = rightX + t * 0.5 + rnd * t * 0.4;
         const ty = y + ((seed % 100) / 100 - 0.5) * rowH * 0.3;
-        const size = rowH * (0.85 + (rnd * 0.3));
+        const size = t * (0.55 + rnd * 0.2);
         ctx.drawImage(SPRITES.tree, tx - size / 2, ty - size * 0.7, size, size * 1.1);
       }
     }
@@ -1168,9 +1221,7 @@
     ctx.save();
     ctx.translate(cx, y);
     if (facing < 0) ctx.scale(-1, 1);
-    // Небольшой "бег" — колыхание
-    const bob = Math.sin(performance.now() * 0.02 + e.x) * t * 0.03;
-    ctx.translate(0, bob);
+    // Без wobble — спрайт едет ровно по горизонтали, не дёргается.
     ctx.drawImage(spr, -w / 2, -h / 2, w, h);
     ctx.restore();
   }
@@ -1224,8 +1275,8 @@
       // Камера: целимся на игрока (или фронт)
       S.targetCamera = Math.min(S.frontestRow - 0, S.player.row) - 1.0;
       S.camera += (S.targetCamera - S.camera) * CAMERA_LERP * (60 * dt);
-      // Принудительный скролл вперёд — усиливается со счётом.
-      const pressure = 0.1 + Math.min(0.6, S.score * 0.005);
+      // Принудительный скролл вперёд — мягче, медленнее растёт со счётом (легче).
+      const pressure = 0.04 + Math.min(0.25, S.score * 0.002);
       S.camera -= pressure * dt;
       ensureRows();
 
