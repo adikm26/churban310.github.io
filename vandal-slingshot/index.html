@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#2b1e12" />
+<title>Симулятор Вандала — рогатка и ценности</title>
+<link rel="stylesheet" href="styles.css" />
+<!-- Yandex.Games SDK. Вне платформы просто не подключится — sdk.js это корректно ловит. -->
+<script src="https://yandex.ru/games/sdk/v2"></script>
+</head>
+<body>
+  <div id="game">
+    <!-- Канвас физики и отрисовки -->
+    <canvas id="stage" aria-label="Игровая сцена"></canvas>
+
+    <!-- HUD -->
+    <div class="hud" id="hud">
+      <div class="hud-left">
+        <div class="panel level-info">
+          <div class="panel-title">Уровень <span id="levelNum">1</span></div>
+          <div class="panel-sub" id="levelName">—</div>
+        </div>
+        <div class="panel score-info">
+          <div class="panel-title">Очки</div>
+          <div class="panel-value" id="scoreValue">0</div>
+          <div class="panel-sub">Цель 3★ <span id="goal3">—</span></div>
+        </div>
+        <div class="panel rocks-info">
+          <div class="panel-title">Камни</div>
+          <div class="rocks-list" id="rocksList"></div>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div class="panel coins-info">
+          <div class="coin-ico">◎</div>
+          <div class="panel-value" id="coinsValue">0</div>
+        </div>
+        <button class="hud-btn" id="btnSound" title="Звук">
+          <span class="ico-on">🔊</span><span class="ico-off">🔇</span>
+        </button>
+        <button class="hud-btn" id="btnPause" title="Пауза">⏸</button>
+      </div>
+    </div>
+
+    <!-- Всплывающие очки -->
+    <div class="floaters" id="floaters"></div>
+
+    <!-- Главное меню -->
+    <div class="overlay show" id="menuMain">
+      <div class="dialog">
+        <h1 class="title">СИМУЛЯТОР <span>ВАНДАЛА</span></h1>
+        <p class="subtitle">Рогатка, камни и целая комната ценностей, которые так и просятся превратиться в осколки.</p>
+        <div class="row">
+          <button class="btn primary" id="btnPlay">Играть</button>
+          <button class="btn" id="btnLevels">Уровни</button>
+        </div>
+        <div class="hints">
+          <span>Тяни рогатку → отпускай</span>
+          <span>Бей по ценным вещам, а не по ящикам</span>
+          <span>Тапни по камню в полёте — особый эффект</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Выбор уровня -->
+    <div class="overlay" id="menuLevels">
+      <div class="dialog wide">
+        <h2 class="title small">Выбор уровня</h2>
+        <div class="levels-grid" id="levelsGrid"></div>
+        <div class="row"><button class="btn" id="btnLevelsBack">Назад</button></div>
+      </div>
+    </div>
+
+    <!-- Пауза -->
+    <div class="overlay" id="menuPause">
+      <div class="dialog">
+        <h2 class="title small">Пауза</h2>
+        <div class="col">
+          <button class="btn primary" id="btnResume">Продолжить</button>
+          <button class="btn" id="btnRestart">Переиграть</button>
+          <button class="btn" id="btnToLevels">К уровням</button>
+          <button class="btn" id="btnToMenu">Главное меню</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Победа -->
+    <div class="overlay" id="menuWin">
+      <div class="dialog">
+        <h2 class="title small">Погром удался!</h2>
+        <div class="stars" id="winStars"><span>★</span><span>★</span><span>★</span></div>
+        <div class="result-row">
+          <div>Очки: <b id="winScore">0</b></div>
+          <div>+<b id="winCoins">0</b> <span class="coin-ico">◎</span></div>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="btnNext">Следующий</button>
+          <button class="btn" id="btnWinRetry">Ещё раз</button>
+          <button class="btn" id="btnWinLevels">К уровням</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Поражение -->
+    <div class="overlay" id="menuLose">
+      <div class="dialog">
+        <h2 class="title small">Камни кончились</h2>
+        <p class="subtitle">Недостаточно целей разбито. Можно посмотреть рекламу и получить бонусный камень.</p>
+        <div class="result-row">
+          <div>Очки: <b id="loseScore">0</b></div>
+        </div>
+        <div class="col">
+          <button class="btn primary" id="btnReward">Получить камень за рекламу</button>
+          <button class="btn" id="btnLoseRetry">Переиграть</button>
+          <button class="btn" id="btnLoseLevels">К уровням</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Тост -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="matter.min.js"></script>
+  <script src="sdk.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
