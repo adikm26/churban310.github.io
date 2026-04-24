@@ -422,12 +422,13 @@
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 60 + Math.random() * 120;
+      const lifeVal = 0.4 + Math.random() * 0.4;
       S.particles.push({
         x, y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        life: 0.4 + Math.random() * 0.4,
-        maxLife: 0.4 + Math.random() * 0.4,
+        life: lifeVal,
+        maxLife: lifeVal,
         r: 2 + Math.random() * 4,
         color,
       });
@@ -543,8 +544,8 @@
     el.className = 'floater ' + (cls || '');
     el.textContent = text;
     const rect = S.canvas.getBoundingClientRect();
-    el.style.left = (x / S.vw * rect.width) + 'px';
-    el.style.top = (y / S.vh * rect.height) + 'px';
+    el.style.left = (x / S.width * rect.width) + 'px';
+    el.style.top = (y / S.height * rect.height) + 'px';
     document.getElementById('floaters').appendChild(el);
     setTimeout(() => el.remove(), 1200);
   }
@@ -613,6 +614,7 @@
   }
 
   function waveComplete() {
+    S.paused = true;
     const timeBonus = Math.round(S.timeLeft * 10);
     const waveScore = S.totalChars * 100;
     S.score += waveScore + timeBonus;
@@ -629,6 +631,7 @@
 
   function nextWave() {
     S.wave++;
+    S.paused = false;
     S.trail = [];
     S.particles = [];
     S.player.x = S.width / 2;
