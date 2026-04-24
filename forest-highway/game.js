@@ -1151,7 +1151,8 @@
     // оставляя узкую полосу для декоративных деревьев по краям.
     const tByW = w / (COLS + 0.2);
     const tByH = h / 6.2;
-    S.tile = Math.max(56, Math.min(200, Math.floor(Math.min(tByW, tByH))));
+    // Минимум не должен превышать tByW — иначе поле вылезет за экран на мобильных.
+    S.tile = Math.max(32, Math.min(200, Math.floor(Math.min(tByW, tByH))));
   }
 
   // ---------- Обновление мира ----------
