@@ -349,6 +349,10 @@
 
   function clearWorld() {
     if (!gameState.world) return;
+    // Отменяем отложенные колбэки уровня, чтобы они не сработали поверх пустого мира
+    if (gameState.rockDoneTimer) { clearTimeout(gameState.rockDoneTimer); gameState.rockDoneTimer = null; }
+    if (gameState.winTimer) { clearTimeout(gameState.winTimer); gameState.winTimer = null; }
+    gameState.winScheduled = false;
     Composite.clear(gameState.world, false, true);
     gameState.entities = [];
     gameState.particles.length = 0;
@@ -594,8 +598,15 @@
     spawnShatter(e.body.position.x, e.body.position.y, e.def.w, e.def.h, pickShatterColor(e.type));
     if (e.kind === 'value') {
       gameState.targetCount--;
-      if (gameState.targetCount <= 0) {
-        completeLevel(true);
+      if (gameState.targetCount <= 0 && !gameState.winScheduled) {
+        // Откладываем вызов до окончания текущего прохода коллизий/каскада —
+        // иначе очки, начисленные за предметы, разрушенные в том же цикле,
+        // не попадают в итоговый счёт и звёзды.
+        gameState.winScheduled = true;
+        gameState.winTimer = setTimeout(() => {
+          gameState.winTimer = null;
+          completeLevel(true);
+        }, 0);
       }
     }
   }
@@ -1208,9 +1219,15 @@
 
   function onRockDone() {
     if (gameState.finished) return;
+    // Маркер текущего уровня — если рестарт, значение обновится и
+    // устаревший колбэк отбросит результат.
+    const levelToken = gameState.levelToken;
     // Дождаться, пока валяющиеся сущности тоже успокоятся — короткая пауза
-    setTimeout(() => {
+    if (gameState.rockDoneTimer) clearTimeout(gameState.rockDoneTimer);
+    gameState.rockDoneTimer = setTimeout(() => {
+      gameState.rockDoneTimer = null;
       if (gameState.finished) return;
+      if (gameState.levelToken !== levelToken) return; // уровень перезагрузили
       if (gameState.targetCount <= 0) return; // победа уже обработана
       const type = currentRockType();
       if (!type) {
@@ -1341,6 +1358,12 @@
   // 19. Управление уровнями (старт/перезапуск/победа/поражение)
   // =====================================================================
   function loadLevel(idx) {
+    // Отменяем отложенные колбэки с предыдущего уровня
+    if (gameState.rockDoneTimer) { clearTimeout(gameState.rockDoneTimer); gameState.rockDoneTimer = null; }
+    if (gameState.winTimer) { clearTimeout(gameState.winTimer); gameState.winTimer = null; }
+    gameState.winScheduled = false;
+    gameState.levelToken = (gameState.levelToken || 0) + 1;
+
     gameState.levelIndex = idx;
     gameState.currentRockIndex = 0;
     gameState.score = 0;
