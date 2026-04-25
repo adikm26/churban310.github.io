@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Спасатель Зверей</title>
+<script src="https://yandex.ru/games/sdk/v2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Segoe UI',Arial,sans-serif;touch-action:none;user-select:none}
+canvas{display:block}
+
+/* Overlays */
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;pointer-events:auto;transition:opacity 0.5s}
+.overlay.hidden{opacity:0;pointer-events:none}
+
+/* Menu */
+#menu{background:linear-gradient(135deg,#1a5e1a 0%,#0d3d0d 100%)}
+#menu h1{font-size:clamp(2rem,6vw,4rem);color:#fff;text-shadow:3px 3px 0 #000,0 0 20px rgba(76,175,80,0.8);margin-bottom:0.3em;text-align:center;letter-spacing:2px}
+#menu .subtitle{font-size:clamp(0.9rem,2.5vw,1.4rem);color:#a5d6a7;margin-bottom:2em;text-align:center}
+.menu-animals{display:flex;gap:10px;margin-bottom:2em;flex-wrap:wrap;justify-content:center;max-width:400px}
+.menu-animal{width:50px;height:50px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;animation:bounce 2s infinite}
+.menu-animal:nth-child(2n){animation-delay:0.3s}
+.menu-animal:nth-child(3n){animation-delay:0.6s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.btn{padding:14px 48px;font-size:clamp(1rem,3vw,1.3rem);border:none;border-radius:50px;cursor:pointer;font-weight:700;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+.btn:active{transform:scale(0.95)}
+.btn-play{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:15px}
+.btn-play:hover{background:linear-gradient(135deg,#66bb6a,#388e3c);box-shadow:0 6px 20px rgba(76,175,80,0.5)}
+.btn-settings{background:rgba(255,255,255,0.15);color:#fff;border:2px solid rgba(255,255,255,0.3);font-size:clamp(0.85rem,2.5vw,1.1rem);padding:10px 36px}
+.btn-settings:hover{background:rgba(255,255,255,0.25)}
+
+/* Settings */
+#settings{background:rgba(0,0,0,0.92)}
+#settings h2{font-size:clamp(1.5rem,4vw,2.5rem);color:#fff;margin-bottom:1.5em}
+.setting-row{display:flex;align-items:center;justify-content:space-between;width:min(80%,320px);margin-bottom:20px;color:#fff;font-size:clamp(0.9rem,2.5vw,1.2rem)}
+.toggle{width:56px;height:30px;background:#555;border-radius:15px;position:relative;cursor:pointer;transition:background 0.3s}
+.toggle.on{background:#4caf50}
+.toggle::after{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left 0.3s}
+.toggle.on::after{left:29px}
+.btn-back{margin-top:30px;background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
+
+/* HUD */
+#hud{position:fixed;top:0;left:0;width:100%;padding:12px 20px;display:flex;justify-content:space-between;align-items:flex-start;z-index:50;pointer-events:none}
+#hud.hidden{display:none}
+.hud-score{color:#fff;font-size:clamp(1rem,3vw,1.5rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
+.hud-animals{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
+#pauseBtn{pointer-events:auto;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.4);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* Game Over */
+#gameover{background:rgba(0,0,0,0.88)}
+#gameover h2{font-size:clamp(1.8rem,5vw,3rem);color:#ff5252;text-shadow:0 0 20px rgba(255,82,82,0.5);margin-bottom:0.5em}
+.go-stats{color:#fff;font-size:clamp(1rem,3vw,1.4rem);margin-bottom:0.5em}
+.go-animals-rescued{color:#ffd54f;font-size:clamp(1.1rem,3vw,1.5rem);margin-bottom:0.3em;font-weight:700}
+.go-animal-icons{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:300px;margin-bottom:1.5em}
+.go-animal-icon{font-size:1.6rem;background:rgba(255,255,255,0.1);padding:6px;border-radius:8px}
+.btn-restart{background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;margin-bottom:12px}
+.btn-menu{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
+
+/* Pause */
+#pause{background:rgba(0,0,0,0.8)}
+#pause h2{font-size:clamp(1.5rem,4vw,2.5rem);color:#fff;margin-bottom:1em}
+.btn-resume{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:12px}
+
+/* Loading */
+#loading{background:#0d3d0d;z-index:200}
+#loading h2{color:#fff;font-size:clamp(1.2rem,3vw,1.8rem);margin-bottom:1em}
+.loader{width:min(60%,250px);height:8px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden}
+.loader-bar{height:100%;background:#4caf50;border-radius:4px;width:0%;transition:width 0.3s}
+.loader-text{color:#a5d6a7;font-size:0.9rem;margin-top:0.8em}
+
+/* Mobile controls */
+#mobileControls{position:fixed;bottom:20px;left:0;width:100%;display:flex;justify-content:center;gap:15px;z-index:60;pointer-events:none}
+#mobileControls.hidden{display:none}
+.mob-btn{pointer-events:auto;width:clamp(50px,12vw,70px);height:clamp(50px,12vw,70px);background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:16px;color:#fff;font-size:clamp(1.2rem,3vw,1.8rem);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.mob-btn:active{background:rgba(255,255,255,0.35);transform:scale(0.9)}
+</style>
+</head>
+<body>
+
+<div id="loading" class="overlay">
+  <h2>Загрузка...</h2>
+  <div class="loader"><div class="loader-bar" id="loaderBar"></div></div>
+  <div class="loader-text" id="loaderText">Подготовка зверей...</div>
+</div>
+
+<div id="menu" class="overlay hidden">
+  <h1>СПАСАТЕЛЬ<br>ЗВЕРЕЙ</h1>
+  <p class="subtitle">Спаси всех животных!</p>
+  <div class="menu-animals">
+    <div class="menu-animal">🐰</div>
+    <div class="menu-animal">🐱</div>
+    <div class="menu-animal">🐶</div>
+    <div class="menu-animal">🦊</div>
+    <div class="menu-animal">🐧</div>
+    <div class="menu-animal">🐼</div>
+    <div class="menu-animal">🐯</div>
+  </div>
+  <button class="btn btn-play" id="btnPlay">ИГРАТЬ</button>
+  <button class="btn btn-settings" id="btnSettings">Настройки</button>
+</div>
+
+<div id="settings" class="overlay hidden">
+  <h2>Настройки</h2>
+  <div class="setting-row">
+    <span>Музыка</span>
+    <div class="toggle on" id="toggleMusic"></div>
+  </div>
+  <div class="setting-row">
+    <span>Звуки</span>
+    <div class="toggle on" id="toggleSfx"></div>
+  </div>
+  <button class="btn btn-back" id="btnBack">Назад</button>
+</div>
+
+<div id="hud" class="hidden">
+  <div>
+    <div class="hud-score" id="hudScore">0 м</div>
+    <div class="hud-animals" id="hudAnimals">Зверей: 0</div>
+  </div>
+  <button id="pauseBtn">⏸</button>
+</div>
+
+<div id="pause" class="overlay hidden">
+  <h2>Пауза</h2>
+  <button class="btn btn-resume" id="btnResume">Продолжить</button>
+  <button class="btn btn-menu" id="btnToMenu">В меню</button>
+</div>
+
+<div id="gameover" class="overlay hidden">
+  <h2>Игра окончена!</h2>
+  <div class="go-stats" id="goScore">Дистанция: 0 м</div>
+  <div class="go-animals-rescued" id="goAnimals">Спасено зверей: 0</div>
+  <div class="go-animal-icons" id="goAnimalIcons"></div>
+  <button class="btn btn-restart" id="btnRestart">Ещё раз</button>
+  <button class="btn btn-menu" id="btnToMenu2">В меню</button>
+</div>
+
+<div id="mobileControls" class="hidden">
+  <button class="mob-btn" id="mobLeft">◀</button>
+  <button class="mob-btn" id="mobJump">▲</button>
+  <button class="mob-btn" id="mobRight">▶</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// ==================== CONFIG ====================
+const LANE_WIDTH = 2.5;
+const LANES = [-LANE_WIDTH, 0, LANE_WIDTH];
+const PLAYER_Y = 0.5;
+const JUMP_FORCE = 0.22;
+const GRAVITY = 0.008;
+const BASE_SPEED = 0.15;
+const MAX_SPEED = 0.4;
+const SPEED_INCREMENT = 0.0001;
+const CHUNK_LENGTH = 60;
+const SPAWN_DISTANCE = 80;
+const DESPAWN_DISTANCE = -20;
+const ANIMAL_NAMES = [
+  'animal-bunny','animal-cat','animal-dog','animal-fox','animal-penguin',
+  'animal-panda','animal-tiger','animal-lion','animal-elephant','animal-monkey',
+  'animal-bee','animal-koala','animal-pig','animal-chick','animal-deer'
+];
+const ANIMAL_EMOJIS = {
+  'animal-bunny':'🐰','animal-cat':'🐱','animal-dog':'🐶','animal-fox':'🦊',
+  'animal-penguin':'🐧','animal-panda':'🐼','animal-tiger':'🐯','animal-lion':'🦁',
+  'animal-elephant':'🐘','animal-monkey':'🐵','animal-bee':'🐝','animal-koala':'🐨',
+  'animal-pig':'🐷','animal-chick':'🐤','animal-deer':'🦌'
+};
+const ANIMAL_COLORS = {
+  'animal-bunny':0xeeeeee,'animal-cat':0xff8844,'animal-dog':0xbb8855,
+  'animal-fox':0xff6600,'animal-penguin':0x222222,'animal-panda':0xffffff,
+  'animal-tiger':0xff8800,'animal-lion':0xddaa33,'animal-elephant':0x888899,
+  'animal-monkey':0x886644,'animal-bee':0xffcc00,'animal-koala':0x999999,
+  'animal-pig':0xffaaaa,'animal-chick':0xffee44,'animal-deer':0xaa7744
+};
+
+// ==================== STATE ====================
+let gameState = 'loading'; // loading, menu, playing, paused, gameover
+let score = 0;
+let animalCount = 0;
+let rescuedAnimals = [];
+let currentLane = 1; // 0,1,2
+let targetLane = 1;
+let playerVelY = 0;
+let isGrounded = true;
+let gameSpeed = BASE_SPEED;
+let distance = 0;
+let lastChunkZ = 0;
+
+let musicEnabled = true;
+let sfxEnabled = true;
+
+// ==================== THREE.JS SETUP ====================
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87CEEB);
+scene.fog = new THREE.Fog(0x87CEEB, 40, 90);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(0, 6, -8);
+camera.lookAt(0, 1, 10);
+
+// Lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xfff4e0, 1.2);
+dirLight.position.set(10, 20, 10);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(1024, 1024);
+dirLight.shadow.camera.near = 1;
+dirLight.shadow.camera.far = 60;
+dirLight.shadow.camera.left = -20;
+dirLight.shadow.camera.right = 20;
+dirLight.shadow.camera.top = 20;
+dirLight.shadow.camera.bottom = -20;
+scene.add(dirLight);
+
+const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x556b2f, 0.4);
+scene.add(hemiLight);
+
+// ==================== AUDIO ====================
+let audioCtx = null;
+let musicGain = null;
+let sfxGain = null;
+let musicOscillators = [];
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicGain = audioCtx.createGain();
+  musicGain.gain.value = musicEnabled ? 0.12 : 0;
+  musicGain.connect(audioCtx.destination);
+  sfxGain = audioCtx.createGain();
+  sfxGain.gain.value = sfxEnabled ? 0.3 : 0;
+  sfxGain.connect(audioCtx.destination);
+}
+
+function updateMusicVolume() {
+  if (musicGain) musicGain.gain.value = musicEnabled ? 0.12 : 0;
+}
+function updateSfxVolume() {
+  if (sfxGain) sfxGain.gain.value = sfxEnabled ? 0.3 : 0;
+}
+
+// Background music - simple procedural chiptune loop
+let musicInterval = null;
+const MELODY = [
+  262, 330, 392, 523, 392, 330, 262, 294,
+  330, 392, 440, 392, 330, 294, 262, 330,
+  349, 440, 523, 440, 349, 330, 294, 349,
+  392, 523, 587, 523, 392, 349, 330, 262
+];
+let melodyIdx = 0;
+
+function startMusic() {
+  if (!audioCtx || musicInterval) return;
+  melodyIdx = 0;
+  playMelodyNote();
+  musicInterval = setInterval(playMelodyNote, 220);
+}
+
+function stopMusic() {
+  if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
+  musicOscillators.forEach(o => { try { o.stop(); } catch(e){} });
+  musicOscillators = [];
+}
+
+function playMelodyNote() {
+  if (!audioCtx) return;
+  const freq = MELODY[melodyIdx % MELODY.length];
+  melodyIdx++;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+  osc.connect(gain);
+  gain.connect(musicGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.22);
+  musicOscillators.push(osc);
+  if (musicOscillators.length > 8) musicOscillators.splice(0, 4);
+}
+
+function playSfx(type) {
+  if (!audioCtx || !sfxEnabled) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(sfxGain);
+
+  switch(type) {
+    case 'jump':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+      break;
+    case 'collect':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.08);
+      osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.16);
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      break;
+    case 'hit':
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+      break;
+    case 'swoosh':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+      break;
+  }
+}
+
+// ==================== GEOMETRY POOLS ====================
+const groundGeo = new THREE.BoxGeometry(8, 0.3, CHUNK_LENGTH);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.8 });
+const grassDarkMat = new THREE.MeshStandardMaterial({ color: 0x388e3c, roughness: 0.9 });
+
+const obstacleMats = {
+  spike: new THREE.MeshStandardMaterial({ color: 0xd32f2f, roughness: 0.5 }),
+  rock: new THREE.MeshStandardMaterial({ color: 0x757575, roughness: 0.7 }),
+  log: new THREE.MeshStandardMaterial({ color: 0x795548, roughness: 0.8 }),
+  crate: new THREE.MeshStandardMaterial({ color: 0xff8f00, roughness: 0.6 })
+};
+
+const treeTrunkGeo = new THREE.CylinderGeometry(0.15, 0.2, 1.5, 6);
+const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
+const treeTopGeo = new THREE.ConeGeometry(0.8, 2, 6);
+const treeTopMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
+const treeTopMat2 = new THREE.MeshStandardMaterial({ color: 0x1b5e20 });
+
+const bushGeo = new THREE.SphereGeometry(0.5, 6, 4);
+const bushMat = new THREE.MeshStandardMaterial({ color: 0x43a047 });
+
+const coinGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.08, 12);
+const coinMat = new THREE.MeshStandardMaterial({ color: 0xffd54f, metalness: 0.6, roughness: 0.3 });
+
+// ==================== OBJECT POOLS ====================
+const chunks = [];
+const obstacles = [];
+const collectibles = [];
+const decorations = [];
+const followAnimals = [];
+
+// ==================== PLAYER ====================
+let playerGroup = new THREE.Group();
+let playerMesh = null;
+let playerModel = null;
+
+function createFallbackPlayer() {
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(0.6, 0.6, 0.6),
+    new THREE.MeshStandardMaterial({ color: 0x4fc3f7 })
+  );
+  const eyes = new THREE.Group();
+  const eyeGeo = new THREE.SphereGeometry(0.08, 8, 8);
+  const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+  const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+  eyeL.position.set(-0.12, 0.08, 0.3);
+  const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+  eyeR.position.set(0.12, 0.08, 0.3);
+  eyes.add(eyeL, eyeR);
+  body.add(eyes);
+  return body;
+}
+
+// ==================== LOAD MODELS ====================
+const loader = new GLTFLoader();
+const animalModels = {};
+let modelsLoaded = 0;
+
+function loadModels() {
+  return new Promise((resolve) => {
+    const total = ANIMAL_NAMES.length;
+    let loaded = 0;
+
+    ANIMAL_NAMES.forEach(name => {
+      loader.load(
+        `models/${name}.glb`,
+        (gltf) => {
+          const model = gltf.scene;
+          model.traverse(c => {
+            if (c.isMesh) {
+              c.castShadow = true;
+              c.receiveShadow = true;
+            }
+          });
+          // Scale to fit
+          const box = new THREE.Box3().setFromObject(model);
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = 0.8 / maxDim;
+          model.scale.setScalar(scale);
+          // Center
+          const center = box.getCenter(new THREE.Vector3());
+          model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
+
+          animalModels[name] = model;
+          loaded++;
+          updateLoadProgress(loaded, total);
+          if (loaded === total) resolve();
+        },
+        undefined,
+        () => {
+          // Fallback: create colored cube for failed models
+          const geo = new THREE.BoxGeometry(0.6, 0.6, 0.6);
+          const mat = new THREE.MeshStandardMaterial({ color: ANIMAL_COLORS[name] || 0xffffff });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.castShadow = true;
+          animalModels[name] = mesh;
+          loaded++;
+          updateLoadProgress(loaded, total);
+          if (loaded === total) resolve();
+        }
+      );
+    });
+  });
+}
+
+function updateLoadProgress(loaded, total) {
+  const pct = Math.round((loaded / total) * 100);
+  document.getElementById('loaderBar').style.width = pct + '%';
+  document.getElementById('loaderText').textContent = `Загружено зверей: ${loaded}/${total}`;
+}
+
+// ==================== WORLD GENERATION ====================
+function createGroundChunk(z) {
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.position.set(0, -0.15, z + CHUNK_LENGTH / 2);
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Side stripes
+  const stripeGeo = new THREE.BoxGeometry(1, 0.32, CHUNK_LENGTH);
+  const stripeL = new THREE.Mesh(stripeGeo, grassDarkMat);
+  stripeL.position.set(-4.5, -0.15, z + CHUNK_LENGTH / 2);
+  stripeL.receiveShadow = true;
+  scene.add(stripeL);
+  const stripeR = new THREE.Mesh(stripeGeo, grassDarkMat);
+  stripeR.position.set(4.5, -0.15, z + CHUNK_LENGTH / 2);
+  stripeR.receiveShadow = true;
+  scene.add(stripeR);
+
+  const chunkObj = { ground, stripeL, stripeR, z, decos: [], obs: [], cols: [] };
+
+  // Add decorations on sides
+  for (let i = 0; i < 8; i++) {
+    const tz = z + Math.random() * CHUNK_LENGTH;
+    const side = Math.random() > 0.5 ? 1 : -1;
+    const tx = side * (5.5 + Math.random() * 3);
+
+    if (Math.random() > 0.4) {
+      // Tree
+      const tree = new THREE.Group();
+      const trunk = new THREE.Mesh(treeTrunkGeo, treeTrunkMat);
+      trunk.position.y = 0.75;
+      trunk.castShadow = true;
+      tree.add(trunk);
+      const topMat = Math.random() > 0.5 ? treeTopMat : treeTopMat2;
+      const top = new THREE.Mesh(treeTopGeo, topMat);
+      top.position.y = 2.2;
+      top.castShadow = true;
+      tree.add(top);
+      const s = 0.7 + Math.random() * 0.8;
+      tree.scale.setScalar(s);
+      tree.position.set(tx, 0, tz);
+      scene.add(tree);
+      chunkObj.decos.push(tree);
+    } else {
+      // Bush
+      const bush = new THREE.Mesh(bushGeo, bushMat);
+      const s = 0.5 + Math.random() * 0.5;
+      bush.scale.setScalar(s);
+      bush.position.set(tx, 0.25 * s, tz);
+      bush.castShadow = true;
+      scene.add(bush);
+      chunkObj.decos.push(bush);
+    }
+  }
+
+  // Add obstacles
+  const numObstacles = Math.floor(2 + Math.random() * 3);
+  const usedPositions = [];
+  for (let i = 0; i < numObstacles; i++) {
+    const oz = z + 10 + Math.random() * (CHUNK_LENGTH - 20);
+    const lane = Math.floor(Math.random() * 3);
+
+    // Check no overlap
+    const key = `${Math.round(oz/3)}_${lane}`;
+    if (usedPositions.includes(key)) continue;
+    usedPositions.push(key);
+
+    const type = Math.random();
+    let obs;
+
+    if (type < 0.3) {
+      // Spike
+      const geo = new THREE.ConeGeometry(0.35, 1.0, 6);
+      obs = new THREE.Mesh(geo, obstacleMats.spike);
+      obs.position.set(LANES[lane], 0.5, oz);
+    } else if (type < 0.55) {
+      // Rock
+      const geo = new THREE.DodecahedronGeometry(0.45, 0);
+      obs = new THREE.Mesh(geo, obstacleMats.rock);
+      obs.position.set(LANES[lane], 0.45, oz);
+    } else if (type < 0.8) {
+      // Log
+      const geo = new THREE.CylinderGeometry(0.25, 0.25, 1.8, 8);
+      obs = new THREE.Mesh(geo, obstacleMats.log);
+      obs.rotation.z = Math.PI / 2;
+      obs.position.set(LANES[lane], 0.25, oz);
+    } else {
+      // Crate
+      const geo = new THREE.BoxGeometry(0.7, 0.7, 0.7);
+      obs = new THREE.Mesh(geo, obstacleMats.crate);
+      obs.position.set(LANES[lane], 0.35, oz);
+    }
+
+    obs.castShadow = true;
+    obs.userData = { type: 'obstacle', lane };
+    scene.add(obs);
+    chunkObj.obs.push(obs);
+  }
+
+  // Add collectible animals
+  const numCollectibles = 1 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < numCollectibles; i++) {
+    const cz = z + 5 + Math.random() * (CHUNK_LENGTH - 10);
+    const lane = Math.floor(Math.random() * 3);
+
+    // Check no obstacle nearby
+    const tooClose = chunkObj.obs.some(o =>
+      Math.abs(o.position.z - cz) < 3 && Math.abs(o.position.x - LANES[lane]) < 1
+    );
+    if (tooClose) continue;
+
+    const animalIdx = Math.floor(Math.random() * ANIMAL_NAMES.length);
+    const animalName = ANIMAL_NAMES[animalIdx];
+    const template = animalModels[animalName];
+    if (!template) continue;
+
+    const animalClone = template.clone();
+    const wrapper = new THREE.Group();
+    wrapper.add(animalClone);
+    wrapper.position.set(LANES[lane], 1.0, cz);
+    wrapper.userData = { type: 'animal', name: animalName, collected: false };
+    scene.add(wrapper);
+    chunkObj.cols.push(wrapper);
+  }
+
+  // Add coins
+  const numCoins = 3 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < numCoins; i++) {
+    const cz = z + 3 + (i / numCoins) * (CHUNK_LENGTH - 6);
+    const lane = Math.floor(Math.random() * 3);
+
+    const coin = new THREE.Mesh(coinGeo, coinMat);
+    coin.position.set(LANES[lane], 0.8, cz);
+    coin.rotation.x = Math.PI / 2;
+    coin.userData = { type: 'coin', collected: false };
+    coin.castShadow = true;
+    scene.add(coin);
+    chunkObj.cols.push(coin);
+  }
+
+  chunks.push(chunkObj);
+  return chunkObj;
+}
+
+function removeChunk(chunk) {
+  scene.remove(chunk.ground);
+  scene.remove(chunk.stripeL);
+  scene.remove(chunk.stripeR);
+  chunk.decos.forEach(d => scene.remove(d));
+  chunk.obs.forEach(o => scene.remove(o));
+  chunk.cols.forEach(c => scene.remove(c));
+}
+
+// ==================== GAME LOGIC ====================
+function initGame() {
+  // Clear
+  chunks.forEach(c => removeChunk(c));
+  chunks.length = 0;
+  followAnimals.forEach(a => scene.remove(a.mesh));
+  followAnimals.length = 0;
+
+  score = 0;
+  animalCount = 0;
+  rescuedAnimals = [];
+  currentLane = 1;
+  targetLane = 1;
+  playerVelY = 0;
+  isGrounded = true;
+  gameSpeed = BASE_SPEED;
+  distance = 0;
+  lastChunkZ = 0;
+
+  // Player
+  if (playerModel) scene.remove(playerModel);
+  const firstAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
+  const template = animalModels[firstAnimal];
+  if (template) {
+    playerModel = template.clone();
+  } else {
+    playerModel = createFallbackPlayer();
+  }
+  playerGroup = new THREE.Group();
+  playerGroup.add(playerModel);
+  playerGroup.position.set(LANES[1], PLAYER_Y, 0);
+  scene.add(playerGroup);
+
+  // Generate initial chunks
+  for (let i = 0; i < 4; i++) {
+    createGroundChunk(i * CHUNK_LENGTH);
+    lastChunkZ = (i + 1) * CHUNK_LENGTH;
+  }
+
+  updateHUD();
+}
+
+function moveLeft() {
+  if (targetLane > 0) {
+    targetLane--;
+    playSfx('swoosh');
+  }
+}
+function moveRight() {
+  if (targetLane < 2) {
+    targetLane++;
+    playSfx('swoosh');
+  }
+}
+function jump() {
+  if (isGrounded) {
+    playerVelY = JUMP_FORCE;
+    isGrounded = false;
+    playSfx('jump');
+  }
+}
+
+function updateHUD() {
+  document.getElementById('hudScore').textContent = Math.floor(distance) + ' м';
+  document.getElementById('hudAnimals').textContent = `Зверей: ${animalCount}`;
+}
+
+let lastTime = 0;
+let bobPhase = 0;
+let invincibleTime = 0;
+
+function gameLoop(time) {
+  requestAnimationFrame(gameLoop);
+
+  if (gameState !== 'playing') {
+    renderer.render(scene, camera);
+    return;
+  }
+
+  const dt = Math.min((time - lastTime) / 16.67, 3); // normalize to ~60fps, cap at 3
+  lastTime = time;
+
+  // Speed up
+  gameSpeed = Math.min(MAX_SPEED, gameSpeed + SPEED_INCREMENT * dt);
+  const moveZ = gameSpeed * dt;
+  distance += moveZ;
+
+  // Move player to target lane (smooth)
+  const targetX = LANES[targetLane];
+  playerGroup.position.x += (targetX - playerGroup.position.x) * 0.15 * dt;
+
+  // Jump physics
+  if (!isGrounded) {
+    playerVelY -= GRAVITY * dt;
+    playerGroup.position.y += playerVelY * dt;
+    if (playerGroup.position.y <= PLAYER_Y) {
+      playerGroup.position.y = PLAYER_Y;
+      playerVelY = 0;
+      isGrounded = true;
+    }
+  }
+
+  // Bobbing animation
+  bobPhase += 0.08 * dt;
+  if (isGrounded) {
+    playerGroup.position.y = PLAYER_Y + Math.sin(bobPhase) * 0.05;
+  }
+  // Tilt on lane change
+  const tiltTarget = (targetX - playerGroup.position.x) * 0.3;
+  playerGroup.rotation.z += (tiltTarget - playerGroup.rotation.z) * 0.1 * dt;
+  // Squash & stretch on jump
+  const squash = isGrounded ? 1 : (playerVelY > 0 ? 0.85 : 1.15);
+  const stretch = isGrounded ? 1 : (playerVelY > 0 ? 1.2 : 0.85);
+  playerGroup.scale.set(squash, stretch, squash);
+
+  // Move world toward player (player stays at z=0 visually)
+  chunks.forEach(chunk => {
+    chunk.ground.position.z -= moveZ;
+    chunk.stripeL.position.z -= moveZ;
+    chunk.stripeR.position.z -= moveZ;
+    chunk.decos.forEach(d => d.position.z -= moveZ);
+    chunk.obs.forEach(o => o.position.z -= moveZ);
+    chunk.cols.forEach(c => c.position.z -= moveZ);
+    chunk.z -= moveZ;
+  });
+
+  // Move follow animals
+  followAnimals.forEach((fa, i) => {
+    const targetPos = i === 0 ? playerGroup.position : followAnimals[i - 1].mesh.position;
+    const followDist = 1.2;
+    const dx = targetPos.x - fa.mesh.position.x;
+    const dz = (targetPos.z - followDist) - fa.mesh.position.z;
+    fa.mesh.position.x += dx * 0.08 * dt;
+    fa.mesh.position.z += dz * 0.08 * dt;
+    fa.mesh.position.y = PLAYER_Y + Math.sin(bobPhase + i * 0.5) * 0.05;
+    fa.mesh.rotation.y += 0.02 * dt;
+  });
+
+  // Generate new chunks
+  const furthestZ = chunks.reduce((max, c) => Math.max(max, c.z + CHUNK_LENGTH), 0);
+  if (furthestZ - distance < SPAWN_DISTANCE) {
+    createGroundChunk(lastChunkZ);
+    lastChunkZ += CHUNK_LENGTH;
+  }
+
+  // Remove old chunks
+  for (let i = chunks.length - 1; i >= 0; i--) {
+    if (chunks[i].z + CHUNK_LENGTH < DESPAWN_DISTANCE) {
+      removeChunk(chunks[i]);
+      chunks.splice(i, 1);
+    }
+  }
+
+  // Collision detection
+  if (invincibleTime > 0) {
+    invincibleTime -= dt;
+    playerGroup.visible = Math.floor(time / 100) % 2 === 0;
+  } else {
+    playerGroup.visible = true;
+  }
+
+  chunks.forEach(chunk => {
+    // Obstacles
+    chunk.obs.forEach(obs => {
+      const dx = Math.abs(obs.position.x - playerGroup.position.x);
+      const dz = Math.abs(obs.position.z - playerGroup.position.z);
+      const dy = obs.position.y - playerGroup.position.y;
+      if (dx < 0.7 && dz < 0.7 && dy < 0.6 && invincibleTime <= 0) {
+        // Check if jumping over
+        if (playerGroup.position.y > obs.position.y + 0.3) return;
+        gameOver();
+      }
+    });
+
+    // Collectibles
+    chunk.cols.forEach(col => {
+      if (col.userData.collected) return;
+      const dx = Math.abs(col.position.x - playerGroup.position.x);
+      const dz = Math.abs(col.position.z - playerGroup.position.z);
+      if (dx < 1.0 && dz < 1.0) {
+        col.userData.collected = true;
+        scene.remove(col);
+
+        if (col.userData.type === 'animal') {
+          animalCount++;
+          rescuedAnimals.push(col.userData.name);
+          playSfx('collect');
+
+          // Add to follow train
+          const template = animalModels[col.userData.name];
+          if (template) {
+            const clone = template.clone();
+            const wrapper = new THREE.Group();
+            wrapper.add(clone);
+            const lastPos = followAnimals.length > 0
+              ? followAnimals[followAnimals.length - 1].mesh.position
+              : playerGroup.position;
+            wrapper.position.set(lastPos.x, PLAYER_Y, lastPos.z - 1.2);
+            scene.add(wrapper);
+            followAnimals.push({ mesh: wrapper, name: col.userData.name });
+          }
+        } else if (col.userData.type === 'coin') {
+          score += 10;
+          playSfx('collect');
+        }
+      }
+    });
+  });
+
+  // Animate collectibles (rotate & float)
+  chunks.forEach(chunk => {
+    chunk.cols.forEach(col => {
+      if (col.userData.collected) return;
+      col.rotation.y += 0.03 * dt;
+      if (col.userData.type === 'animal') {
+        col.position.y = 1.0 + Math.sin(time * 0.003 + col.position.z) * 0.2;
+      }
+    });
+  });
+
+  // Update shadow
+  dirLight.position.set(playerGroup.position.x + 10, 20, playerGroup.position.z + 10);
+  dirLight.target.position.copy(playerGroup.position);
+  dirLight.target.updateMatrixWorld();
+
+  // Camera follow
+  camera.position.x += (playerGroup.position.x * 0.3 - camera.position.x) * 0.05 * dt;
+
+  updateHUD();
+  renderer.render(scene, camera);
+}
+
+function gameOver() {
+  gameState = 'gameover';
+  playSfx('hit');
+  stopMusic();
+
+  const finalScore = Math.floor(distance) + score;
+  document.getElementById('goScore').textContent = `Дистанция: ${Math.floor(distance)} м | Очки: ${finalScore}`;
+  document.getElementById('goAnimals').textContent = `Спасено зверей: ${animalCount}`;
+
+  const iconsDiv = document.getElementById('goAnimalIcons');
+  iconsDiv.innerHTML = '';
+  rescuedAnimals.forEach(name => {
+    const span = document.createElement('span');
+    span.className = 'go-animal-icon';
+    span.textContent = ANIMAL_EMOJIS[name] || '?';
+    iconsDiv.appendChild(span);
+  });
+
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('mobileControls').classList.add('hidden');
+  document.getElementById('gameover').classList.remove('hidden');
+
+  // Yandex Games: show ad on game over
+  if (window.ysdk) {
+    try { window.ysdk.adv.showFullscreenAdv({ callbacks: {} }); } catch(e) {}
+  }
+}
+
+// ==================== UI ====================
+function showMenu() {
+  gameState = 'menu';
+  document.getElementById('menu').classList.remove('hidden');
+  document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('pause').classList.add('hidden');
+  document.getElementById('mobileControls').classList.add('hidden');
+}
+
+function startGame() {
+  initAudio();
+  initGame();
+  gameState = 'playing';
+  lastTime = performance.now();
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  if (isMobile()) document.getElementById('mobileControls').classList.remove('hidden');
+  startMusic();
+}
+
+function pauseGame() {
+  if (gameState !== 'playing') return;
+  gameState = 'paused';
+  stopMusic();
+  document.getElementById('pause').classList.remove('hidden');
+  document.getElementById('mobileControls').classList.add('hidden');
+}
+
+function resumeGame() {
+  gameState = 'playing';
+  lastTime = performance.now();
+  document.getElementById('pause').classList.add('hidden');
+  if (isMobile()) document.getElementById('mobileControls').classList.remove('hidden');
+  startMusic();
+}
+
+function isMobile() {
+  return /Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+}
+
+// ==================== INPUT ====================
+document.addEventListener('keydown', (e) => {
+  if (gameState === 'playing') {
+    switch(e.code) {
+      case 'ArrowLeft': case 'KeyA': moveLeft(); break;
+      case 'ArrowRight': case 'KeyD': moveRight(); break;
+      case 'ArrowUp': case 'KeyW': case 'Space': jump(); e.preventDefault(); break;
+      case 'Escape': pauseGame(); break;
+    }
+  } else if (gameState === 'menu') {
+    if (e.code === 'Enter' || e.code === 'Space') { startGame(); e.preventDefault(); }
+  } else if (gameState === 'paused') {
+    if (e.code === 'Escape') resumeGame();
+  }
+});
+
+// Touch / Swipe
+let touchStartX = 0, touchStartY = 0;
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (gameState !== 'playing') return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  const absDx = Math.abs(dx);
+  const absDy = Math.abs(dy);
+
+  if (absDx < 30 && absDy < 30) return; // tap, not swipe
+
+  if (absDx > absDy) {
+    if (dx > 30) moveRight();
+    else if (dx < -30) moveLeft();
+  } else {
+    if (dy < -30) jump();
+  }
+}, { passive: true });
+
+// Mobile buttons
+document.getElementById('mobLeft').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
+document.getElementById('mobRight').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
+document.getElementById('mobJump').addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+
+// UI Buttons
+document.getElementById('btnPlay').addEventListener('click', startGame);
+document.getElementById('btnSettings').addEventListener('click', () => {
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('settings').classList.remove('hidden');
+});
+document.getElementById('btnBack').addEventListener('click', () => {
+  document.getElementById('settings').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+});
+document.getElementById('btnRestart').addEventListener('click', startGame);
+document.getElementById('btnToMenu').addEventListener('click', () => { stopMusic(); showMenu(); });
+document.getElementById('btnToMenu2').addEventListener('click', () => { stopMusic(); showMenu(); });
+document.getElementById('pauseBtn').addEventListener('click', pauseGame);
+document.getElementById('btnResume').addEventListener('click', resumeGame);
+
+// Settings toggles
+document.getElementById('toggleMusic').addEventListener('click', function() {
+  musicEnabled = !musicEnabled;
+  this.classList.toggle('on', musicEnabled);
+  updateMusicVolume();
+  if (!musicEnabled) stopMusic();
+  else if (gameState === 'playing') startMusic();
+});
+document.getElementById('toggleSfx').addEventListener('click', function() {
+  sfxEnabled = !sfxEnabled;
+  this.classList.toggle('on', sfxEnabled);
+  updateSfxVolume();
+});
+
+// Resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ==================== INIT ====================
+async function init() {
+  // Init Yandex Games SDK
+  try {
+    window.ysdk = await YaGames.init();
+  } catch(e) {
+    console.log('Yandex SDK not available (local mode)');
+  }
+
+  await loadModels();
+
+  document.getElementById('loading').classList.add('hidden');
+  showMenu();
+  requestAnimationFrame(gameLoop);
+}
+
+init();
+</script>
+</body>
+</html>
