@@ -635,7 +635,7 @@ function initGame() {
   lastChunkZ = 0;
 
   // Player
-  if (playerModel) scene.remove(playerModel);
+  if (playerGroup) scene.remove(playerGroup);
   const firstAnimal = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
   const template = animalModels[firstAnimal];
   if (template) {
@@ -755,9 +755,8 @@ function gameLoop(time) {
 
   // Generate new chunks
   const furthestZ = chunks.reduce((max, c) => Math.max(max, c.z + CHUNK_LENGTH), 0);
-  if (furthestZ - distance < SPAWN_DISTANCE) {
-    createGroundChunk(lastChunkZ);
-    lastChunkZ += CHUNK_LENGTH;
+  if (furthestZ < SPAWN_DISTANCE) {
+    createGroundChunk(furthestZ);
   }
 
   // Remove old chunks
