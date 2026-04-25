@@ -67,6 +67,11 @@ canvas{display:block}
 #mobileControls.hidden{display:none}
 .mob-btn{pointer-events:auto;width:clamp(50px,12vw,70px);height:clamp(50px,12vw,70px);background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:16px;color:#fff;font-size:clamp(1.2rem,3vw,1.8rem);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .mob-btn:active{background:rgba(255,255,255,0.35);transform:scale(0.9)}
+
+#collectNotify{position:fixed;top:80px;right:20px;z-index:55;pointer-events:none}
+.notify-item{background:rgba(0,0,0,0.75);color:#ffd54f;padding:10px 18px;border-radius:12px;font-size:clamp(0.85rem,2.5vw,1.1rem);font-weight:700;margin-bottom:8px;animation:notifyIn 0.3s ease-out,notifyOut 0.5s 2s ease-in forwards;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-shadow:1px 1px 2px rgba(0,0,0,0.5)}
+@keyframes notifyIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes notifyOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
 </style>
 </head>
 <body>
@@ -135,6 +140,8 @@ canvas{display:block}
   <button class="mob-btn" id="mobRight">▶</button>
 </div>
 
+<div id="collectNotify"></div>
+
 <script type="importmap">
 {
   "imports": {
@@ -150,7 +157,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ==================== CONFIG ====================
 const LANE_WIDTH = 2.5;
-const LANES = [-LANE_WIDTH, 0, LANE_WIDTH];
+const LANES = [LANE_WIDTH, 0, -LANE_WIDTH];
 const PLAYER_Y = 0.5;
 const JUMP_FORCE = 0.22;
 const GRAVITY = 0.008;
@@ -171,6 +178,12 @@ const ANIMAL_EMOJIS = {
   'animal-penguin':'🐧','animal-panda':'🐼','animal-tiger':'🐯','animal-lion':'🦁',
   'animal-elephant':'🐘','animal-monkey':'🐵','animal-bee':'🐝','animal-koala':'🐨',
   'animal-pig':'🐷','animal-chick':'🐤','animal-deer':'🦌'
+};
+const ANIMAL_NAMES_RU = {
+  'animal-bunny':'Кролика','animal-cat':'Кота','animal-dog':'Собаку','animal-fox':'Лису',
+  'animal-penguin':'Пингвина','animal-panda':'Панду','animal-tiger':'Тигра','animal-lion':'Льва',
+  'animal-elephant':'Слона','animal-monkey':'Обезьяну','animal-bee':'Пчелу','animal-koala':'Коалу',
+  'animal-pig':'Свинку','animal-chick':'Цыплёнка','animal-deer':'Оленя'
 };
 
 // ==================== STATE ====================
@@ -588,6 +601,16 @@ function getFormationPosition(index, totalCount) {
   return { x: xOffset, z: -(row + 1) * ROW_SPACING };
 }
 
+function triggerFollowJump() {
+  followAnimals.forEach((fa, i) => {
+    const delay = (Math.floor(i / 3) + 1) * 80;
+    setTimeout(() => {
+      fa.jumpVel = JUMP_FORCE * 0.9;
+      fa.jumping = true;
+    }, delay);
+  });
+}
+
 function updateFormationPositions(dt) {
   const total = followAnimals.length;
   followAnimals.forEach((fa, i) => {
@@ -596,7 +619,15 @@ function updateFormationPositions(dt) {
     const targetZ = playerGroup.position.z + target.z;
     fa.mesh.position.x += (targetX - fa.mesh.position.x) * 0.12 * dt;
     fa.mesh.position.z += (targetZ - fa.mesh.position.z) * 0.12 * dt;
-    fa.mesh.position.y = PLAYER_Y + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
+
+    if (fa.jumping) {
+      fa.jumpVel -= GRAVITY * dt;
+      fa.jumpY = (fa.jumpY || 0) + fa.jumpVel * dt;
+      if (fa.jumpY <= 0) { fa.jumpY = 0; fa.jumping = false; fa.jumpVel = 0; }
+      fa.mesh.position.y = PLAYER_Y + fa.jumpY + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
+    } else {
+      fa.mesh.position.y = PLAYER_Y + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
+    }
   });
 }
 
@@ -612,6 +643,7 @@ function initGame() {
   animalCount = 0;
   rescuedAnimals = [];
   targetLane = 1;
+  document.getElementById('collectNotify').innerHTML = '';
   playerVelY = 0;
   isGrounded = true;
   gameSpeed = BASE_SPEED;
@@ -649,12 +681,23 @@ function moveRight() {
   if (targetLane < 2) { targetLane++; playSfx('swoosh'); }
 }
 function jump() {
-  if (isGrounded) { playerVelY = JUMP_FORCE; isGrounded = false; playSfx('jump'); }
+  if (isGrounded) { playerVelY = JUMP_FORCE; isGrounded = false; playSfx('jump'); triggerFollowJump(); }
 }
 
 function updateHUD() {
   document.getElementById('hudScore').textContent = Math.floor(distance) + ' м';
   document.getElementById('hudAnimals').textContent = `Зверей: ${animalCount}`;
+}
+
+function showCollectNotify(animalName) {
+  const container = document.getElementById('collectNotify');
+  const emoji = ANIMAL_EMOJIS[animalName] || '';
+  const ruName = ANIMAL_NAMES_RU[animalName] || animalName;
+  const el = document.createElement('div');
+  el.className = 'notify-item';
+  el.textContent = `${emoji} Вы подобрали ${ruName}!`;
+  container.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 2600);
 }
 
 let lastTime = 0;
@@ -750,6 +793,7 @@ function gameLoop(time) {
           animalCount++;
           rescuedAnimals.push(col.userData.name);
           playSfx('collect');
+          showCollectNotify(col.userData.name);
 
           const tmpl = animalModels[col.userData.name];
           if (tmpl) {
@@ -764,7 +808,7 @@ function gameLoop(time) {
               playerGroup.position.z + pos.z
             );
             scene.add(wrapper);
-            followAnimals.push({ mesh: wrapper, name: col.userData.name });
+            followAnimals.push({ mesh: wrapper, name: col.userData.name, jumping: false, jumpVel: 0, jumpY: 0 });
           }
         } else if (col.userData.type === 'coin') {
           score += 10;
@@ -774,13 +818,15 @@ function gameLoop(time) {
     });
   });
 
-  // Animate collectibles
+  // Animate collectibles (rotate uncollected animals, bob coins)
   chunks.forEach(chunk => {
     chunk.cols.forEach(col => {
       if (col.userData.collected) return;
-      col.rotation.y += 0.03 * dt;
       if (col.userData.type === 'animal') {
-        col.position.y = 1.0 + Math.sin(time * 0.003 + col.position.z) * 0.2;
+        col.rotation.y += 0.06 * dt;
+        col.position.y = 1.0 + Math.sin(time * 0.003 + col.position.z) * 0.25;
+      } else {
+        col.rotation.y += 0.04 * dt;
       }
     });
   });
