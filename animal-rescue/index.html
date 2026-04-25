@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Спасатель Зверей</title>
+<script src="https://yandex.ru/games/sdk/v2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Segoe UI',Arial,sans-serif;touch-action:none;user-select:none}
+canvas{display:block}
+
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;pointer-events:auto;transition:opacity 0.5s}
+.overlay.hidden{opacity:0;pointer-events:none}
+
+#menu{background:linear-gradient(135deg,#1a5e1a 0%,#0d3d0d 100%)}
+#menu h1{font-size:clamp(2rem,6vw,4rem);color:#fff;text-shadow:3px 3px 0 #000,0 0 20px rgba(76,175,80,0.8);margin-bottom:0.3em;text-align:center;letter-spacing:2px}
+#menu .subtitle{font-size:clamp(0.9rem,2.5vw,1.4rem);color:#a5d6a7;margin-bottom:2em;text-align:center}
+.menu-animals{display:flex;gap:10px;margin-bottom:2em;flex-wrap:wrap;justify-content:center;max-width:400px}
+.menu-animal{width:50px;height:50px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;animation:bounce 2s infinite}
+.menu-animal:nth-child(2n){animation-delay:0.3s}
+.menu-animal:nth-child(3n){animation-delay:0.6s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.btn{padding:14px 48px;font-size:clamp(1rem,3vw,1.3rem);border:none;border-radius:50px;cursor:pointer;font-weight:700;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+.btn:active{transform:scale(0.95)}
+.btn-play{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:15px}
+.btn-play:hover{background:linear-gradient(135deg,#66bb6a,#388e3c);box-shadow:0 6px 20px rgba(76,175,80,0.5)}
+.btn-settings{background:rgba(255,255,255,0.15);color:#fff;border:2px solid rgba(255,255,255,0.3);font-size:clamp(0.85rem,2.5vw,1.1rem);padding:10px 36px}
+.btn-settings:hover{background:rgba(255,255,255,0.25)}
+
+#settings{background:rgba(0,0,0,0.92)}
+#settings h2{font-size:clamp(1.5rem,4vw,2.5rem);color:#fff;margin-bottom:1.5em}
+.setting-row{display:flex;align-items:center;justify-content:space-between;width:min(80%,320px);margin-bottom:20px;color:#fff;font-size:clamp(0.9rem,2.5vw,1.2rem)}
+.toggle{width:56px;height:30px;background:#555;border-radius:15px;position:relative;cursor:pointer;transition:background 0.3s}
+.toggle.on{background:#4caf50}
+.toggle::after{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left 0.3s}
+.toggle.on::after{left:29px}
+.btn-back{margin-top:30px;background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
+
+#hud{position:fixed;top:0;left:0;width:100%;padding:12px 20px;display:flex;justify-content:space-between;align-items:flex-start;z-index:50;pointer-events:none}
+#hud.hidden{display:none}
+.hud-score{color:#fff;font-size:clamp(1rem,3vw,1.5rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
+.hud-animals{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
+#pauseBtn{pointer-events:auto;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.4);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+#gameover{background:rgba(0,0,0,0.88)}
+#gameover h2{font-size:clamp(1.8rem,5vw,3rem);color:#ff5252;text-shadow:0 0 20px rgba(255,82,82,0.5);margin-bottom:0.5em}
+.go-stats{color:#fff;font-size:clamp(1rem,3vw,1.4rem);margin-bottom:0.5em}
+.go-animals-rescued{color:#ffd54f;font-size:clamp(1.1rem,3vw,1.5rem);margin-bottom:0.3em;font-weight:700}
+.go-animal-icons{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:300px;margin-bottom:1.5em}
+.go-animal-icon{font-size:1.6rem;background:rgba(255,255,255,0.1);padding:6px;border-radius:8px}
+.btn-restart{background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;margin-bottom:12px}
+.btn-menu{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
+
+#pause{background:rgba(0,0,0,0.8)}
+#pause h2{font-size:clamp(1.5rem,4vw,2.5rem);color:#fff;margin-bottom:1em}
+.btn-resume{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:12px}
+
+#loading{background:#0d3d0d;z-index:200}
+#loading h2{color:#fff;font-size:clamp(1.2rem,3vw,1.8rem);margin-bottom:1em}
+.loader{width:min(60%,250px);height:8px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden}
+.loader-bar{height:100%;background:#4caf50;border-radius:4px;width:0%;transition:width 0.3s}
+.loader-text{color:#a5d6a7;font-size:0.9rem;margin-top:0.8em}
+
+#mobileControls{position:fixed;bottom:20px;left:0;width:100%;display:flex;justify-content:center;gap:15px;z-index:60;pointer-events:none}
+#mobileControls.hidden{display:none}
+.mob-btn{pointer-events:auto;width:clamp(50px,12vw,70px);height:clamp(50px,12vw,70px);background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:16px;color:#fff;font-size:clamp(1.2rem,3vw,1.8rem);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.mob-btn:active{background:rgba(255,255,255,0.35);transform:scale(0.9)}
+
+#collectNotify{position:fixed;top:80px;right:20px;z-index:55;pointer-events:none}
+.notify-item{background:rgba(0,0,0,0.75);color:#ffd54f;padding:10px 18px;border-radius:12px;font-size:clamp(0.85rem,2.5vw,1.1rem);font-weight:700;margin-bottom:8px;animation:notifyIn 0.3s ease-out,notifyOut 0.5s 2s ease-in forwards;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-shadow:1px 1px 2px rgba(0,0,0,0.5)}
+@keyframes notifyIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes notifyOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
+
+.hud-coins{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
+.go-coins{color:#ffd54f;font-size:clamp(1rem,3vw,1.3rem);margin-bottom:0.5em;font-weight:700}
+
+#shop{background:rgba(0,0,0,0.92);overflow-y:auto;justify-content:flex-start;padding:30px 0 40px}
+#shop h2{font-size:clamp(1.5rem,4vw,2.5rem);color:#fff;margin-bottom:0.3em}
+.shop-balance{color:#ffd54f;font-size:clamp(1rem,3vw,1.4rem);font-weight:700;margin-bottom:1.2em}
+.shop-section{margin-bottom:1.5em;width:min(90%,400px)}
+.shop-section h3{color:#a5d6a7;font-size:clamp(0.95rem,2.5vw,1.2rem);margin-bottom:0.6em;text-align:left}
+.shop-item{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px 16px;margin-bottom:8px;transition:background 0.2s}
+.shop-item:hover{background:rgba(255,255,255,0.14)}
+.shop-item-info{display:flex;align-items:center;gap:10px;color:#fff;font-size:clamp(0.85rem,2.2vw,1rem)}
+.shop-item-icon{font-size:1.6rem;width:36px;text-align:center}
+.shop-item-name{font-weight:600}
+.shop-item-desc{font-size:0.8em;color:#aaa;margin-top:2px}
+.btn-buy{padding:8px 18px;font-size:clamp(0.75rem,2vw,0.9rem);border:none;border-radius:20px;cursor:pointer;font-weight:700;background:linear-gradient(135deg,#ffd54f,#ff8f00);color:#333;transition:all 0.2s}
+.btn-buy:hover{box-shadow:0 2px 10px rgba(255,213,79,0.4)}
+.btn-buy:disabled{background:#555;color:#888;cursor:default;box-shadow:none}
+.btn-buy.owned{background:#4caf50;color:#fff;cursor:default}
+.active-boosts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1em;justify-content:center}
+.boost-badge{background:rgba(255,213,79,0.2);color:#ffd54f;padding:4px 12px;border-radius:16px;font-size:0.85rem;font-weight:600}
+</style>
+</head>
+<body>
+
+<div id="loading" class="overlay">
+  <h2>Загрузка...</h2>
+  <div class="loader"><div class="loader-bar" id="loaderBar"></div></div>
+  <div class="loader-text" id="loaderText">Подготовка зверей...</div>
+</div>
+
+<div id="menu" class="overlay hidden">
+  <h1>СПАСАТЕЛЬ<br>ЗВЕРЕЙ</h1>
+  <p class="subtitle">Спаси всех животных!</p>
+  <div class="menu-animals">
+    <div class="menu-animal">🐰</div>
+    <div class="menu-animal">🐱</div>
+    <div class="menu-animal">🐶</div>
+    <div class="menu-animal">🦊</div>
+    <div class="menu-animal">🐧</div>
+    <div class="menu-animal">🐼</div>
+    <div class="menu-animal">🐯</div>
+  </div>
+  <div class="shop-balance" id="menuCoins">Монеты: 0 🪙</div>
+  <button class="btn btn-play" id="btnPlay">ИГРАТЬ</button>
+  <button class="btn btn-settings" id="btnShop" style="margin-bottom:12px;background:linear-gradient(135deg,rgba(255,213,79,0.3),rgba(255,143,0,0.3));border-color:rgba(255,213,79,0.5)">🛒 Магазин</button>
+  <button class="btn btn-settings" id="btnSettings">Настройки</button>
+</div>
+
+<div id="settings" class="overlay hidden">
+  <h2>Настройки</h2>
+  <div class="setting-row">
+    <span>Музыка</span>
+    <div class="toggle on" id="toggleMusic"></div>
+  </div>
+  <div class="setting-row">
+    <span>Звуки</span>
+    <div class="toggle on" id="toggleSfx"></div>
+  </div>
+  <button class="btn btn-back" id="btnBack">Назад</button>
+</div>
+
+<div id="shop" class="overlay hidden">
+  <h2>🛒 Магазин</h2>
+  <div class="shop-balance" id="shopBalance">Монеты: 0 🪙</div>
+  <div id="activeBoostsDisplay" class="active-boosts"></div>
+  <div class="shop-section">
+    <h3>⚡ Бусты (на 1 забег)</h3>
+    <div id="shopBoosts"></div>
+  </div>
+  <div class="shop-section">
+    <h3>🐾 Персонажи</h3>
+    <div id="shopSkins"></div>
+  </div>
+  <button class="btn btn-back" id="btnShopBack">Назад</button>
+</div>
+
+<div id="hud" class="hidden">
+  <div>
+    <div class="hud-score" id="hudScore">0 м</div>
+    <div class="hud-coins" id="hudCoins">🪙 0</div>
+    <div class="hud-animals" id="hudAnimals">Зверей: 0</div>
+  </div>
+  <button id="pauseBtn">⏸</button>
+</div>
+
+<div id="pause" class="overlay hidden">
+  <h2>Пауза</h2>
+  <button class="btn btn-resume" id="btnResume">Продолжить</button>
+  <button class="btn btn-menu" id="btnToMenu">В меню</button>
+</div>
+
+<div id="gameover" class="overlay hidden">
+  <h2>Игра окончена!</h2>
+  <div class="go-stats" id="goScore">Дистанция: 0 м</div>
+  <div class="go-coins" id="goCoins">+0 🪙</div>
+  <div class="go-animals-rescued" id="goAnimals">Спасено зверей: 0</div>
+  <div class="go-animal-icons" id="goAnimalIcons"></div>
+  <button class="btn btn-restart" id="btnRestart">Ещё раз</button>
+  <button class="btn btn-menu" id="btnToMenu2">В меню</button>
+</div>
+
+<div id="mobileControls" class="hidden">
+  <button class="mob-btn" id="mobLeft">◀</button>
+  <button class="mob-btn" id="mobJump">▲</button>
+  <button class="mob-btn" id="mobRight">▶</button>
+</div>
+
+<div id="collectNotify"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// ==================== CONFIG ====================
+const LANE_WIDTH = 2.5;
+const LANES = [LANE_WIDTH, 0, -LANE_WIDTH];
+const PLAYER_Y = 0.5;
+const JUMP_FORCE = 0.22;
+const GRAVITY = 0.008;
+const BASE_SPEED = 0.12;
+const MAX_SPEED = 0.8;
+const SPEED_INCREMENT = 0.00006;
+const CHUNK_LENGTH = 60;
+const SPAWN_DISTANCE = 80;
+const DESPAWN_DISTANCE = -20;
+const ROW_SPACING = 1.3;
+const ANIMAL_NAMES = [
+  'animal-bunny','animal-cat','animal-dog','animal-fox','animal-penguin',
+  'animal-panda','animal-tiger','animal-lion','animal-elephant','animal-monkey',
+  'animal-bee','animal-koala','animal-pig','animal-chick','animal-deer'
+];
+const ANIMAL_EMOJIS = {
+  'animal-bunny':'🐰','animal-cat':'🐱','animal-dog':'🐶','animal-fox':'🦊',
+  'animal-penguin':'🐧','animal-panda':'🐼','animal-tiger':'🐯','animal-lion':'🦁',
+  'animal-elephant':'🐘','animal-monkey':'🐵','animal-bee':'🐝','animal-koala':'🐨',
+  'animal-pig':'🐷','animal-chick':'🐤','animal-deer':'🦌'
+};
+const ANIMAL_NAMES_RU = {
+  'animal-bunny':'Кролика','animal-cat':'Кота','animal-dog':'Собаку','animal-fox':'Лису',
+  'animal-penguin':'Пингвина','animal-panda':'Панду','animal-tiger':'Тигра','animal-lion':'Льва',
+  'animal-elephant':'Слона','animal-monkey':'Обезьяну','animal-bee':'Пчелу','animal-koala':'Коалу',
+  'animal-pig':'Свинку','animal-chick':'Цыплёнка','animal-deer':'Оленя'
+};
+
+// ==================== STATE ====================
+let gameState = 'loading';
+let score = 0;
+let animalCount = 0;
+let rescuedAnimals = [];
+let targetLane = 1;
+let playerVelY = 0;
+let isGrounded = true;
+let gameSpeed = BASE_SPEED;
+let distance = 0;
+let runCoins = 0;
+
+let musicEnabled = true;
+let sfxEnabled = true;
+
+// ==================== ECONOMY ====================
+const COIN_PER_PICKUP = 10;
+const COIN_PER_ANIMAL = 25;
+const COIN_DISTANCE_BONUS = 50;
+
+let totalCoins = 0;
+let selectedSkin = null;
+let ownedSkins = [];
+let activeBoosts = [];
+
+const BOOST_ITEMS = [
+  { id: 'magnet', name: 'Магнит', desc: 'Притягивает монеты', icon: '🧲', price: 150 },
+  { id: 'shield', name: 'Щит', desc: 'Защита от 1 удара', icon: '🛡️', price: 200 },
+  { id: 'double', name: 'x2 Монеты', desc: 'Двойные монеты', icon: '💰', price: 200 },
+  { id: 'slow', name: 'Лёгкий старт', desc: 'Медленный старт', icon: '🐢', price: 100 }
+];
+
+const ANIMAL_NAMES_NOM = {
+  'animal-bunny':'Кролик','animal-cat':'Кот','animal-dog':'Собака','animal-fox':'Лиса',
+  'animal-penguin':'Пингвин','animal-panda':'Панда','animal-tiger':'Тигр','animal-lion':'Лев',
+  'animal-elephant':'Слон','animal-monkey':'Обезьяна','animal-bee':'Пчела','animal-koala':'Коала',
+  'animal-pig':'Свинка','animal-chick':'Цыплёнок','animal-deer':'Олень'
+};
+const SKIN_ITEMS = ANIMAL_NAMES.map((name, i) => ({
+  id: name,
+  name: ANIMAL_NAMES_NOM[name] || name,
+  icon: ANIMAL_EMOJIS[name],
+  price: i < 5 ? 0 : i < 10 ? 150 : 300
+}));
+
+function loadEconomy() {
+  try {
+    const d = JSON.parse(localStorage.getItem('animalRescueEcon') || '{}');
+    totalCoins = d.coins || 0;
+    selectedSkin = d.skin || null;
+    ownedSkins = d.owned || [];
+    activeBoosts = d.boosts || [];
+  } catch(e) {}
+}
+function saveEconomy() {
+  try { localStorage.setItem('animalRescueEcon', JSON.stringify({ coins: totalCoins, skin: selectedSkin, owned: ownedSkins, boosts: activeBoosts })); } catch(e) {}
+}
+loadEconomy();
+
+// Load saved settings
+try {
+  const saved = localStorage.getItem('animalRescueSettings');
+  if (saved) {
+    const s = JSON.parse(saved);
+    musicEnabled = s.music !== false;
+    sfxEnabled = s.sfx !== false;
+  }
+} catch(e) {}
+
+function saveSettings() {
+  try { localStorage.setItem('animalRescueSettings', JSON.stringify({ music: musicEnabled, sfx: sfxEnabled })); } catch(e) {}
+}
+
+// ==================== RENDERER (optimized) ====================
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87CEEB);
+scene.fog = new THREE.Fog(0x87CEEB, 30, 70);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 150);
+camera.position.set(0, 6, -8);
+camera.lookAt(0, 1, 10);
+
+// Lights (no shadows for performance)
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+const dirLight = new THREE.DirectionalLight(0xfff4e0, 1.0);
+dirLight.position.set(5, 15, 10);
+scene.add(dirLight);
+scene.add(new THREE.HemisphereLight(0x87CEEB, 0x556b2f, 0.5));
+
+// ==================== BACKGROUND SCENERY ====================
+// Large ground plane
+const groundPlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(200, 200),
+  new THREE.MeshLambertMaterial({ color: 0x4a8c3f })
+);
+groundPlane.rotation.x = -Math.PI / 2;
+groundPlane.position.y = -0.2;
+scene.add(groundPlane);
+
+// Distant mountains (simple triangles)
+function createMountains() {
+  const mtns = new THREE.Group();
+  const mtnGeo = new THREE.ConeGeometry(1, 1, 4);
+  const colors = [0x5d8a4e, 0x4a7a3d, 0x6b9b5a, 0x3d6b2f];
+  for (let i = 0; i < 30; i++) {
+    const mat = new THREE.MeshLambertMaterial({ color: colors[i % colors.length] });
+    const mtn = new THREE.Mesh(mtnGeo, mat);
+    const side = i < 15 ? -1 : 1;
+    const s = 3 + Math.random() * 8;
+    mtn.scale.set(s, s * (0.8 + Math.random() * 0.8), s);
+    mtn.position.set(
+      side * (20 + Math.random() * 30),
+      s * 0.3,
+      -30 + Math.random() * 100
+    );
+    mtn.rotation.y = Math.random() * Math.PI;
+    mtns.add(mtn);
+  }
+  scene.add(mtns);
+  return mtns;
+}
+const mountains = createMountains();
+
+// ==================== AUDIO ====================
+let audioCtx = null;
+let musicGain = null;
+let sfxGain = null;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicGain = audioCtx.createGain();
+  musicGain.gain.value = musicEnabled ? 0.12 : 0;
+  musicGain.connect(audioCtx.destination);
+  sfxGain = audioCtx.createGain();
+  sfxGain.gain.value = sfxEnabled ? 0.3 : 0;
+  sfxGain.connect(audioCtx.destination);
+}
+
+function updateMusicVolume() { if (musicGain) musicGain.gain.value = musicEnabled ? 0.12 : 0; }
+function updateSfxVolume() { if (sfxGain) sfxGain.gain.value = sfxEnabled ? 0.3 : 0; }
+
+let musicInterval = null;
+const MELODY = [
+  262,330,392,523,392,330,262,294,
+  330,392,440,392,330,294,262,330,
+  349,440,523,440,349,330,294,349,
+  392,523,587,523,392,349,330,262
+];
+let melodyIdx = 0;
+
+function startMusic() {
+  if (!audioCtx || musicInterval) return;
+  melodyIdx = 0;
+  playMelodyNote();
+  musicInterval = setInterval(playMelodyNote, 220);
+}
+
+function stopMusic() {
+  if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
+}
+
+function playMelodyNote() {
+  if (!audioCtx || !musicEnabled) return;
+  const freq = MELODY[melodyIdx % MELODY.length];
+  melodyIdx++;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+  osc.connect(gain);
+  gain.connect(musicGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.2);
+}
+
+function playSfx(type) {
+  if (!audioCtx || !sfxEnabled) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(sfxGain);
+  switch(type) {
+    case 'jump':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+      break;
+    case 'collect':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.08);
+      osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.16);
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      break;
+    case 'hit':
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+      break;
+    case 'swoosh':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+      break;
+  }
+}
+
+// ==================== SHARED GEOMETRIES (reuse for perf) ====================
+const groundGeo = new THREE.BoxGeometry(8, 0.3, CHUNK_LENGTH);
+const groundMat = new THREE.MeshLambertMaterial({ color: 0x6b8e5a });
+const grassDarkMat = new THREE.MeshLambertMaterial({ color: 0x4a7a3d });
+const stripeGeo = new THREE.BoxGeometry(1, 0.32, CHUNK_LENGTH);
+
+// Road markings
+const laneMarkGeo = new THREE.BoxGeometry(0.08, 0.02, 2);
+const laneMarkMat = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x666666, emissiveIntensity: 0.2 });
+const roadEdgeGeo = new THREE.BoxGeometry(0.12, 0.04, CHUNK_LENGTH);
+const roadEdgeMat = new THREE.MeshLambertMaterial({ color: 0xdddddd });
+
+const coinGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.08, 8);
+const coinMat = new THREE.MeshLambertMaterial({ color: 0xffd54f, emissive: 0x997700, emissiveIntensity: 0.3 });
+
+// ==================== POOLS ====================
+const chunks = [];
+const followAnimals = [];
+
+// ==================== PLAYER ====================
+let playerGroup = null;
+
+// ==================== LOAD MODELS ====================
+const loader = new GLTFLoader();
+const animalModels = {};
+const obstacleModels = {};
+const sceneryModels = {};
+
+const OBSTACLE_NAMES = ['obstacle-barrel','obstacle-crate','obstacle-spike','obstacle-rocks','obstacle-trap','obstacle-bomb','obstacle-saw','obstacle-hedge'];
+const SCENERY_NAMES = ['scenery-tree-pine','scenery-tree-pine-small','scenery-tree','scenery-mushrooms','scenery-flowers','scenery-flowers-tall','scenery-fence'];
+
+function cloneModel(source) {
+  return source.clone(true);
+}
+
+function loadModels() {
+  return new Promise((resolve) => {
+    const allNames = [...ANIMAL_NAMES, ...OBSTACLE_NAMES, ...SCENERY_NAMES];
+    const total = allNames.length;
+    let loaded = 0;
+
+    function onLoad() {
+      loaded++;
+      updateLoadProgress(loaded, total);
+      if (loaded === total) resolve();
+    }
+
+    ANIMAL_NAMES.forEach(name => {
+      loader.load(`models/${name}.glb`, (gltf) => {
+        const model = gltf.scene;
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 0.8 / maxDim;
+        model.scale.setScalar(scale);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
+        animalModels[name] = model;
+        onLoad();
+      }, undefined, onLoad);
+    });
+
+    OBSTACLE_NAMES.forEach(name => {
+      loader.load(`models/${name}.glb`, (gltf) => {
+        const model = gltf.scene;
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 1.0 / maxDim;
+        model.scale.setScalar(scale);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
+        obstacleModels[name] = model;
+        onLoad();
+      }, undefined, onLoad);
+    });
+
+    SCENERY_NAMES.forEach(name => {
+      loader.load(`models/${name}.glb`, (gltf) => {
+        const model = gltf.scene;
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.set(-center.x, -box.min.y, -center.z);
+        sceneryModels[name] = model;
+        onLoad();
+      }, undefined, onLoad);
+    });
+  });
+}
+
+function updateLoadProgress(loaded, total) {
+  const pct = Math.round((loaded / total) * 100);
+  document.getElementById('loaderBar').style.width = pct + '%';
+  document.getElementById('loaderText').textContent = `Загружено моделей: ${loaded}/${total}`;
+}
+
+// ==================== WORLD GENERATION ====================
+function createGroundChunk(z, safe) {
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.position.set(0, -0.15, z + CHUNK_LENGTH / 2);
+  scene.add(ground);
+
+  const stripeL = new THREE.Mesh(stripeGeo, grassDarkMat);
+  stripeL.position.set(-4.5, -0.15, z + CHUNK_LENGTH / 2);
+  scene.add(stripeL);
+  const stripeR = new THREE.Mesh(stripeGeo, grassDarkMat);
+  stripeR.position.set(4.5, -0.15, z + CHUNK_LENGTH / 2);
+  scene.add(stripeR);
+
+  const chunkObj = { ground, stripeL, stripeR, z, decos: [], obs: [], cols: [], marks: [] };
+
+  // Road lane markings (dashed lines between lanes)
+  const lanePositions = [(LANES[0] + LANES[1]) / 2, (LANES[1] + LANES[2]) / 2];
+  lanePositions.forEach(lx => {
+    for (let mz = z + 1; mz < z + CHUNK_LENGTH; mz += 5) {
+      const mark = new THREE.Mesh(laneMarkGeo, laneMarkMat);
+      mark.position.set(lx, 0.01, mz);
+      scene.add(mark);
+      chunkObj.marks.push(mark);
+    }
+  });
+
+  // Road edges
+  const edgeL = new THREE.Mesh(roadEdgeGeo, roadEdgeMat);
+  edgeL.position.set(LANES[0] + LANE_WIDTH * 0.6, 0.01, z + CHUNK_LENGTH / 2);
+  scene.add(edgeL);
+  chunkObj.marks.push(edgeL);
+  const edgeR = new THREE.Mesh(roadEdgeGeo, roadEdgeMat);
+  edgeR.position.set(LANES[2] - LANE_WIDTH * 0.6, 0.01, z + CHUNK_LENGTH / 2);
+  scene.add(edgeR);
+  chunkObj.marks.push(edgeR);
+
+  // Side scenery with 3D models
+  const sceneryKeys = Object.keys(sceneryModels);
+  for (let i = 0; i < 6; i++) {
+    const tz = z + Math.random() * CHUNK_LENGTH;
+    const side = Math.random() > 0.5 ? 1 : -1;
+    const tx = side * (5 + Math.random() * 4);
+
+    if (sceneryKeys.length > 0) {
+      const key = sceneryKeys[Math.floor(Math.random() * sceneryKeys.length)];
+      const tmpl = sceneryModels[key];
+      const clone = cloneModel(tmpl);
+      const wrapper = new THREE.Group();
+      wrapper.add(clone);
+      const isTree = key.includes('tree');
+      const s = isTree ? (0.8 + Math.random() * 1.2) : (0.5 + Math.random() * 0.8);
+      wrapper.scale.setScalar(s);
+      wrapper.position.set(tx, 0, tz);
+      wrapper.rotation.y = Math.random() * Math.PI * 2;
+      scene.add(wrapper);
+      chunkObj.decos.push(wrapper);
+    }
+  }
+
+  // Obstacles with 3D models (skip in safe zone)
+  const numObstacles = safe ? 0 : Math.floor(2 + Math.random() * 3);
+  const usedPositions = [];
+  const obsKeys = Object.keys(obstacleModels);
+  for (let i = 0; i < numObstacles; i++) {
+    const oz = z + 10 + Math.random() * (CHUNK_LENGTH - 20);
+    const lane = Math.floor(Math.random() * 3);
+    const key = `${Math.round(oz/3)}_${lane}`;
+    if (usedPositions.includes(key)) continue;
+    usedPositions.push(key);
+
+    let obs;
+    if (obsKeys.length > 0) {
+      const obsName = obsKeys[Math.floor(Math.random() * obsKeys.length)];
+      const clone = cloneModel(obstacleModels[obsName]);
+      obs = new THREE.Group();
+      obs.add(clone);
+      obs.position.set(LANES[lane], 0.3, oz);
+    } else {
+      obs = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshLambertMaterial({ color: 0xd32f2f }));
+      obs.position.set(LANES[lane], 0.35, oz);
+    }
+    obs.userData = { type: 'obstacle', lane };
+    scene.add(obs);
+    chunkObj.obs.push(obs);
+  }
+
+  // Collectible animals
+  const numAnimals = 1 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < numAnimals; i++) {
+    const cz = z + 5 + Math.random() * (CHUNK_LENGTH - 10);
+    const lane = Math.floor(Math.random() * 3);
+    const tooClose = chunkObj.obs.some(o =>
+      Math.abs(o.position.z - cz) < 3 && Math.abs(o.position.x - LANES[lane]) < 1
+    );
+    if (tooClose) continue;
+
+    const animalName = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
+    const template = animalModels[animalName];
+    if (!template) continue;
+
+    const animalClone = cloneModel(template);
+    const wrapper = new THREE.Group();
+    wrapper.add(animalClone);
+    wrapper.position.set(LANES[lane], 1.0, cz);
+    wrapper.userData = { type: 'animal', name: animalName, collected: false };
+    scene.add(wrapper);
+    chunkObj.cols.push(wrapper);
+  }
+
+  // Coins
+  const numCoins = 3 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < numCoins; i++) {
+    const cz = z + 3 + (i / numCoins) * (CHUNK_LENGTH - 6);
+    const lane = Math.floor(Math.random() * 3);
+    const coin = new THREE.Mesh(coinGeo, coinMat);
+    coin.position.set(LANES[lane], 0.8, cz);
+    coin.rotation.x = Math.PI / 2;
+    coin.userData = { type: 'coin', collected: false };
+    scene.add(coin);
+    chunkObj.cols.push(coin);
+  }
+
+  chunks.push(chunkObj);
+  return chunkObj;
+}
+
+function removeChunk(chunk) {
+  scene.remove(chunk.ground);
+  scene.remove(chunk.stripeL);
+  scene.remove(chunk.stripeR);
+  chunk.decos.forEach(d => scene.remove(d));
+  chunk.obs.forEach(o => scene.remove(o));
+  chunk.cols.forEach(c => scene.remove(c));
+  if (chunk.marks) chunk.marks.forEach(m => scene.remove(m));
+}
+
+// ==================== FORMATION SYSTEM ====================
+// Animals form rows of up to 3 behind the player
+// Row 1: first 1-3 animals, Row 2: next 1-3, etc.
+const FORMATION_GAP_X = 1.2;
+
+function getFormationPosition(index, totalCount) {
+  const row = Math.floor(index / 3);
+  const posInRow = index % 3;
+  const rowStart = row * 3;
+  const rowCount = Math.min(3, totalCount - rowStart);
+
+  let xOffset;
+  if (rowCount === 1) {
+    xOffset = 0;
+  } else if (rowCount === 2) {
+    xOffset = posInRow === 0 ? -FORMATION_GAP_X * 0.5 : FORMATION_GAP_X * 0.5;
+  } else {
+    xOffset = (posInRow - 1) * FORMATION_GAP_X;
+  }
+
+  return { x: xOffset, z: -(row + 1) * ROW_SPACING };
+}
+
+function triggerFollowJump() {
+  followAnimals.forEach((fa, i) => {
+    const delay = (Math.floor(i / 3) + 1) * 80;
+    setTimeout(() => {
+      fa.jumpVel = JUMP_FORCE * 0.9;
+      fa.jumping = true;
+    }, delay);
+  });
+}
+
+function updateFormationPositions(dt) {
+  const total = followAnimals.length;
+  followAnimals.forEach((fa, i) => {
+    const target = getFormationPosition(i, total);
+    const targetX = playerGroup.position.x + target.x;
+    const targetZ = playerGroup.position.z + target.z;
+    fa.mesh.position.x += (targetX - fa.mesh.position.x) * 0.12 * dt;
+    fa.mesh.position.z += (targetZ - fa.mesh.position.z) * 0.12 * dt;
+
+    if (fa.jumping) {
+      fa.jumpVel -= GRAVITY * dt;
+      fa.jumpY = (fa.jumpY || 0) + fa.jumpVel * dt;
+      if (fa.jumpY <= 0) { fa.jumpY = 0; fa.jumping = false; fa.jumpVel = 0; }
+      fa.mesh.position.y = PLAYER_Y + fa.jumpY + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
+    } else {
+      fa.mesh.position.y = PLAYER_Y + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
+    }
+  });
+}
+
+// ==================== GAME LOGIC ====================
+let hasShield = false;
+
+function initGame() {
+  // Clear old state
+  chunks.forEach(c => removeChunk(c));
+  chunks.length = 0;
+  followAnimals.forEach(a => scene.remove(a.mesh));
+  followAnimals.length = 0;
+
+  score = 0;
+  animalCount = 0;
+  rescuedAnimals = [];
+  targetLane = 1;
+  runCoins = 0;
+  document.getElementById('collectNotify').innerHTML = '';
+  playerVelY = 0;
+  isGrounded = true;
+  gameSpeed = activeBoosts.includes('slow') ? BASE_SPEED * 0.6 : BASE_SPEED;
+  distance = 0;
+  hasShield = activeBoosts.includes('shield');
+
+  // Player
+  if (playerGroup) scene.remove(playerGroup);
+  const firstAnimal = selectedSkin && animalModels[selectedSkin] ? selectedSkin : ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
+  const template = animalModels[firstAnimal];
+  playerGroup = new THREE.Group();
+  if (template) {
+    playerGroup.add(cloneModel(template));
+  } else {
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(0.6, 0.6, 0.6),
+      new THREE.MeshLambertMaterial({ color: 0x4fc3f7 })
+    );
+    playerGroup.add(body);
+  }
+  playerGroup.position.set(LANES[1], PLAYER_Y, 0);
+  scene.add(playerGroup);
+
+  // Generate initial chunks (first chunk is safe - no obstacles)
+  for (let i = 0; i < 4; i++) {
+    createGroundChunk(i * CHUNK_LENGTH, i === 0);
+  }
+
+  updateHUD();
+}
+
+function moveLeft() {
+  if (targetLane > 0) { targetLane--; playSfx('swoosh'); }
+}
+function moveRight() {
+  if (targetLane < 2) { targetLane++; playSfx('swoosh'); }
+}
+function jump() {
+  if (isGrounded) { playerVelY = JUMP_FORCE; isGrounded = false; playSfx('jump'); triggerFollowJump(); }
+}
+
+function updateHUD() {
+  document.getElementById('hudScore').textContent = Math.floor(distance) + ' м';
+  document.getElementById('hudCoins').textContent = `🪙 ${runCoins}`;
+  document.getElementById('hudAnimals').textContent = `Зверей: ${animalCount}`;
+}
+
+function showCollectNotify(animalName) {
+  const container = document.getElementById('collectNotify');
+  const emoji = ANIMAL_EMOJIS[animalName] || '';
+  const ruName = ANIMAL_NAMES_RU[animalName] || animalName;
+  const el = document.createElement('div');
+  el.className = 'notify-item';
+  el.textContent = `${emoji} Вы подобрали ${ruName}!`;
+  container.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 2600);
+}
+
+let lastTime = 0;
+let bobPhase = 0;
+
+function gameLoop(time) {
+  requestAnimationFrame(gameLoop);
+
+  if (gameState !== 'playing') {
+    renderer.render(scene, camera);
+    return;
+  }
+
+  const dt = Math.min((time - lastTime) / 16.67, 3);
+  lastTime = time;
+
+  gameSpeed = Math.min(MAX_SPEED, gameSpeed + SPEED_INCREMENT * dt);
+  const moveZ = gameSpeed * dt;
+  distance += moveZ;
+
+  // Instant lane snap (responsive controls)
+  const targetX = LANES[targetLane];
+  const laneSpeed = 0.25;
+  playerGroup.position.x += (targetX - playerGroup.position.x) * laneSpeed * dt;
+
+  // Jump physics
+  if (!isGrounded) {
+    playerVelY -= GRAVITY * dt;
+    playerGroup.position.y += playerVelY * dt;
+    if (playerGroup.position.y <= PLAYER_Y) {
+      playerGroup.position.y = PLAYER_Y;
+      playerVelY = 0;
+      isGrounded = true;
+    }
+  }
+
+  // Bob
+  bobPhase += 0.08 * dt;
+  if (isGrounded) {
+    playerGroup.position.y = PLAYER_Y + Math.sin(bobPhase) * 0.04;
+  }
+
+  // Move world
+  chunks.forEach(chunk => {
+    chunk.ground.position.z -= moveZ;
+    chunk.stripeL.position.z -= moveZ;
+    chunk.stripeR.position.z -= moveZ;
+    chunk.decos.forEach(d => d.position.z -= moveZ);
+    chunk.obs.forEach(o => o.position.z -= moveZ);
+    chunk.cols.forEach(c => c.position.z -= moveZ);
+    if (chunk.marks) chunk.marks.forEach(m => m.position.z -= moveZ);
+    chunk.z -= moveZ;
+  });
+
+  // Update formation
+  updateFormationPositions(dt);
+
+  // Generate new chunks
+  const furthestZ = chunks.reduce((max, c) => Math.max(max, c.z + CHUNK_LENGTH), 0);
+  if (furthestZ < SPAWN_DISTANCE) {
+    createGroundChunk(furthestZ);
+  }
+
+  // Remove old chunks
+  for (let i = chunks.length - 1; i >= 0; i--) {
+    if (chunks[i].z + CHUNK_LENGTH < DESPAWN_DISTANCE) {
+      removeChunk(chunks[i]);
+      chunks.splice(i, 1);
+    }
+  }
+
+  // Collision detection
+  chunks.forEach(chunk => {
+    chunk.obs.forEach(obs => {
+      if (gameState !== 'playing') return;
+      if (obs.userData.destroyed) return;
+      const dx = Math.abs(obs.position.x - playerGroup.position.x);
+      const dz = Math.abs(obs.position.z - playerGroup.position.z);
+      if (dx < 0.6 && dz < 0.6) {
+        if (playerGroup.position.y > obs.position.y + 0.4) return;
+        if (hasShield) { hasShield = false; obs.userData.destroyed = true; scene.remove(obs); playSfx('collect'); return; }
+        gameOver();
+      }
+    });
+
+    chunk.cols.forEach(col => {
+      if (gameState !== 'playing') return;
+      if (col.userData.collected) return;
+      const dx = Math.abs(col.position.x - playerGroup.position.x);
+      const dz = Math.abs(col.position.z - playerGroup.position.z);
+      if (dx < 1.0 && dz < 1.0) {
+        col.userData.collected = true;
+        scene.remove(col);
+
+        if (col.userData.type === 'animal') {
+          animalCount++;
+          rescuedAnimals.push(col.userData.name);
+          const animalBonus = activeBoosts.includes('double') ? COIN_PER_ANIMAL * 2 : COIN_PER_ANIMAL;
+          runCoins += animalBonus;
+          playSfx('collect');
+          showCollectNotify(col.userData.name);
+
+          const tmpl = animalModels[col.userData.name];
+          if (tmpl) {
+            const clone = cloneModel(tmpl);
+            const wrapper = new THREE.Group();
+            wrapper.add(clone);
+            const newCount = followAnimals.length + 1;
+            const pos = getFormationPosition(followAnimals.length, newCount);
+            wrapper.position.set(
+              playerGroup.position.x + pos.x,
+              PLAYER_Y,
+              playerGroup.position.z + pos.z
+            );
+            scene.add(wrapper);
+            followAnimals.push({ mesh: wrapper, name: col.userData.name, jumping: false, jumpVel: 0, jumpY: 0 });
+          }
+        } else if (col.userData.type === 'coin') {
+          const coinVal = activeBoosts.includes('double') ? COIN_PER_PICKUP * 2 : COIN_PER_PICKUP;
+          runCoins += coinVal;
+          score += 10;
+          playSfx('collect');
+        }
+      }
+    });
+  });
+
+  // Magnet boost: attract nearby coins
+  if (activeBoosts.includes('magnet')) {
+    chunks.forEach(chunk => {
+      chunk.cols.forEach(col => {
+        if (col.userData.collected || col.userData.type !== 'coin') return;
+        const dz = Math.abs(col.position.z - playerGroup.position.z);
+        if (dz < 6) {
+          col.position.x += (playerGroup.position.x - col.position.x) * 0.08 * dt;
+        }
+      });
+    });
+  }
+
+  // Animate collectibles (rotate uncollected animals, bob coins)
+  chunks.forEach(chunk => {
+    chunk.cols.forEach(col => {
+      if (col.userData.collected) return;
+      if (col.userData.type === 'animal') {
+        col.rotation.y += 0.06 * dt;
+        col.position.y = 1.0 + Math.sin(time * 0.003 + col.position.z) * 0.25;
+      } else {
+        col.rotation.y += 0.04 * dt;
+      }
+    });
+  });
+
+  // Camera follow
+  camera.position.x += (playerGroup.position.x * 0.3 - camera.position.x) * 0.05 * dt;
+
+  updateHUD();
+  renderer.render(scene, camera);
+}
+
+function gameOver() {
+  gameState = 'gameover';
+  playSfx('hit');
+  stopMusic();
+
+  // Distance bonus
+  const distBonus = Math.floor(distance / COIN_DISTANCE_BONUS);
+  runCoins += distBonus;
+
+  // Save coins
+  totalCoins += runCoins;
+  activeBoosts = [];
+  saveEconomy();
+
+  const finalScore = Math.floor(distance) + score;
+  document.getElementById('goScore').textContent = `Дистанция: ${Math.floor(distance)} м | Очки: ${finalScore}`;
+  document.getElementById('goCoins').textContent = `+${runCoins} 🪙 (всего: ${totalCoins})`;
+  document.getElementById('goAnimals').textContent = `Спасено зверей: ${animalCount}`;
+
+  const iconsDiv = document.getElementById('goAnimalIcons');
+  iconsDiv.innerHTML = '';
+  rescuedAnimals.forEach(name => {
+    const span = document.createElement('span');
+    span.className = 'go-animal-icon';
+    span.textContent = ANIMAL_EMOJIS[name] || '?';
+    iconsDiv.appendChild(span);
+  });
+
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('mobileControls').classList.add('hidden');
+  document.getElementById('gameover').classList.remove('hidden');
+
+  if (window.ysdk) {
+    try { window.ysdk.adv.showFullscreenAdv({ callbacks: {} }); } catch(e) {}
+  }
+}
+
+// ==================== UI ====================
+function showMenu() {
+  gameState = 'menu';
+  document.getElementById('menu').classList.remove('hidden');
+  document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('pause').classList.add('hidden');
+  document.getElementById('shop').classList.add('hidden');
+  document.getElementById('mobileControls').classList.add('hidden');
+  document.getElementById('menuCoins').textContent = `Монеты: ${totalCoins} 🪙`;
+}
+
+// ==================== SHOP ====================
+function openShop() {
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('shop').classList.remove('hidden');
+  renderShop();
+}
+
+function closeShop() {
+  document.getElementById('shop').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+  document.getElementById('menuCoins').textContent = `Монеты: ${totalCoins} 🪙`;
+}
+
+function renderShop() {
+  document.getElementById('shopBalance').textContent = `Монеты: ${totalCoins} 🪙`;
+
+  // Active boosts
+  const boostsEl = document.getElementById('activeBoostsDisplay');
+  boostsEl.innerHTML = '';
+  activeBoosts.forEach(bid => {
+    const b = BOOST_ITEMS.find(x => x.id === bid);
+    if (b) {
+      const badge = document.createElement('span');
+      badge.className = 'boost-badge';
+      badge.textContent = `${b.icon} ${b.name}`;
+      boostsEl.appendChild(badge);
+    }
+  });
+
+  // Boosts
+  const boostsDiv = document.getElementById('shopBoosts');
+  boostsDiv.innerHTML = '';
+  BOOST_ITEMS.forEach(item => {
+    const owned = activeBoosts.includes(item.id);
+    const canBuy = totalCoins >= item.price && !owned;
+    const el = document.createElement('div');
+    el.className = 'shop-item';
+    el.innerHTML = `
+      <div class="shop-item-info">
+        <span class="shop-item-icon">${item.icon}</span>
+        <div><div class="shop-item-name">${item.name}</div><div class="shop-item-desc">${item.desc}</div></div>
+      </div>
+      <button class="btn-buy ${owned ? 'owned' : ''}" ${!canBuy && !owned ? 'disabled' : ''} data-type="boost" data-id="${item.id}">
+        ${owned ? 'Активен' : item.price + ' 🪙'}
+      </button>`;
+    boostsDiv.appendChild(el);
+  });
+
+  // Skins
+  const skinsDiv = document.getElementById('shopSkins');
+  skinsDiv.innerHTML = '';
+  SKIN_ITEMS.forEach(item => {
+    const isFree = item.price === 0;
+    const isOwned = isFree || ownedSkins.includes(item.id);
+    const isSelected = selectedSkin === item.id;
+    const canBuy = totalCoins >= item.price && !isOwned;
+    const el = document.createElement('div');
+    el.className = 'shop-item';
+    el.innerHTML = `
+      <div class="shop-item-info">
+        <span class="shop-item-icon">${item.icon}</span>
+        <div><div class="shop-item-name">${item.name}</div></div>
+      </div>
+      <button class="btn-buy ${isSelected ? 'owned' : ''}" ${!canBuy && !isOwned ? 'disabled' : ''} data-type="skin" data-id="${item.id}">
+        ${isSelected ? 'Выбран' : isOwned ? 'Выбрать' : item.price === 0 ? 'Бесплатно' : item.price + ' 🪙'}
+      </button>`;
+    skinsDiv.appendChild(el);
+  });
+
+  // Attach click handlers
+  document.querySelectorAll('#shop .btn-buy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.type;
+      const id = btn.dataset.id;
+      if (type === 'boost') buyBoost(id);
+      else if (type === 'skin') buySkin(id);
+    });
+  });
+}
+
+function buyBoost(id) {
+  const item = BOOST_ITEMS.find(x => x.id === id);
+  if (!item || activeBoosts.includes(id) || totalCoins < item.price) return;
+  totalCoins -= item.price;
+  activeBoosts.push(id);
+  saveEconomy();
+  renderShop();
+}
+
+function buySkin(id) {
+  const item = SKIN_ITEMS.find(x => x.id === id);
+  if (!item) return;
+  const isFree = item.price === 0;
+  const isOwned = isFree || ownedSkins.includes(id);
+
+  if (isOwned) {
+    selectedSkin = id;
+    saveEconomy();
+    renderShop();
+    return;
+  }
+  if (totalCoins < item.price) return;
+  totalCoins -= item.price;
+  ownedSkins.push(id);
+  selectedSkin = id;
+  saveEconomy();
+  renderShop();
+}
+
+function startGame() {
+  initAudio();
+  initGame();
+  gameState = 'playing';
+  lastTime = performance.now();
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  if (isMobile()) document.getElementById('mobileControls').classList.remove('hidden');
+  startMusic();
+}
+
+function pauseGame() {
+  if (gameState !== 'playing') return;
+  gameState = 'paused';
+  stopMusic();
+  document.getElementById('pause').classList.remove('hidden');
+  document.getElementById('mobileControls').classList.add('hidden');
+}
+
+function resumeGame() {
+  gameState = 'playing';
+  lastTime = performance.now();
+  document.getElementById('pause').classList.add('hidden');
+  if (isMobile()) document.getElementById('mobileControls').classList.remove('hidden');
+  startMusic();
+}
+
+function isMobile() {
+  return /Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+}
+
+// ==================== INPUT ====================
+document.addEventListener('keydown', (e) => {
+  if (gameState === 'playing') {
+    switch(e.code) {
+      case 'ArrowLeft': case 'KeyA': moveLeft(); break;
+      case 'ArrowRight': case 'KeyD': moveRight(); break;
+      case 'ArrowUp': case 'KeyW': case 'Space': jump(); e.preventDefault(); break;
+      case 'Escape': pauseGame(); break;
+    }
+  } else if (gameState === 'menu') {
+    if (e.code === 'Enter' || e.code === 'Space') { startGame(); e.preventDefault(); }
+  } else if (gameState === 'paused') {
+    if (e.code === 'Escape') resumeGame();
+  }
+});
+
+let touchStartX = 0, touchStartY = 0;
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (gameState !== 'playing') return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 30) moveRight(); else if (dx < -30) moveLeft();
+  } else {
+    if (dy < -30) jump();
+  }
+}, { passive: true });
+
+document.getElementById('mobLeft').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
+document.getElementById('mobRight').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
+document.getElementById('mobJump').addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+
+// UI Buttons
+document.getElementById('btnPlay').addEventListener('click', startGame);
+document.getElementById('btnShop').addEventListener('click', openShop);
+document.getElementById('btnShopBack').addEventListener('click', closeShop);
+document.getElementById('btnSettings').addEventListener('click', () => {
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('settings').classList.remove('hidden');
+});
+document.getElementById('btnBack').addEventListener('click', () => {
+  document.getElementById('settings').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+});
+document.getElementById('btnRestart').addEventListener('click', startGame);
+document.getElementById('btnToMenu').addEventListener('click', () => { stopMusic(); activeBoosts = []; saveEconomy(); showMenu(); });
+document.getElementById('btnToMenu2').addEventListener('click', () => { stopMusic(); showMenu(); });
+document.getElementById('pauseBtn').addEventListener('click', pauseGame);
+document.getElementById('btnResume').addEventListener('click', resumeGame);
+
+// Settings toggles with persistence
+document.getElementById('toggleMusic').classList.toggle('on', musicEnabled);
+document.getElementById('toggleSfx').classList.toggle('on', sfxEnabled);
+
+document.getElementById('toggleMusic').addEventListener('click', function() {
+  musicEnabled = !musicEnabled;
+  this.classList.toggle('on', musicEnabled);
+  updateMusicVolume();
+  if (!musicEnabled) stopMusic();
+  else if (gameState === 'playing') startMusic();
+  saveSettings();
+});
+document.getElementById('toggleSfx').addEventListener('click', function() {
+  sfxEnabled = !sfxEnabled;
+  this.classList.toggle('on', sfxEnabled);
+  updateSfxVolume();
+  saveSettings();
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ==================== INIT ====================
+async function init() {
+  try { window.ysdk = await YaGames.init(); } catch(e) { console.log('Yandex SDK not available (local mode)'); }
+  await loadModels();
+  document.getElementById('loading').classList.add('hidden');
+  showMenu();
+  requestAnimationFrame(gameLoop);
+}
+
+init();
+</script>
+</body>
+</html>
