@@ -728,6 +728,7 @@ function gameLoop(time) {
   // Collision detection
   chunks.forEach(chunk => {
     chunk.obs.forEach(obs => {
+      if (gameState !== 'playing') return;
       const dx = Math.abs(obs.position.x - playerGroup.position.x);
       const dz = Math.abs(obs.position.z - playerGroup.position.z);
       if (dx < 0.6 && dz < 0.6) {
@@ -737,6 +738,7 @@ function gameLoop(time) {
     });
 
     chunk.cols.forEach(col => {
+      if (gameState !== 'playing') return;
       if (col.userData.collected) return;
       const dx = Math.abs(col.position.x - playerGroup.position.x);
       const dz = Math.abs(col.position.z - playerGroup.position.z);
