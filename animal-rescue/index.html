@@ -885,11 +885,12 @@ function gameLoop(time) {
   chunks.forEach(chunk => {
     chunk.obs.forEach(obs => {
       if (gameState !== 'playing') return;
+      if (obs.userData.destroyed) return;
       const dx = Math.abs(obs.position.x - playerGroup.position.x);
       const dz = Math.abs(obs.position.z - playerGroup.position.z);
       if (dx < 0.6 && dz < 0.6) {
         if (playerGroup.position.y > obs.position.y + 0.4) return;
-        if (hasShield) { hasShield = false; scene.remove(obs); playSfx('collect'); return; }
+        if (hasShield) { hasShield = false; obs.userData.destroyed = true; scene.remove(obs); playSfx('collect'); return; }
         gameOver();
       }
     });
