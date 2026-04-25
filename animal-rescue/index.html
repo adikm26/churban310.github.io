@@ -202,8 +202,8 @@ const PLAYER_Y = 0.5;
 const JUMP_FORCE = 0.22;
 const GRAVITY = 0.008;
 const BASE_SPEED = 0.12;
-const MAX_SPEED = 0.35;
-const SPEED_INCREMENT = 0.00008;
+const MAX_SPEED = 0.8;
+const SPEED_INCREMENT = 0.00006;
 const CHUNK_LENGTH = 60;
 const SPAWN_DISTANCE = 80;
 const DESPAWN_DISTANCE = -20;
@@ -481,7 +481,7 @@ const animalModels = {};
 const obstacleModels = {};
 const sceneryModels = {};
 
-const OBSTACLE_NAMES = ['obstacle-barrel','obstacle-crate','obstacle-spike','obstacle-rocks','obstacle-trap'];
+const OBSTACLE_NAMES = ['obstacle-barrel','obstacle-crate','obstacle-spike','obstacle-rocks','obstacle-trap','obstacle-bomb','obstacle-saw','obstacle-hedge'];
 const SCENERY_NAMES = ['scenery-tree-pine','scenery-tree-pine-small','scenery-tree','scenery-mushrooms','scenery-flowers','scenery-flowers-tall','scenery-fence'];
 
 function cloneModel(source) {
@@ -625,7 +625,7 @@ function createGroundChunk(z, safe) {
       const clone = cloneModel(obstacleModels[obsName]);
       obs = new THREE.Group();
       obs.add(clone);
-      obs.position.set(LANES[lane], 0.0, oz);
+      obs.position.set(LANES[lane], 0.3, oz);
     } else {
       obs = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshLambertMaterial({ color: 0xd32f2f }));
       obs.position.set(LANES[lane], 0.35, oz);
