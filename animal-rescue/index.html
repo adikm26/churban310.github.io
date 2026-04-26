@@ -63,17 +63,17 @@ canvas{display:block}
 
 .skill-wrap{position:fixed;bottom:90px;left:16px;z-index:55;pointer-events:auto}
 .skill-wrap.hidden{display:none}
-.skill-button{position:relative;width:88px;height:88px;background:rgba(0,0,0,0.55);border:3px solid #ffd54f;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.skill-button{position:relative;width:100px;height:100px;background:rgba(0,0,0,0.55);border:3px solid #ffd54f;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .skill-button.on-cooldown{border-color:#666;opacity:0.5}
 .skill-button.active{border-color:#4caf50;box-shadow:0 0 15px rgba(76,175,80,0.7);animation:skillActive 1s infinite}
 @keyframes skillActive{0%,100%{box-shadow:0 0 10px rgba(76,175,80,0.5)}50%{box-shadow:0 0 22px rgba(76,175,80,0.9)}}
-.skill-icon{font-size:1.8rem;line-height:1}
-.skill-name{color:#fff;font-size:0.65rem;font-weight:700;margin-top:3px}
-.skill-key{color:#aaa;font-size:0.55rem}
+.skill-icon{font-size:2.1rem;line-height:1}
+.skill-name{color:#fff;font-size:0.72rem;font-weight:700;margin-top:4px}
+.skill-key{color:#aaa;font-size:0.6rem}
 .skill-cd-overlay{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.65);pointer-events:none;border-radius:0 0 15px 15px;transition:height 0.15s}
 .skill-cd-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:0.9rem;font-weight:700;pointer-events:none}
 
-.boost-timers{position:fixed;bottom:185px;left:16px;z-index:55;pointer-events:none;display:flex;flex-direction:column;gap:4px}
+.boost-timers{position:fixed;bottom:200px;left:16px;z-index:55;pointer-events:none;display:flex;flex-direction:column;gap:4px}
 .boost-timers.hidden{display:none}
 .boost-timer-item{background:rgba(0,0,0,0.6);color:#fff;padding:5px 12px;border-radius:10px;font-size:clamp(0.7rem,2vw,0.85rem);font-weight:600;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1.5px solid rgba(76,175,80,0.5);white-space:nowrap}
 .boost-timer-item .bt-icon{font-size:1rem}
@@ -83,8 +83,8 @@ canvas{display:block}
 .go-stats{color:#fff;font-size:clamp(1rem,3vw,1.4rem);margin-bottom:0.5em}
 .go-highscore{color:#ff9800;font-size:clamp(0.9rem,2.5vw,1.1rem);margin-bottom:0.5em;font-weight:700}
 .go-animals-rescued{color:#ffd54f;font-size:clamp(1.1rem,3vw,1.5rem);margin-bottom:0.3em;font-weight:700}
-.go-animal-icons{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:300px;margin-bottom:1.5em}
-.go-animal-icon{font-size:1.6rem;background:rgba(255,255,255,0.1);padding:6px;border-radius:8px}
+.go-animal-icons{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:450px;margin-bottom:1em}
+.go-animal-icon{font-size:1.3rem;background:rgba(255,255,255,0.1);padding:4px;border-radius:6px}
 .go-coins{color:#ffd54f;font-size:clamp(1rem,3vw,1.3rem);margin-bottom:0.5em;font-weight:700}
 .btn-restart{background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;margin-bottom:12px}
 .btn-menu{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
@@ -314,18 +314,18 @@ const HERO_CHARACTERS = [
   { id: 'animal-monkey', name: 'Обезьянка', emoji: '🐵', price: 0,
     skillName: 'Ловкач', skillDesc: 'Авто-уклонение 10 сек', skillIcon: '🦘',
     skillDuration: 10000, skillColor: 0x4caf50 },
-  { id: 'animal-fox', name: 'Лиса', emoji: '🦊', price: 2000,
+  { id: 'animal-fox', name: 'Лиса', emoji: '🦊', price: 4000,
     skillName: 'Магнит', skillDesc: 'Притягивает монеты 10 сек', skillIcon: '🧲',
     skillDuration: 10000, skillColor: 0xffd54f },
-  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 3000,
-    skillName: 'Рогач', skillDesc: 'Разбивает преграды 5 сек', skillIcon: '💥',
-    skillDuration: 5000, skillColor: 0xff9800 },
-  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 4000,
-    skillName: 'Дзен', skillDesc: 'Замедление 8 сек', skillIcon: '🧘',
-    skillDuration: 8000, skillColor: 0xce93d8 },
-  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 5000,
-    skillName: 'Ярость', skillDesc: 'Неуязвимость 5 сек', skillIcon: '🔥',
-    skillDuration: 5000, skillColor: 0x2196f3 }
+  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 6000,
+    skillName: 'Рогач', skillDesc: 'Разбивает преграды 10 сек', skillIcon: '💥',
+    skillDuration: 10000, skillColor: 0xff9800 },
+  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 8000,
+    skillName: 'Дзен', skillDesc: 'Замедление 15 сек', skillIcon: '🧘',
+    skillDuration: 15000, skillColor: 0xce93d8 },
+  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 10000,
+    skillName: 'Ярость', skillDesc: 'Неуязвимость 10 сек', skillIcon: '🔥',
+    skillDuration: 10000, skillColor: 0x2196f3 }
 ];
 
 // ==================== STATE ====================
@@ -354,6 +354,7 @@ let skillEndTime = 0;
 let skillCooldownEnd = 0;
 let currentHero = null;
 let skillRing = null;
+let skillWarnPlayed = false;
 
 // ==================== ECONOMY ====================
 const COIN_PER_PICKUP = 10;
@@ -442,17 +443,45 @@ scene.add(groundPlane);
 
 function createMountains() {
   const mtns = new THREE.Group();
-  const mtnGeo = new THREE.ConeGeometry(1, 1, 4);
-  const colors = [0x5d8a4e, 0x4a7a3d, 0x6b9b5a, 0x3d6b2f];
-  for (let i = 0; i < 30; i++) {
-    const mat = new THREE.MeshLambertMaterial({ color: colors[i % colors.length] });
-    const mtn = new THREE.Mesh(mtnGeo, mat);
-    const side = i < 15 ? -1 : 1;
-    const s = 3 + Math.random() * 8;
-    mtn.scale.set(s, s * (0.8 + Math.random() * 0.8), s);
-    mtn.position.set(side * (20 + Math.random() * 30), s * 0.3, -30 + Math.random() * 100);
-    mtn.rotation.y = Math.random() * Math.PI;
+  // Varied mountain shapes
+  const geos = [
+    new THREE.ConeGeometry(1, 1.5, 5),
+    new THREE.ConeGeometry(1, 1, 6),
+    new THREE.ConeGeometry(1, 1.8, 4),
+    new THREE.ConeGeometry(0.8, 1.2, 7)
+  ];
+  const baseColors = [0x5d8a4e, 0x4a7a3d, 0x6b9b5a, 0x3d6b2f, 0x7a9e6d, 0x3a5e2c];
+  const snowColors = [0xddeedd, 0xccddcc, 0xeef5ee];
+  const rockColors = [0x8a7a6a, 0x6d6050, 0x9a8a7a];
+
+  for (let i = 0; i < 40; i++) {
+    const side = i < 20 ? -1 : 1;
+    const geo = geos[Math.floor(Math.random() * geos.length)];
+    const s = 4 + Math.random() * 10;
+    const h = s * (0.8 + Math.random() * 1.0);
+    const x = side * (22 + Math.random() * 35);
+    const z = -40 + Math.random() * 120;
+
+    // Base mountain
+    const isRocky = Math.random() < 0.3;
+    const palette = isRocky ? rockColors : baseColors;
+    const mat = new THREE.MeshLambertMaterial({ color: palette[Math.floor(Math.random() * palette.length)] });
+    const mtn = new THREE.Mesh(geo, mat);
+    mtn.scale.set(s, h, s * (0.7 + Math.random() * 0.6));
+    mtn.position.set(x, h * 0.25, z);
+    mtn.rotation.y = Math.random() * Math.PI * 2;
     mtns.add(mtn);
+
+    // Snow cap on taller mountains
+    if (h > 8 && Math.random() < 0.6) {
+      const capGeo = new THREE.ConeGeometry(0.4, 0.3, geo.parameters.radialSegments);
+      const capMat = new THREE.MeshLambertMaterial({ color: snowColors[Math.floor(Math.random() * snowColors.length)] });
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.scale.set(s * 0.5, h * 0.15, s * 0.5);
+      cap.position.set(x, h * 0.55, z);
+      cap.rotation.y = mtn.rotation.y;
+      mtns.add(cap);
+    }
   }
   scene.add(mtns);
   return mtns;
@@ -576,6 +605,23 @@ function playSfx(type) {
       gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
       osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+      break;
+    case 'skillWarn':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(660, audioCtx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.35);
+      break;
+    case 'skillEnd':
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.3);
       break;
   }
 }
@@ -852,8 +898,8 @@ function createGroundChunk(z, safe) {
       }
     }
 
-    // Barrier (duck obstacle) - every 3-4 chunks, with large clear zone
-    if (chunkCounter > 2 && chunkCounter % 3 === 0 && Math.random() < 0.6) {
+    // Barrier (duck obstacle) - more frequent
+    if (chunkCounter > 2 && Math.random() < 0.45) {
       let bz = z + 20 + Math.random() * (CHUNK_LENGTH - 35);
       if (!placedObs.some(p => Math.abs(p.z - bz) < 12)) {
         const barrier = createBarrierMesh();
@@ -877,11 +923,11 @@ function createGroundChunk(z, safe) {
       }
     }
 
-    // Road tree (tall, must dodge sideways) - occasional
-    if (chunkCounter > 4 && Math.random() < 0.25) {
+    // Road tree (tall, must dodge sideways) - more frequent, varied 1-2 lanes
+    if (chunkCounter > 3 && Math.random() < 0.4) {
       const tz = z + 15 + Math.random() * (CHUNK_LENGTH - 30);
       if (!placedObs.some(p => Math.abs(p.z - tz) < 10)) {
-        const numTreeLanes = Math.random() < 0.3 ? 2 : 1;
+        const numTreeLanes = Math.random() < 0.45 ? 2 : 1;
         const startLane = Math.floor(Math.random() * 3);
         for (let t = 0; t < numTreeLanes; t++) {
           const treeLane = (startLane + t) % 3;
@@ -938,6 +984,18 @@ function createGroundChunk(z, safe) {
       scene.add(coin);
       chunkObj.cols.push(coin);
     }
+
+    // Bonus coins above some obstacles (jump to collect)
+    placedObs.forEach(p => {
+      if (p.lane >= 0 && p.lane < 3 && Math.random() < 0.25) {
+        const coin = new THREE.Mesh(coinGeo, coinMat);
+        coin.position.set(LANES[p.lane], 1.8, p.z);
+        coin.rotation.x = Math.PI / 2;
+        coin.userData = { type: 'coin', collected: false };
+        scene.add(coin);
+        chunkObj.cols.push(coin);
+      }
+    });
   } else {
     // Safe chunk: only coins
     for (let i = 0; i < 5; i++) {
@@ -1132,6 +1190,7 @@ function activateSkill() {
   if (now < skillCooldownEnd) return;
 
   skillActive = true;
+  skillWarnPlayed = false;
   skillEndTime = now + currentHero.skillDuration;
   skillCooldownEnd = skillEndTime + SKILL_COOLDOWN;
   playSfx('skill');
@@ -1370,16 +1429,26 @@ function gameLoop(time) {
 
   // Skill timing
   const now = performance.now();
-  if (skillActive && now >= skillEndTime) {
-    skillActive = false;
-    if (skillRing) { playerGroup.remove(skillRing); skillRing = null; }
+  if (skillActive) {
+    const remaining = skillEndTime - now;
+    if (remaining <= 1000 && remaining > 0 && !skillWarnPlayed) {
+      playSfx('skillWarn');
+      skillWarnPlayed = true;
+    }
+    if (now >= skillEndTime) {
+      skillActive = false;
+      playSfx('skillEnd');
+      if (skillRing) { playerGroup.remove(skillRing); skillRing = null; }
+    }
   }
 
   // Skill: Panda slowdown effect
   let speedMult = 1;
   if (skillActive && currentHero.id === 'animal-panda') speedMult = 0.5;
 
-  gameSpeed = Math.min(MAX_SPEED, gameSpeed + SPEED_INCREMENT * dt);
+  // Diminishing acceleration: slows down over time but never stops increasing
+  const accelFactor = SPEED_INCREMENT / (1 + distance * 0.0003);
+  gameSpeed += accelFactor * dt;
   const moveZ = gameSpeed * dt * speedMult;
   distance += moveZ;
 
