@@ -1203,13 +1203,17 @@ function applyDeerSkill(obs) {
     const vy = 0.1 + Math.random() * 0.15;
     const vz = (Math.random() - 0.5) * 0.3;
     const startTime = performance.now();
+    let lastPieceTime = startTime;
     function animPiece() {
-      const elapsed = (performance.now() - startTime) / 16.67;
-      piece.position.x += vx;
-      piece.position.y += vy - elapsed * 0.005;
-      piece.position.z += vz;
-      piece.rotation.x += 0.1;
-      piece.rotation.z += 0.1;
+      const now = performance.now();
+      const frameDt = (now - lastPieceTime) / 16.67;
+      lastPieceTime = now;
+      const elapsed = (now - startTime) / 16.67;
+      piece.position.x += vx * frameDt;
+      piece.position.y += (vy - elapsed * 0.005) * frameDt;
+      piece.position.z += vz * frameDt;
+      piece.rotation.x += 0.1 * frameDt;
+      piece.rotation.z += 0.1 * frameDt;
       if (elapsed < 40) requestAnimationFrame(animPiece);
       else scene.remove(piece);
     }
@@ -1710,7 +1714,7 @@ document.addEventListener('keydown', (e) => {
       case 'Escape': pauseGame(); break;
     }
   } else if (gameState === 'menu') {
-    if (e.code === 'Enter') { startGame(); e.preventDefault(); }
+    if (e.code === 'Enter') { document.getElementById('btnPlay').click(); e.preventDefault(); }
   } else if (gameState === 'paused') {
     if (e.code === 'Escape') resumeGame();
   }
