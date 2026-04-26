@@ -43,6 +43,10 @@ canvas{display:block}
 .hud-score{color:#fff;font-size:clamp(1rem,3vw,1.5rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
 .hud-animals{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
 #pauseBtn{pointer-events:auto;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.4);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.hud-boosts{display:flex;gap:6px}
+.hud-boost-icon{width:38px;height:38px;background:rgba(0,0,0,0.45);border:2px solid #4caf50;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 0 8px rgba(76,175,80,0.6);animation:boostPulse 2s infinite}
+@keyframes boostPulse{0%,100%{box-shadow:0 0 8px rgba(76,175,80,0.6)}50%{box-shadow:0 0 16px rgba(76,175,80,0.9)}}
 
 #gameover{background:rgba(0,0,0,0.88)}
 #gameover h2{font-size:clamp(1.8rem,5vw,3rem);color:#ff5252;text-shadow:0 0 20px rgba(255,82,82,0.5);margin-bottom:0.5em}
@@ -155,7 +159,10 @@ canvas{display:block}
     <div class="hud-coins" id="hudCoins">🪙 0</div>
     <div class="hud-animals" id="hudAnimals">Зверей: 0</div>
   </div>
-  <button id="pauseBtn">⏸</button>
+  <div class="hud-right">
+    <button id="pauseBtn">⏸</button>
+    <div class="hud-boosts" id="hudBoosts"></div>
+  </div>
 </div>
 
 <div id="pause" class="overlay hidden">
@@ -203,7 +210,7 @@ const JUMP_FORCE = 0.22;
 const GRAVITY = 0.008;
 const BASE_SPEED = 0.12;
 const MAX_SPEED = 0.8;
-const SPEED_INCREMENT = 0.00006;
+const SPEED_INCREMENT = 0.00012;
 const CHUNK_LENGTH = 60;
 const SPAWN_DISTANCE = 80;
 const DESPAWN_DISTANCE = -20;
@@ -521,7 +528,7 @@ function loadModels() {
         const box = new THREE.Box3().setFromObject(model);
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 1.0 / maxDim;
+        const scale = 1.4 / maxDim;
         model.scale.setScalar(scale);
         const center = box.getCenter(new THREE.Vector3());
         model.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
@@ -636,7 +643,7 @@ function createGroundChunk(z, safe) {
   }
 
   // Collectible animals
-  const numAnimals = 1 + Math.floor(Math.random() * 2);
+  const numAnimals = Math.random() < 0.6 ? 1 : 0;
   for (let i = 0; i < numAnimals; i++) {
     const cz = z + 5 + Math.random() * (CHUNK_LENGTH - 10);
     const lane = Math.floor(Math.random() * 3);
@@ -652,6 +659,9 @@ function createGroundChunk(z, safe) {
     const animalClone = cloneModel(template);
     const wrapper = new THREE.Group();
     wrapper.add(animalClone);
+    const glow = new THREE.PointLight(0xffd54f, 2, 4);
+    glow.position.set(0, 0.5, 0);
+    wrapper.add(glow);
     wrapper.position.set(LANES[lane], 1.0, cz);
     wrapper.userData = { type: 'animal', name: animalName, collected: false };
     scene.add(wrapper);
@@ -801,6 +811,18 @@ function updateHUD() {
   document.getElementById('hudAnimals').textContent = `Зверей: ${animalCount}`;
 }
 
+function updateBoostIcons() {
+  const container = document.getElementById('hudBoosts');
+  container.innerHTML = '';
+  const boostIcons = { magnet: '🧲', shield: '🛡️', double: '💰', slow: '🐢' };
+  activeBoosts.forEach(id => {
+    const icon = document.createElement('div');
+    icon.className = 'hud-boost-icon';
+    icon.textContent = boostIcons[id] || '⚡';
+    container.appendChild(icon);
+  });
+}
+
 function showCollectNotify(animalName) {
   const container = document.getElementById('collectNotify');
   const emoji = ANIMAL_EMOJIS[animalName] || '';
@@ -888,9 +910,9 @@ function gameLoop(time) {
       if (obs.userData.destroyed) return;
       const dx = Math.abs(obs.position.x - playerGroup.position.x);
       const dz = Math.abs(obs.position.z - playerGroup.position.z);
-      if (dx < 0.6 && dz < 0.6) {
-        if (playerGroup.position.y > obs.position.y + 0.4) return;
-        if (hasShield) { hasShield = false; obs.userData.destroyed = true; scene.remove(obs); playSfx('collect'); return; }
+      if (dx < 0.8 && dz < 0.8) {
+        if (playerGroup.position.y > obs.position.y + 0.5) return;
+        if (hasShield) { hasShield = false; obs.userData.destroyed = true; scene.remove(obs); playSfx('collect'); updateBoostIcons(); return; }
         gameOver();
       }
     });
@@ -1137,6 +1159,7 @@ function startGame() {
   document.getElementById('gameover').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');
   if (isMobile()) document.getElementById('mobileControls').classList.remove('hidden');
+  updateBoostIcons();
   startMusic();
 }
 
