@@ -15,12 +15,14 @@ canvas{display:block}
 
 #menu{background:linear-gradient(135deg,#1a5e1a 0%,#0d3d0d 100%)}
 #menu h1{font-size:clamp(2rem,6vw,4rem);color:#fff;text-shadow:3px 3px 0 #000,0 0 20px rgba(76,175,80,0.8);margin-bottom:0.3em;text-align:center;letter-spacing:2px}
-#menu .subtitle{font-size:clamp(0.9rem,2.5vw,1.4rem);color:#a5d6a7;margin-bottom:2em;text-align:center}
-.menu-animals{display:flex;gap:10px;margin-bottom:2em;flex-wrap:wrap;justify-content:center;max-width:400px}
+#menu .subtitle{font-size:clamp(0.9rem,2.5vw,1.4rem);color:#a5d6a7;margin-bottom:1.5em;text-align:center}
+.menu-animals{display:flex;gap:10px;margin-bottom:1.5em;flex-wrap:wrap;justify-content:center;max-width:400px}
 .menu-animal{width:50px;height:50px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;animation:bounce 2s infinite}
 .menu-animal:nth-child(2n){animation-delay:0.3s}
 .menu-animal:nth-child(3n){animation-delay:0.6s}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.menu-stats{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:1.5em}
+.menu-highscore{color:#ff9800;font-size:clamp(0.85rem,2.5vw,1.1rem);font-weight:700;text-shadow:1px 1px 3px rgba(0,0,0,0.5)}
 
 .btn{padding:14px 48px;font-size:clamp(1rem,3vw,1.3rem);border:none;border-radius:50px;cursor:pointer;font-weight:700;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
 .btn:active{transform:scale(0.95)}
@@ -28,6 +30,13 @@ canvas{display:block}
 .btn-play:hover{background:linear-gradient(135deg,#66bb6a,#388e3c);box-shadow:0 6px 20px rgba(76,175,80,0.5)}
 .btn-settings{background:rgba(255,255,255,0.15);color:#fff;border:2px solid rgba(255,255,255,0.3);font-size:clamp(0.85rem,2.5vw,1.1rem);padding:10px 36px}
 .btn-settings:hover{background:rgba(255,255,255,0.25)}
+
+#backstory{background:linear-gradient(135deg,#1a4a1a 0%,#0d2d0d 100%)}
+.backstory-content{max-width:420px;padding:20px;text-align:center}
+.backstory-content h2{color:#ffd54f;font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:0.8em}
+.backstory-text{color:#e8f5e9;font-size:clamp(0.85rem,2.5vw,1.05rem);line-height:1.8;margin-bottom:1.5em;text-align:left}
+.backstory-text p{margin-bottom:0.6em}
+.backstory-text b{color:#ffd54f}
 
 #settings{background:rgba(0,0,0,0.92)}
 #settings h2{font-size:clamp(1.5rem,4vw,2.5rem);color:#fff;margin-bottom:1.5em}
@@ -42,18 +51,33 @@ canvas{display:block}
 #hud.hidden{display:none}
 .hud-score{color:#fff;font-size:clamp(1rem,3vw,1.5rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
 .hud-animals{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
+.hud-coins{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
 #pauseBtn{pointer-events:auto;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.4);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .hud-boosts{display:flex;gap:6px}
 .hud-boost-icon{width:38px;height:38px;background:rgba(0,0,0,0.45);border:2px solid #4caf50;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 0 8px rgba(76,175,80,0.6);animation:boostPulse 2s infinite}
 @keyframes boostPulse{0%,100%{box-shadow:0 0 8px rgba(76,175,80,0.6)}50%{box-shadow:0 0 16px rgba(76,175,80,0.9)}}
 
+.skill-wrap{position:fixed;bottom:90px;left:16px;z-index:55;pointer-events:auto}
+.skill-wrap.hidden{display:none}
+.skill-button{position:relative;width:68px;height:68px;background:rgba(0,0,0,0.55);border:2.5px solid #ffd54f;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.skill-button.on-cooldown{border-color:#666;opacity:0.5}
+.skill-button.active{border-color:#4caf50;box-shadow:0 0 15px rgba(76,175,80,0.7);animation:skillActive 1s infinite}
+@keyframes skillActive{0%,100%{box-shadow:0 0 10px rgba(76,175,80,0.5)}50%{box-shadow:0 0 22px rgba(76,175,80,0.9)}}
+.skill-icon{font-size:1.4rem;line-height:1}
+.skill-name{color:#fff;font-size:0.5rem;font-weight:700;margin-top:2px}
+.skill-key{color:#aaa;font-size:0.45rem}
+.skill-cd-overlay{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.65);pointer-events:none;border-radius:0 0 13px 13px;transition:height 0.15s}
+.skill-cd-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:0.75rem;font-weight:700;pointer-events:none}
+
 #gameover{background:rgba(0,0,0,0.88)}
 #gameover h2{font-size:clamp(1.8rem,5vw,3rem);color:#ff5252;text-shadow:0 0 20px rgba(255,82,82,0.5);margin-bottom:0.5em}
 .go-stats{color:#fff;font-size:clamp(1rem,3vw,1.4rem);margin-bottom:0.5em}
+.go-highscore{color:#ff9800;font-size:clamp(0.9rem,2.5vw,1.1rem);margin-bottom:0.5em;font-weight:700}
 .go-animals-rescued{color:#ffd54f;font-size:clamp(1.1rem,3vw,1.5rem);margin-bottom:0.3em;font-weight:700}
 .go-animal-icons{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:300px;margin-bottom:1.5em}
 .go-animal-icon{font-size:1.6rem;background:rgba(255,255,255,0.1);padding:6px;border-radius:8px}
+.go-coins{color:#ffd54f;font-size:clamp(1rem,3vw,1.3rem);margin-bottom:0.5em;font-weight:700}
 .btn-restart{background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;margin-bottom:12px}
 .btn-menu{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
 
@@ -67,18 +91,15 @@ canvas{display:block}
 .loader-bar{height:100%;background:#4caf50;border-radius:4px;width:0%;transition:width 0.3s}
 .loader-text{color:#a5d6a7;font-size:0.9rem;margin-top:0.8em}
 
-#mobileControls{position:fixed;bottom:20px;left:0;width:100%;display:flex;justify-content:center;gap:15px;z-index:60;pointer-events:none}
+#mobileControls{position:fixed;bottom:20px;left:0;width:100%;display:flex;justify-content:center;gap:12px;z-index:60;pointer-events:none}
 #mobileControls.hidden{display:none}
-.mob-btn{pointer-events:auto;width:clamp(50px,12vw,70px);height:clamp(50px,12vw,70px);background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:16px;color:#fff;font-size:clamp(1.2rem,3vw,1.8rem);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.mob-btn{pointer-events:auto;width:clamp(48px,11vw,64px);height:clamp(48px,11vw,64px);background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:16px;color:#fff;font-size:clamp(1.1rem,2.8vw,1.6rem);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .mob-btn:active{background:rgba(255,255,255,0.35);transform:scale(0.9)}
 
 #collectNotify{position:fixed;top:80px;right:20px;z-index:55;pointer-events:none}
 .notify-item{background:rgba(0,0,0,0.75);color:#ffd54f;padding:10px 18px;border-radius:12px;font-size:clamp(0.85rem,2.5vw,1.1rem);font-weight:700;margin-bottom:8px;animation:notifyIn 0.3s ease-out,notifyOut 0.5s 2s ease-in forwards;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-shadow:1px 1px 2px rgba(0,0,0,0.5)}
 @keyframes notifyIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
 @keyframes notifyOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
-
-.hud-coins{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
-.go-coins{color:#ffd54f;font-size:clamp(1rem,3vw,1.3rem);margin-bottom:0.5em;font-weight:700}
 
 #shop{background:rgba(0,0,0,0.92);overflow-y:auto;justify-content:flex-start;padding:30px 0 40px}
 #shop h2{font-size:clamp(1.5rem,4vw,2.5rem);color:#fff;margin-bottom:0.3em}
@@ -107,19 +128,36 @@ canvas{display:block}
   <div class="loader-text" id="loaderText">Подготовка зверей...</div>
 </div>
 
+<div id="backstory" class="overlay hidden">
+  <div class="backstory-content">
+    <h2>📖 История</h2>
+    <div class="backstory-text">
+      <p>🐵 Привет! Я — <b>Обезьянка</b>, самая ловкая в лесу!</p>
+      <p>Наши друзья-зверята заблудились на большой дороге. Впереди много преград — бочки, шипы и ловушки!</p>
+      <p>⬆️ <b>Перепрыгивай</b> препятствия на дороге</p>
+      <p>⬇️ <b>Приседай</b> под дорожными знаками</p>
+      <p>🪙 <b>Собирай монеты</b> и копи на новых героев</p>
+      <p>🐾 <b>Спасай зверей</b> — они побегут за тобой!</p>
+      <p>У каждого героя есть <b>особый навык</b> — используй его с умом! 🌟</p>
+    </div>
+    <button class="btn btn-play" id="btnStartAdventure">Вперёд! 🚀</button>
+  </div>
+</div>
+
 <div id="menu" class="overlay hidden">
   <h1>СПАСАТЕЛЬ<br>ЗВЕРЕЙ</h1>
   <p class="subtitle">Спаси всех животных!</p>
   <div class="menu-animals">
-    <div class="menu-animal">🐰</div>
-    <div class="menu-animal">🐱</div>
-    <div class="menu-animal">🐶</div>
+    <div class="menu-animal">🐵</div>
+    <div class="menu-animal">🦌</div>
     <div class="menu-animal">🦊</div>
-    <div class="menu-animal">🐧</div>
-    <div class="menu-animal">🐼</div>
     <div class="menu-animal">🐯</div>
+    <div class="menu-animal">🐼</div>
   </div>
-  <div class="shop-balance" id="menuCoins">Монеты: 0 🪙</div>
+  <div class="menu-stats">
+    <div class="shop-balance" id="menuCoins">Монеты: 0 🪙</div>
+    <div class="menu-highscore" id="menuHighScore">Рекорд: 0 м</div>
+  </div>
   <button class="btn btn-play" id="btnPlay">ИГРАТЬ</button>
   <button class="btn btn-settings" id="btnShop" style="margin-bottom:12px;background:linear-gradient(135deg,rgba(255,213,79,0.3),rgba(255,143,0,0.3));border-color:rgba(255,213,79,0.5)">🛒 Магазин</button>
   <button class="btn btn-settings" id="btnSettings">Настройки</button>
@@ -147,7 +185,7 @@ canvas{display:block}
     <div id="shopBoosts"></div>
   </div>
   <div class="shop-section">
-    <h3>🐾 Персонажи</h3>
+    <h3>🐾 Герои</h3>
     <div id="shopSkins"></div>
   </div>
   <button class="btn btn-back" id="btnShopBack">Назад</button>
@@ -165,6 +203,16 @@ canvas{display:block}
   </div>
 </div>
 
+<div class="skill-wrap hidden" id="skillWrap">
+  <div class="skill-button" id="skillBtn">
+    <span class="skill-icon" id="skillIcon">🦘</span>
+    <span class="skill-name" id="skillName">Ловкач</span>
+    <span class="skill-key">[Пробел]</span>
+    <div class="skill-cd-overlay" id="skillCdOverlay" style="height:0%"></div>
+    <div class="skill-cd-text hidden" id="skillCdText"></div>
+  </div>
+</div>
+
 <div id="pause" class="overlay hidden">
   <h2>Пауза</h2>
   <button class="btn btn-resume" id="btnResume">Продолжить</button>
@@ -174,6 +222,7 @@ canvas{display:block}
 <div id="gameover" class="overlay hidden">
   <h2>Игра окончена!</h2>
   <div class="go-stats" id="goScore">Дистанция: 0 м</div>
+  <div class="go-highscore" id="goHighScore"></div>
   <div class="go-coins" id="goCoins">+0 🪙</div>
   <div class="go-animals-rescued" id="goAnimals">Спасено зверей: 0</div>
   <div class="go-animal-icons" id="goAnimalIcons"></div>
@@ -183,6 +232,7 @@ canvas{display:block}
 
 <div id="mobileControls" class="hidden">
   <button class="mob-btn" id="mobLeft">◀</button>
+  <button class="mob-btn" id="mobDuck">▼</button>
   <button class="mob-btn" id="mobJump">▲</button>
   <button class="mob-btn" id="mobRight">▶</button>
 </div>
@@ -206,6 +256,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const LANE_WIDTH = 2.5;
 const LANES = [LANE_WIDTH, 0, -LANE_WIDTH];
 const PLAYER_Y = 0.5;
+const DUCK_Y = 0.12;
 const JUMP_FORCE = 0.22;
 const GRAVITY = 0.008;
 const BASE_SPEED = 0.12;
@@ -215,6 +266,8 @@ const CHUNK_LENGTH = 60;
 const SPAWN_DISTANCE = 80;
 const DESPAWN_DISTANCE = -20;
 const ROW_SPACING = 1.3;
+const SKILL_COOLDOWN = 30000;
+
 const ANIMAL_NAMES = [
   'animal-bunny','animal-cat','animal-dog','animal-fox','animal-penguin',
   'animal-panda','animal-tiger','animal-lion','animal-elephant','animal-monkey',
@@ -233,6 +286,25 @@ const ANIMAL_NAMES_RU = {
   'animal-pig':'Свинку','animal-chick':'Цыплёнка','animal-deer':'Оленя'
 };
 
+// ==================== HERO CHARACTERS ====================
+const HERO_CHARACTERS = [
+  { id: 'animal-monkey', name: 'Обезьянка', emoji: '🐵', price: 0,
+    skillName: 'Ловкач', skillDesc: 'Авто-прыжки 10 сек', skillIcon: '🦘',
+    skillDuration: 10000, skillColor: 0x4caf50 },
+  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 300,
+    skillName: 'Рогач', skillDesc: 'Разбивает преграды 5 сек', skillIcon: '💥',
+    skillDuration: 5000, skillColor: 0xff9800 },
+  { id: 'animal-fox', name: 'Лиса', emoji: '🦊', price: 200,
+    skillName: 'Магнит', skillDesc: 'Притягивает монеты 10 сек', skillIcon: '🧲',
+    skillDuration: 10000, skillColor: 0xffd54f },
+  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 500,
+    skillName: 'Ярость', skillDesc: 'Неуязвимость 5 сек', skillIcon: '🔥',
+    skillDuration: 5000, skillColor: 0x2196f3 },
+  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 400,
+    skillName: 'Дзен', skillDesc: 'Замедление 8 сек', skillIcon: '🧘',
+    skillDuration: 8000, skillColor: 0xce93d8 }
+];
+
 // ==================== STATE ====================
 let gameState = 'loading';
 let score = 0;
@@ -241,12 +313,21 @@ let rescuedAnimals = [];
 let targetLane = 1;
 let playerVelY = 0;
 let isGrounded = true;
+let isDucking = false;
 let gameSpeed = BASE_SPEED;
 let distance = 0;
 let runCoins = 0;
+let introTimer = 0;
 
 let musicEnabled = true;
 let sfxEnabled = true;
+
+// Skill state
+let skillActive = false;
+let skillEndTime = 0;
+let skillCooldownEnd = 0;
+let currentHero = null;
+let skillRing = null;
 
 // ==================== ECONOMY ====================
 const COIN_PER_PICKUP = 10;
@@ -257,6 +338,8 @@ let totalCoins = 0;
 let selectedSkin = null;
 let ownedSkins = [];
 let activeBoosts = [];
+let highScore = 0;
+let hasSeenBackstory = false;
 
 const BOOST_ITEMS = [
   { id: 'magnet', name: 'Магнит', desc: 'Притягивает монеты', icon: '🧲', price: 150 },
@@ -265,34 +348,27 @@ const BOOST_ITEMS = [
   { id: 'slow', name: 'Лёгкий старт', desc: 'Медленный старт', icon: '🐢', price: 100 }
 ];
 
-const ANIMAL_NAMES_NOM = {
-  'animal-bunny':'Кролик','animal-cat':'Кот','animal-dog':'Собака','animal-fox':'Лиса',
-  'animal-penguin':'Пингвин','animal-panda':'Панда','animal-tiger':'Тигр','animal-lion':'Лев',
-  'animal-elephant':'Слон','animal-monkey':'Обезьяна','animal-bee':'Пчела','animal-koala':'Коала',
-  'animal-pig':'Свинка','animal-chick':'Цыплёнок','animal-deer':'Олень'
-};
-const SKIN_ITEMS = ANIMAL_NAMES.map((name, i) => ({
-  id: name,
-  name: ANIMAL_NAMES_NOM[name] || name,
-  icon: ANIMAL_EMOJIS[name],
-  price: i < 5 ? 0 : i < 10 ? 150 : 300
-}));
-
 function loadEconomy() {
   try {
-    const d = JSON.parse(localStorage.getItem('animalRescueEcon') || '{}');
+    const d = JSON.parse(localStorage.getItem('animalRescueV2') || '{}');
     totalCoins = d.coins || 0;
-    selectedSkin = d.skin || null;
+    selectedSkin = d.skin || 'animal-monkey';
     ownedSkins = d.owned || [];
     activeBoosts = d.boosts || [];
+    highScore = d.highScore || 0;
+    hasSeenBackstory = d.backstory || false;
   } catch(e) {}
 }
 function saveEconomy() {
-  try { localStorage.setItem('animalRescueEcon', JSON.stringify({ coins: totalCoins, skin: selectedSkin, owned: ownedSkins, boosts: activeBoosts })); } catch(e) {}
+  try {
+    localStorage.setItem('animalRescueV2', JSON.stringify({
+      coins: totalCoins, skin: selectedSkin, owned: ownedSkins,
+      boosts: activeBoosts, highScore, backstory: hasSeenBackstory
+    }));
+  } catch(e) {}
 }
 loadEconomy();
 
-// Load saved settings
 try {
   const saved = localStorage.getItem('animalRescueSettings');
   if (saved) {
@@ -306,7 +382,7 @@ function saveSettings() {
   try { localStorage.setItem('animalRescueSettings', JSON.stringify({ music: musicEnabled, sfx: sfxEnabled })); } catch(e) {}
 }
 
-// ==================== RENDERER (optimized) ====================
+// ==================== RENDERER ====================
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -321,15 +397,13 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 camera.position.set(0, 6, -8);
 camera.lookAt(0, 1, 10);
 
-// Lights (no shadows for performance)
 scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 const dirLight = new THREE.DirectionalLight(0xfff4e0, 1.0);
 dirLight.position.set(5, 15, 10);
 scene.add(dirLight);
 scene.add(new THREE.HemisphereLight(0x87CEEB, 0x556b2f, 0.5));
 
-// ==================== BACKGROUND SCENERY ====================
-// Large ground plane
+// ==================== BACKGROUND ====================
 const groundPlane = new THREE.Mesh(
   new THREE.PlaneGeometry(200, 200),
   new THREE.MeshLambertMaterial({ color: 0x4a8c3f })
@@ -338,7 +412,6 @@ groundPlane.rotation.x = -Math.PI / 2;
 groundPlane.position.y = -0.2;
 scene.add(groundPlane);
 
-// Distant mountains (simple triangles)
 function createMountains() {
   const mtns = new THREE.Group();
   const mtnGeo = new THREE.ConeGeometry(1, 1, 4);
@@ -349,18 +422,14 @@ function createMountains() {
     const side = i < 15 ? -1 : 1;
     const s = 3 + Math.random() * 8;
     mtn.scale.set(s, s * (0.8 + Math.random() * 0.8), s);
-    mtn.position.set(
-      side * (20 + Math.random() * 30),
-      s * 0.3,
-      -30 + Math.random() * 100
-    );
+    mtn.position.set(side * (20 + Math.random() * 30), s * 0.3, -30 + Math.random() * 100);
     mtn.rotation.y = Math.random() * Math.PI;
     mtns.add(mtn);
   }
   scene.add(mtns);
   return mtns;
 }
-const mountains = createMountains();
+createMountains();
 
 // ==================== AUDIO ====================
 let audioCtx = null;
@@ -396,11 +465,9 @@ function startMusic() {
   playMelodyNote();
   musicInterval = setInterval(playMelodyNote, 220);
 }
-
 function stopMusic() {
   if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
 }
-
 function playMelodyNote() {
   if (!audioCtx || !musicEnabled) return;
   const freq = MELODY[melodyIdx % MELODY.length];
@@ -457,16 +524,40 @@ function playSfx(type) {
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
       osc.start(); osc.stop(audioCtx.currentTime + 0.12);
       break;
+    case 'skill':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(1320, audioCtx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+      break;
+    case 'crash':
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+      break;
+    case 'duck':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+      break;
   }
 }
 
-// ==================== SHARED GEOMETRIES (reuse for perf) ====================
+// ==================== SHARED GEOMETRIES ====================
 const groundGeo = new THREE.BoxGeometry(8, 0.3, CHUNK_LENGTH);
 const groundMat = new THREE.MeshLambertMaterial({ color: 0x6b8e5a });
 const grassDarkMat = new THREE.MeshLambertMaterial({ color: 0x4a7a3d });
 const stripeGeo = new THREE.BoxGeometry(1, 0.32, CHUNK_LENGTH);
 
-// Road markings
 const laneMarkGeo = new THREE.BoxGeometry(0.08, 0.02, 2);
 const laneMarkMat = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x666666, emissiveIntensity: 0.2 });
 const roadEdgeGeo = new THREE.BoxGeometry(0.12, 0.04, CHUNK_LENGTH);
@@ -475,11 +566,43 @@ const roadEdgeMat = new THREE.MeshLambertMaterial({ color: 0xdddddd });
 const coinGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.08, 8);
 const coinMat = new THREE.MeshLambertMaterial({ color: 0xffd54f, emissive: 0x997700, emissiveIntensity: 0.3 });
 
+const glowRingGeo = new THREE.RingGeometry(0.35, 0.65, 16);
+const glowRingMat = new THREE.MeshBasicMaterial({ color: 0xffd54f, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+
+// ==================== BARRIER (duck obstacle) ====================
+function createBarrierMesh() {
+  const group = new THREE.Group();
+  const poleMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+  const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, 2.2, 6);
+  const poleL = new THREE.Mesh(poleGeo, poleMat);
+  poleL.position.set(-3.8, 1.1, 0);
+  group.add(poleL);
+  const poleR = new THREE.Mesh(poleGeo, poleMat);
+  poleR.position.set(3.8, 1.1, 0);
+  group.add(poleR);
+
+  const signMat = new THREE.MeshLambertMaterial({ color: 0xffeb3b, emissive: 0x665500, emissiveIntensity: 0.15 });
+  const signGeo = new THREE.BoxGeometry(8, 0.7, 0.12);
+  const sign = new THREE.Mesh(signGeo, signMat);
+  sign.position.set(0, 1.2, 0);
+  group.add(sign);
+
+  const stripeMat = new THREE.MeshLambertMaterial({ color: 0xf44336 });
+  const sGeo = new THREE.BoxGeometry(8, 0.08, 0.14);
+  const s1 = new THREE.Mesh(sGeo, stripeMat);
+  s1.position.set(0, 0.9, 0);
+  group.add(s1);
+  const s2 = new THREE.Mesh(sGeo, stripeMat);
+  s2.position.set(0, 1.5, 0);
+  group.add(s2);
+
+  return group;
+}
+
 // ==================== POOLS ====================
 const chunks = [];
 const followAnimals = [];
 
-// ==================== PLAYER ====================
 let playerGroup = null;
 
 // ==================== LOAD MODELS ====================
@@ -491,16 +614,13 @@ const sceneryModels = {};
 const OBSTACLE_NAMES = ['obstacle-barrel','obstacle-crate','obstacle-spike','obstacle-rocks','obstacle-trap','obstacle-bomb','obstacle-saw','obstacle-hedge'];
 const SCENERY_NAMES = ['scenery-tree-pine','scenery-tree-pine-small','scenery-tree','scenery-mushrooms','scenery-flowers','scenery-flowers-tall','scenery-fence'];
 
-function cloneModel(source) {
-  return source.clone(true);
-}
+function cloneModel(source) { return source.clone(true); }
 
 function loadModels() {
   return new Promise((resolve) => {
     const allNames = [...ANIMAL_NAMES, ...OBSTACLE_NAMES, ...SCENERY_NAMES];
     const total = allNames.length;
     let loaded = 0;
-
     function onLoad() {
       loaded++;
       updateLoadProgress(loaded, total);
@@ -557,7 +677,10 @@ function updateLoadProgress(loaded, total) {
 }
 
 // ==================== WORLD GENERATION ====================
+let chunkCounter = 0;
+
 function createGroundChunk(z, safe) {
+  chunkCounter++;
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.position.set(0, -0.15, z + CHUNK_LENGTH / 2);
   scene.add(ground);
@@ -571,7 +694,6 @@ function createGroundChunk(z, safe) {
 
   const chunkObj = { ground, stripeL, stripeR, z, decos: [], obs: [], cols: [], marks: [] };
 
-  // Road lane markings (dashed lines between lanes)
   const lanePositions = [(LANES[0] + LANES[1]) / 2, (LANES[1] + LANES[2]) / 2];
   lanePositions.forEach(lx => {
     for (let mz = z + 1; mz < z + CHUNK_LENGTH; mz += 5) {
@@ -582,7 +704,6 @@ function createGroundChunk(z, safe) {
     }
   });
 
-  // Road edges
   const edgeL = new THREE.Mesh(roadEdgeGeo, roadEdgeMat);
   edgeL.position.set(LANES[0] + LANE_WIDTH * 0.6, 0.01, z + CHUNK_LENGTH / 2);
   scene.add(edgeL);
@@ -592,17 +713,15 @@ function createGroundChunk(z, safe) {
   scene.add(edgeR);
   chunkObj.marks.push(edgeR);
 
-  // Side scenery with 3D models
+  // Side scenery
   const sceneryKeys = Object.keys(sceneryModels);
   for (let i = 0; i < 6; i++) {
     const tz = z + Math.random() * CHUNK_LENGTH;
     const side = Math.random() > 0.5 ? 1 : -1;
     const tx = side * (5 + Math.random() * 4);
-
     if (sceneryKeys.length > 0) {
       const key = sceneryKeys[Math.floor(Math.random() * sceneryKeys.length)];
-      const tmpl = sceneryModels[key];
-      const clone = cloneModel(tmpl);
+      const clone = cloneModel(sceneryModels[key]);
       const wrapper = new THREE.Group();
       wrapper.add(clone);
       const isTree = key.includes('tree');
@@ -615,74 +734,151 @@ function createGroundChunk(z, safe) {
     }
   }
 
-  // Obstacles with 3D models (skip in safe zone)
-  const numObstacles = safe ? 0 : Math.floor(2 + Math.random() * 3);
-  const usedPositions = [];
-  const obsKeys = Object.keys(obstacleModels);
-  for (let i = 0; i < numObstacles; i++) {
-    const oz = z + 10 + Math.random() * (CHUNK_LENGTH - 20);
-    const lane = Math.floor(Math.random() * 3);
-    const key = `${Math.round(oz/3)}_${lane}`;
-    if (usedPositions.includes(key)) continue;
-    usedPositions.push(key);
+  if (!safe) {
+    // Place obstacles using patterns
+    const obsKeys = Object.keys(obstacleModels);
+    const placedObs = []; // {z, lane} for collision avoidance
 
-    let obs;
-    if (obsKeys.length > 0) {
-      const obsName = obsKeys[Math.floor(Math.random() * obsKeys.length)];
-      const clone = cloneModel(obstacleModels[obsName]);
-      obs = new THREE.Group();
-      obs.add(clone);
-      obs.position.set(LANES[lane], 0.3, oz);
+    // Decide pattern
+    const patternRoll = Math.random();
+    if (patternRoll < 0.3) {
+      // Random 3-5 obstacles
+      const num = 3 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < num; i++) {
+        const oz = z + 8 + Math.random() * (CHUNK_LENGTH - 16);
+        const lane = Math.floor(Math.random() * 3);
+        if (placedObs.some(p => Math.abs(p.z - oz) < 4 && p.lane === lane)) continue;
+        placeObstacle(chunkObj, obsKeys, oz, lane);
+        placedObs.push({ z: oz, lane });
+      }
+    } else if (patternRoll < 0.55) {
+      // Wall with gap (2 obstacles side by side)
+      const wallZ = z + 15 + Math.random() * (CHUNK_LENGTH - 30);
+      const openLane = Math.floor(Math.random() * 3);
+      for (let l = 0; l < 3; l++) {
+        if (l === openLane) continue;
+        placeObstacle(chunkObj, obsKeys, wallZ, l);
+        placedObs.push({ z: wallZ, lane: l });
+      }
+      // Add more random ones
+      for (let i = 0; i < 2; i++) {
+        const oz = z + 8 + Math.random() * (CHUNK_LENGTH - 16);
+        const lane = Math.floor(Math.random() * 3);
+        if (placedObs.some(p => Math.abs(p.z - oz) < 5)) continue;
+        placeObstacle(chunkObj, obsKeys, oz, lane);
+        placedObs.push({ z: oz, lane });
+      }
+    } else if (patternRoll < 0.8) {
+      // Zigzag
+      const startLane = Math.floor(Math.random() * 3);
+      const startZ = z + 10;
+      for (let i = 0; i < 4; i++) {
+        const oz = startZ + i * 8;
+        if (oz > z + CHUNK_LENGTH - 5) break;
+        const lane = (startLane + i) % 3;
+        placeObstacle(chunkObj, obsKeys, oz, lane);
+        placedObs.push({ z: oz, lane });
+      }
     } else {
-      obs = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshLambertMaterial({ color: 0xd32f2f }));
-      obs.position.set(LANES[lane], 0.35, oz);
+      // Mixed: some obstacles + random
+      const num = 3 + Math.floor(Math.random() * 2);
+      for (let i = 0; i < num; i++) {
+        const oz = z + 8 + (i / num) * (CHUNK_LENGTH - 16);
+        const lane = Math.floor(Math.random() * 3);
+        if (placedObs.some(p => Math.abs(p.z - oz) < 4 && p.lane === lane)) continue;
+        placeObstacle(chunkObj, obsKeys, oz, lane);
+        placedObs.push({ z: oz, lane });
+      }
     }
-    obs.userData = { type: 'obstacle', lane };
-    scene.add(obs);
-    chunkObj.obs.push(obs);
-  }
 
-  // Collectible animals
-  const numAnimals = Math.random() < 0.6 ? 1 : 0;
-  for (let i = 0; i < numAnimals; i++) {
-    const cz = z + 5 + Math.random() * (CHUNK_LENGTH - 10);
-    const lane = Math.floor(Math.random() * 3);
-    const tooClose = chunkObj.obs.some(o =>
-      Math.abs(o.position.z - cz) < 3 && Math.abs(o.position.x - LANES[lane]) < 1
-    );
-    if (tooClose) continue;
+    // Barrier (duck obstacle) - every 3-4 chunks
+    if (chunkCounter > 2 && chunkCounter % 3 === 0 && Math.random() < 0.6) {
+      let bz = z + 20 + Math.random() * (CHUNK_LENGTH - 35);
+      if (!placedObs.some(p => Math.abs(p.z - bz) < 6)) {
+        const barrier = createBarrierMesh();
+        barrier.position.set(0, 0, bz);
+        barrier.userData = { type: 'barrier' };
+        scene.add(barrier);
+        chunkObj.obs.push(barrier);
+        placedObs.push({ z: bz, lane: -1 });
+      }
+    }
 
-    const animalName = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
-    const template = animalModels[animalName];
-    if (!template) continue;
+    // Collectible animals (reduced frequency, better spacing)
+    const numAnimals = Math.random() < 0.55 ? 1 : 0;
+    for (let i = 0; i < numAnimals; i++) {
+      const cz = z + 8 + Math.random() * (CHUNK_LENGTH - 16);
+      const lane = Math.floor(Math.random() * 3);
+      if (placedObs.some(p => Math.abs(p.z - cz) < 6 && (p.lane === lane || p.lane === -1))) continue;
+      const animalName = ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
+      const template = animalModels[animalName];
+      if (!template) continue;
 
-    const animalClone = cloneModel(template);
-    const wrapper = new THREE.Group();
-    wrapper.add(animalClone);
-    const glow = new THREE.PointLight(0xffd54f, 2, 4);
-    glow.position.set(0, 0.5, 0);
-    wrapper.add(glow);
-    wrapper.position.set(LANES[lane], 1.0, cz);
-    wrapper.userData = { type: 'animal', name: animalName, collected: false };
-    scene.add(wrapper);
-    chunkObj.cols.push(wrapper);
-  }
+      const animalClone = cloneModel(template);
+      const wrapper = new THREE.Group();
+      wrapper.add(animalClone);
 
-  // Coins
-  const numCoins = 3 + Math.floor(Math.random() * 3);
-  for (let i = 0; i < numCoins; i++) {
-    const cz = z + 3 + (i / numCoins) * (CHUNK_LENGTH - 6);
-    const lane = Math.floor(Math.random() * 3);
-    const coin = new THREE.Mesh(coinGeo, coinMat);
-    coin.position.set(LANES[lane], 0.8, cz);
-    coin.rotation.x = Math.PI / 2;
-    coin.userData = { type: 'coin', collected: false };
-    scene.add(coin);
-    chunkObj.cols.push(coin);
+      // Glow effects
+      const glow = new THREE.PointLight(0xffd54f, 2.5, 5);
+      glow.position.set(0, 0.5, 0);
+      wrapper.add(glow);
+      const ring = new THREE.Mesh(glowRingGeo, glowRingMat.clone());
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = -0.95;
+      wrapper.add(ring);
+      wrapper.userData = { type: 'animal', name: animalName, collected: false, glowRing: ring };
+
+      wrapper.position.set(LANES[lane], 1.0, cz);
+      scene.add(wrapper);
+      chunkObj.cols.push(wrapper);
+    }
+
+    // Coins (better spacing from obstacles)
+    const numCoins = 3 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < numCoins; i++) {
+      const cz = z + 3 + (i / numCoins) * (CHUNK_LENGTH - 6);
+      const lane = Math.floor(Math.random() * 3);
+      if (placedObs.some(p => Math.abs(p.z - cz) < 5 && (p.lane === lane || p.lane === -1))) continue;
+      const coin = new THREE.Mesh(coinGeo, coinMat);
+      coin.position.set(LANES[lane], 0.8, cz);
+      coin.rotation.x = Math.PI / 2;
+      coin.userData = { type: 'coin', collected: false };
+      scene.add(coin);
+      chunkObj.cols.push(coin);
+    }
+  } else {
+    // Safe chunk: only coins
+    for (let i = 0; i < 5; i++) {
+      const cz = z + 5 + i * 10;
+      const lane = Math.floor(Math.random() * 3);
+      const coin = new THREE.Mesh(coinGeo, coinMat);
+      coin.position.set(LANES[lane], 0.8, cz);
+      coin.rotation.x = Math.PI / 2;
+      coin.userData = { type: 'coin', collected: false };
+      scene.add(coin);
+      chunkObj.cols.push(coin);
+    }
   }
 
   chunks.push(chunkObj);
   return chunkObj;
+}
+
+function placeObstacle(chunkObj, obsKeys, oz, lane) {
+  let obs;
+  if (obsKeys.length > 0) {
+    const obsName = obsKeys[Math.floor(Math.random() * obsKeys.length)];
+    const clone = cloneModel(obstacleModels[obsName]);
+    obs = new THREE.Group();
+    obs.add(clone);
+    obs.position.set(LANES[lane], 0.3, oz);
+  } else {
+    obs = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshLambertMaterial({ color: 0xd32f2f }));
+    obs.position.set(LANES[lane], 0.35, oz);
+  }
+  obs.userData = { type: 'obstacle', lane };
+  scene.add(obs);
+  chunkObj.obs.push(obs);
 }
 
 function removeChunk(chunk) {
@@ -696,8 +892,6 @@ function removeChunk(chunk) {
 }
 
 // ==================== FORMATION SYSTEM ====================
-// Animals form rows of up to 3 behind the player
-// Row 1: first 1-3 animals, Row 2: next 1-3, etc.
 const FORMATION_GAP_X = 1.2;
 
 function getFormationPosition(index, totalCount) {
@@ -705,31 +899,23 @@ function getFormationPosition(index, totalCount) {
   const posInRow = index % 3;
   const rowStart = row * 3;
   const rowCount = Math.min(3, totalCount - rowStart);
-
   let xOffset;
-  if (rowCount === 1) {
-    xOffset = 0;
-  } else if (rowCount === 2) {
-    xOffset = posInRow === 0 ? -FORMATION_GAP_X * 0.5 : FORMATION_GAP_X * 0.5;
-  } else {
-    xOffset = (posInRow - 1) * FORMATION_GAP_X;
-  }
-
+  if (rowCount === 1) xOffset = 0;
+  else if (rowCount === 2) xOffset = posInRow === 0 ? -FORMATION_GAP_X * 0.5 : FORMATION_GAP_X * 0.5;
+  else xOffset = (posInRow - 1) * FORMATION_GAP_X;
   return { x: xOffset, z: -(row + 1) * ROW_SPACING };
 }
 
 function triggerFollowJump() {
   followAnimals.forEach((fa, i) => {
     const delay = (Math.floor(i / 3) + 1) * 80;
-    setTimeout(() => {
-      fa.jumpVel = JUMP_FORCE * 0.9;
-      fa.jumping = true;
-    }, delay);
+    setTimeout(() => { fa.jumpVel = JUMP_FORCE * 0.9; fa.jumping = true; }, delay);
   });
 }
 
 function updateFormationPositions(dt) {
   const total = followAnimals.length;
+  const targetY = isDucking ? DUCK_Y : PLAYER_Y;
   followAnimals.forEach((fa, i) => {
     const target = getFormationPosition(i, total);
     const targetX = playerGroup.position.x + target.x;
@@ -741,9 +927,11 @@ function updateFormationPositions(dt) {
       fa.jumpVel -= GRAVITY * dt;
       fa.jumpY = (fa.jumpY || 0) + fa.jumpVel * dt;
       if (fa.jumpY <= 0) { fa.jumpY = 0; fa.jumping = false; fa.jumpVel = 0; }
-      fa.mesh.position.y = PLAYER_Y + fa.jumpY + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
+      fa.mesh.position.y = targetY + fa.jumpY + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
     } else {
-      fa.mesh.position.y = PLAYER_Y + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
+      const curY = fa.mesh.position.y;
+      const desiredY = targetY + Math.sin(performance.now() * 0.003 + i * 0.7) * 0.04;
+      fa.mesh.position.y += (desiredY - curY) * 0.2 * dt;
     }
   });
 }
@@ -751,18 +939,25 @@ function updateFormationPositions(dt) {
 // ==================== GAME LOGIC ====================
 let hasShield = false;
 
+function getHero() {
+  const id = selectedSkin || 'animal-monkey';
+  return HERO_CHARACTERS.find(h => h.id === id) || HERO_CHARACTERS[0];
+}
+
 function initGame() {
-  // Clear old state
   chunks.forEach(c => removeChunk(c));
   chunks.length = 0;
   followAnimals.forEach(a => scene.remove(a.mesh));
   followAnimals.length = 0;
+  chunkCounter = 0;
 
   score = 0;
   animalCount = 0;
   rescuedAnimals = [];
   targetLane = 1;
   runCoins = 0;
+  isDucking = false;
+  introTimer = 0;
   document.getElementById('collectNotify').innerHTML = '';
   playerVelY = 0;
   isGrounded = true;
@@ -770,10 +965,17 @@ function initGame() {
   distance = 0;
   hasShield = activeBoosts.includes('shield');
 
+  // Skill reset
+  skillActive = false;
+  skillEndTime = 0;
+  skillCooldownEnd = 0;
+  currentHero = getHero();
+  if (skillRing) { scene.remove(skillRing); skillRing = null; }
+
   // Player
   if (playerGroup) scene.remove(playerGroup);
-  const firstAnimal = selectedSkin && animalModels[selectedSkin] ? selectedSkin : ANIMAL_NAMES[Math.floor(Math.random() * ANIMAL_NAMES.length)];
-  const template = animalModels[firstAnimal];
+  const heroId = currentHero.id;
+  const template = animalModels[heroId];
   playerGroup = new THREE.Group();
   if (template) {
     playerGroup.add(cloneModel(template));
@@ -784,13 +986,19 @@ function initGame() {
     );
     playerGroup.add(body);
   }
-  playerGroup.position.set(LANES[1], PLAYER_Y, 0);
+  playerGroup.position.set(LANES[1], 4, 0);
+  playerGroup.rotation.y = Math.PI;
   scene.add(playerGroup);
 
-  // Generate initial chunks (first chunk is safe - no obstacles)
   for (let i = 0; i < 4; i++) {
     createGroundChunk(i * CHUNK_LENGTH, i === 0);
   }
+
+  // Update skill button
+  const skillIconEl = document.getElementById('skillIcon');
+  const skillNameEl = document.getElementById('skillName');
+  skillIconEl.textContent = currentHero.skillIcon;
+  skillNameEl.textContent = currentHero.skillName;
 
   updateHUD();
 }
@@ -802,7 +1010,37 @@ function moveRight() {
   if (targetLane < 2) { targetLane++; playSfx('swoosh'); }
 }
 function jump() {
+  if (isDucking) return;
   if (isGrounded) { playerVelY = JUMP_FORCE; isGrounded = false; playSfx('jump'); triggerFollowJump(); }
+}
+function startDuck() {
+  if (!isGrounded) return;
+  if (!isDucking) { isDucking = true; playSfx('duck'); }
+}
+function stopDuck() {
+  isDucking = false;
+}
+
+function activateSkill() {
+  if (!currentHero) return;
+  const now = performance.now();
+  if (skillActive) return;
+  if (now < skillCooldownEnd) return;
+
+  skillActive = true;
+  skillEndTime = now + currentHero.skillDuration;
+  skillCooldownEnd = skillEndTime + SKILL_COOLDOWN;
+  playSfx('skill');
+
+  // Visual: add glow ring under player
+  const ringGeo = new THREE.RingGeometry(0.5, 0.9, 20);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: currentHero.skillColor, transparent: true, opacity: 0.5, side: THREE.DoubleSide
+  });
+  skillRing = new THREE.Mesh(ringGeo, ringMat);
+  skillRing.rotation.x = -Math.PI / 2;
+  skillRing.position.y = 0.01;
+  playerGroup.add(skillRing);
 }
 
 function updateHUD() {
@@ -823,6 +1061,33 @@ function updateBoostIcons() {
   });
 }
 
+function updateSkillUI() {
+  const btn = document.getElementById('skillBtn');
+  const overlay = document.getElementById('skillCdOverlay');
+  const cdText = document.getElementById('skillCdText');
+  const now = performance.now();
+
+  if (skillActive) {
+    btn.className = 'skill-button active';
+    const remaining = Math.max(0, skillEndTime - now);
+    const pct = (remaining / currentHero.skillDuration) * 100;
+    overlay.style.height = (100 - pct) + '%';
+    cdText.classList.add('hidden');
+  } else if (now < skillCooldownEnd) {
+    btn.className = 'skill-button on-cooldown';
+    const remaining = Math.ceil((skillCooldownEnd - now) / 1000);
+    const totalCd = SKILL_COOLDOWN;
+    const pct = ((skillCooldownEnd - now) / totalCd) * 100;
+    overlay.style.height = pct + '%';
+    cdText.textContent = remaining + 'с';
+    cdText.classList.remove('hidden');
+  } else {
+    btn.className = 'skill-button';
+    overlay.style.height = '0%';
+    cdText.classList.add('hidden');
+  }
+}
+
 function showCollectNotify(animalName) {
   const container = document.getElementById('collectNotify');
   const emoji = ANIMAL_EMOJIS[animalName] || '';
@@ -834,11 +1099,80 @@ function showCollectNotify(animalName) {
   setTimeout(() => { if (el.parentNode) el.remove(); }, 2600);
 }
 
+// ==================== SKILL EFFECTS ====================
+function applyMonkeySkill(dt) {
+  // Auto-jump: detect obstacles ahead and jump
+  if (!isGrounded || isDucking) return;
+  chunks.forEach(chunk => {
+    chunk.obs.forEach(obs => {
+      if (obs.userData.destroyed || obs.userData.type === 'barrier') return;
+      const dz = obs.position.z - playerGroup.position.z;
+      const dx = Math.abs(obs.position.x - playerGroup.position.x);
+      if (dz > 1 && dz < 5 && dx < 1.5) {
+        jump();
+      }
+    });
+  });
+}
+
+function applyDeerSkill(obs) {
+  // Destroy obstacle with antler charge
+  obs.userData.destroyed = true;
+  playSfx('crash');
+
+  // Break apart animation: scatter pieces
+  const pos = obs.position.clone();
+  for (let i = 0; i < 5; i++) {
+    const piece = new THREE.Mesh(
+      new THREE.BoxGeometry(0.15, 0.15, 0.15),
+      new THREE.MeshLambertMaterial({ color: 0x8d6e63 })
+    );
+    piece.position.copy(pos);
+    piece.position.y += 0.3;
+    scene.add(piece);
+    const vx = (Math.random() - 0.5) * 0.3;
+    const vy = 0.1 + Math.random() * 0.15;
+    const vz = (Math.random() - 0.5) * 0.3;
+    const startTime = performance.now();
+    function animPiece() {
+      const elapsed = (performance.now() - startTime) / 16.67;
+      piece.position.x += vx;
+      piece.position.y += vy - elapsed * 0.005;
+      piece.position.z += vz;
+      piece.rotation.x += 0.1;
+      piece.rotation.z += 0.1;
+      if (elapsed < 40) requestAnimationFrame(animPiece);
+      else scene.remove(piece);
+    }
+    animPiece();
+  }
+  scene.remove(obs);
+}
+
+// ==================== GAME LOOP ====================
 let lastTime = 0;
 let bobPhase = 0;
 
 function gameLoop(time) {
   requestAnimationFrame(gameLoop);
+
+  if (gameState === 'intro') {
+    introTimer += 16.67;
+    const progress = Math.min(introTimer / 1500, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+
+    playerGroup.rotation.y = Math.PI * (1 - eased);
+    playerGroup.position.y = 4 + (PLAYER_Y - 4) * eased;
+
+    if (progress >= 1) {
+      gameState = 'playing';
+      playerGroup.rotation.y = 0;
+      playerGroup.position.y = PLAYER_Y;
+      startMusic();
+    }
+    renderer.render(scene, camera);
+    return;
+  }
 
   if (gameState !== 'playing') {
     renderer.render(scene, camera);
@@ -848,17 +1182,29 @@ function gameLoop(time) {
   const dt = Math.min((time - lastTime) / 16.67, 3);
   lastTime = time;
 
+  // Skill timing
+  const now = performance.now();
+  if (skillActive && now >= skillEndTime) {
+    skillActive = false;
+    if (skillRing) { playerGroup.remove(skillRing); skillRing = null; }
+  }
+
+  // Skill: Panda slowdown effect
+  let speedMult = 1;
+  if (skillActive && currentHero.id === 'animal-panda') speedMult = 0.5;
+
   gameSpeed = Math.min(MAX_SPEED, gameSpeed + SPEED_INCREMENT * dt);
-  const moveZ = gameSpeed * dt;
+  const moveZ = gameSpeed * dt * speedMult;
   distance += moveZ;
 
-  // Instant lane snap (responsive controls)
+  // Lane movement
   const targetX = LANES[targetLane];
-  const laneSpeed = 0.25;
-  playerGroup.position.x += (targetX - playerGroup.position.x) * laneSpeed * dt;
+  playerGroup.position.x += (targetX - playerGroup.position.x) * 0.25 * dt;
 
-  // Jump physics
-  if (!isGrounded) {
+  // Duck/Jump physics
+  if (isDucking && isGrounded) {
+    playerGroup.position.y += (DUCK_Y - playerGroup.position.y) * 0.3 * dt;
+  } else if (!isGrounded) {
     playerVelY -= GRAVITY * dt;
     playerGroup.position.y += playerVelY * dt;
     if (playerGroup.position.y <= PLAYER_Y) {
@@ -866,12 +1212,20 @@ function gameLoop(time) {
       playerVelY = 0;
       isGrounded = true;
     }
+  } else {
+    bobPhase += 0.08 * dt;
+    playerGroup.position.y += (PLAYER_Y + Math.sin(bobPhase) * 0.04 - playerGroup.position.y) * 0.2 * dt;
   }
 
-  // Bob
-  bobPhase += 0.08 * dt;
-  if (isGrounded) {
-    playerGroup.position.y = PLAYER_Y + Math.sin(bobPhase) * 0.04;
+  // Skill: Monkey auto-jump
+  if (skillActive && currentHero.id === 'animal-monkey') {
+    applyMonkeySkill(dt);
+  }
+
+  // Skill ring animation
+  if (skillRing) {
+    skillRing.rotation.z += 0.05 * dt;
+    skillRing.material.opacity = 0.3 + Math.sin(time * 0.005) * 0.2;
   }
 
   // Move world
@@ -886,14 +1240,11 @@ function gameLoop(time) {
     chunk.z -= moveZ;
   });
 
-  // Update formation
   updateFormationPositions(dt);
 
   // Generate new chunks
   const furthestZ = chunks.reduce((max, c) => Math.max(max, c.z + CHUNK_LENGTH), 0);
-  if (furthestZ < SPAWN_DISTANCE) {
-    createGroundChunk(furthestZ);
-  }
+  if (furthestZ < SPAWN_DISTANCE) createGroundChunk(furthestZ);
 
   // Remove old chunks
   for (let i = chunks.length - 1; i >= 0; i--) {
@@ -908,11 +1259,57 @@ function gameLoop(time) {
     chunk.obs.forEach(obs => {
       if (gameState !== 'playing') return;
       if (obs.userData.destroyed) return;
+
+      if (obs.userData.type === 'barrier') {
+        // Barrier: must duck under
+        const dz = Math.abs(obs.position.z - playerGroup.position.z);
+        if (dz < 0.8) {
+          if (playerGroup.position.y > 0.25) {
+            // Skill: Tiger invincibility or Deer antler
+            if (skillActive && currentHero.id === 'animal-tiger') return;
+            if (skillActive && currentHero.id === 'animal-deer') {
+              applyDeerSkill(obs);
+              return;
+            }
+            if (hasShield) {
+              hasShield = false;
+              activeBoosts = activeBoosts.filter(b => b !== 'shield');
+              obs.userData.destroyed = true;
+              scene.remove(obs);
+              playSfx('collect');
+              updateBoostIcons();
+              return;
+            }
+            gameOver();
+          }
+        }
+        return;
+      }
+
+      // Regular obstacles
       const dx = Math.abs(obs.position.x - playerGroup.position.x);
       const dz = Math.abs(obs.position.z - playerGroup.position.z);
       if (dx < 0.8 && dz < 0.8) {
         if (playerGroup.position.y > obs.position.y + 0.5) return;
-        if (hasShield) { hasShield = false; activeBoosts = activeBoosts.filter(b => b !== 'shield'); obs.userData.destroyed = true; scene.remove(obs); playSfx('collect'); updateBoostIcons(); return; }
+        // Skill: Tiger invincibility
+        if (skillActive && currentHero.id === 'animal-tiger') {
+          applyDeerSkill(obs);
+          return;
+        }
+        // Skill: Deer antler charge
+        if (skillActive && currentHero.id === 'animal-deer') {
+          applyDeerSkill(obs);
+          return;
+        }
+        if (hasShield) {
+          hasShield = false;
+          activeBoosts = activeBoosts.filter(b => b !== 'shield');
+          obs.userData.destroyed = true;
+          scene.remove(obs);
+          playSfx('collect');
+          updateBoostIcons();
+          return;
+        }
         gameOver();
       }
     });
@@ -941,11 +1338,7 @@ function gameLoop(time) {
             wrapper.add(clone);
             const newCount = followAnimals.length + 1;
             const pos = getFormationPosition(followAnimals.length, newCount);
-            wrapper.position.set(
-              playerGroup.position.x + pos.x,
-              PLAYER_Y,
-              playerGroup.position.z + pos.z
-            );
+            wrapper.position.set(playerGroup.position.x + pos.x, PLAYER_Y, playerGroup.position.z + pos.z);
             scene.add(wrapper);
             followAnimals.push({ mesh: wrapper, name: col.userData.name, jumping: false, jumpVel: 0, jumpY: 0 });
           }
@@ -959,26 +1352,34 @@ function gameLoop(time) {
     });
   });
 
-  // Magnet boost: attract nearby coins
-  if (activeBoosts.includes('magnet')) {
+  // Magnet boost + Fox skill: attract nearby coins
+  const magnetRange = (activeBoosts.includes('magnet') || (skillActive && currentHero.id === 'animal-fox')) ? 12 : 0;
+  if (magnetRange > 0) {
     chunks.forEach(chunk => {
       chunk.cols.forEach(col => {
         if (col.userData.collected || col.userData.type !== 'coin') return;
         const dz = Math.abs(col.position.z - playerGroup.position.z);
-        if (dz < 6) {
-          col.position.x += (playerGroup.position.x - col.position.x) * 0.08 * dt;
+        if (dz < magnetRange) {
+          col.position.x += (playerGroup.position.x - col.position.x) * 0.12 * dt;
+          col.position.z += (playerGroup.position.z - col.position.z) * 0.04 * dt;
         }
       });
     });
   }
 
-  // Animate collectibles (rotate uncollected animals, bob coins)
+  // Animate collectibles
   chunks.forEach(chunk => {
     chunk.cols.forEach(col => {
       if (col.userData.collected) return;
       if (col.userData.type === 'animal') {
         col.rotation.y += 0.06 * dt;
         col.position.y = 1.0 + Math.sin(time * 0.003 + col.position.z) * 0.25;
+        // Pulse glow ring
+        if (col.userData.glowRing) {
+          col.userData.glowRing.material.opacity = 0.3 + Math.sin(time * 0.005) * 0.2;
+          const s = 1 + Math.sin(time * 0.004) * 0.15;
+          col.userData.glowRing.scale.set(s, s, s);
+        }
       } else {
         col.rotation.y += 0.04 * dt;
       }
@@ -989,6 +1390,7 @@ function gameLoop(time) {
   camera.position.x += (playerGroup.position.x * 0.3 - camera.position.x) * 0.05 * dt;
 
   updateHUD();
+  updateSkillUI();
   renderer.render(scene, camera);
 }
 
@@ -997,17 +1399,25 @@ function gameOver() {
   playSfx('hit');
   stopMusic();
 
-  // Distance bonus
   const distBonus = Math.floor(distance / COIN_DISTANCE_BONUS);
   runCoins += distBonus;
 
-  // Save coins
   totalCoins += runCoins;
   activeBoosts = [];
+  const finalDist = Math.floor(distance);
+
+  // High score
+  let isNewRecord = false;
+  if (finalDist > highScore) {
+    highScore = finalDist;
+    isNewRecord = true;
+  }
   saveEconomy();
 
-  const finalScore = Math.floor(distance) + score;
-  document.getElementById('goScore').textContent = `Дистанция: ${Math.floor(distance)} м | Очки: ${finalScore}`;
+  const finalScore = finalDist + score;
+  document.getElementById('goScore').textContent = `Дистанция: ${finalDist} м | Очки: ${finalScore}`;
+  document.getElementById('goHighScore').textContent = isNewRecord ? `🏆 Новый рекорд! ${highScore} м` : `Рекорд: ${highScore} м`;
+  document.getElementById('goHighScore').style.color = isNewRecord ? '#ffeb3b' : '#ff9800';
   document.getElementById('goCoins').textContent = `+${runCoins} 🪙 (всего: ${totalCoins})`;
   document.getElementById('goAnimals').textContent = `Спасено зверей: ${animalCount}`;
 
@@ -1021,6 +1431,7 @@ function gameOver() {
   });
 
   document.getElementById('hud').classList.add('hidden');
+  document.getElementById('skillWrap').classList.add('hidden');
   document.getElementById('mobileControls').classList.add('hidden');
   document.getElementById('gameover').classList.remove('hidden');
 
@@ -1037,8 +1448,10 @@ function showMenu() {
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('pause').classList.add('hidden');
   document.getElementById('shop').classList.add('hidden');
+  document.getElementById('skillWrap').classList.add('hidden');
   document.getElementById('mobileControls').classList.add('hidden');
   document.getElementById('menuCoins').textContent = `Монеты: ${totalCoins} 🪙`;
+  document.getElementById('menuHighScore').textContent = `Рекорд: ${highScore} м`;
 }
 
 // ==================== SHOP ====================
@@ -1057,7 +1470,6 @@ function closeShop() {
 function renderShop() {
   document.getElementById('shopBalance').textContent = `Монеты: ${totalCoins} 🪙`;
 
-  // Active boosts
   const boostsEl = document.getElementById('activeBoostsDisplay');
   boostsEl.innerHTML = '';
   activeBoosts.forEach(bid => {
@@ -1089,28 +1501,30 @@ function renderShop() {
     boostsDiv.appendChild(el);
   });
 
-  // Skins
+  // Heroes
   const skinsDiv = document.getElementById('shopSkins');
   skinsDiv.innerHTML = '';
-  SKIN_ITEMS.forEach(item => {
-    const isFree = item.price === 0;
-    const isOwned = isFree || ownedSkins.includes(item.id);
-    const isSelected = selectedSkin === item.id;
-    const canBuy = totalCoins >= item.price && !isOwned;
+  HERO_CHARACTERS.forEach(hero => {
+    const isFree = hero.price === 0;
+    const isOwned = isFree || ownedSkins.includes(hero.id);
+    const isSelected = selectedSkin === hero.id;
+    const canBuy = totalCoins >= hero.price && !isOwned;
     const el = document.createElement('div');
     el.className = 'shop-item';
     el.innerHTML = `
       <div class="shop-item-info">
-        <span class="shop-item-icon">${item.icon}</span>
-        <div><div class="shop-item-name">${item.name}</div></div>
+        <span class="shop-item-icon">${hero.emoji}</span>
+        <div>
+          <div class="shop-item-name">${hero.name}</div>
+          <div class="shop-item-desc">${hero.skillIcon} ${hero.skillName}: ${hero.skillDesc}</div>
+        </div>
       </div>
-      <button class="btn-buy ${isSelected ? 'owned' : ''}" ${!canBuy && !isOwned ? 'disabled' : ''} data-type="skin" data-id="${item.id}">
-        ${isSelected ? 'Выбран' : isOwned ? 'Выбрать' : item.price === 0 ? 'Бесплатно' : item.price + ' 🪙'}
+      <button class="btn-buy ${isSelected ? 'owned' : ''}" ${!canBuy && !isOwned ? 'disabled' : ''} data-type="skin" data-id="${hero.id}">
+        ${isSelected ? 'Выбран' : isOwned ? 'Выбрать' : hero.price === 0 ? 'Бесплатно' : hero.price + ' 🪙'}
       </button>`;
     skinsDiv.appendChild(el);
   });
 
-  // Attach click handlers
   document.querySelectorAll('#shop .btn-buy').forEach(btn => {
     btn.addEventListener('click', () => {
       const type = btn.dataset.type;
@@ -1131,9 +1545,9 @@ function buyBoost(id) {
 }
 
 function buySkin(id) {
-  const item = SKIN_ITEMS.find(x => x.id === id);
-  if (!item) return;
-  const isFree = item.price === 0;
+  const hero = HERO_CHARACTERS.find(x => x.id === id);
+  if (!hero) return;
+  const isFree = hero.price === 0;
   const isOwned = isFree || ownedSkins.includes(id);
 
   if (isOwned) {
@@ -1142,8 +1556,8 @@ function buySkin(id) {
     renderShop();
     return;
   }
-  if (totalCoins < item.price) return;
-  totalCoins -= item.price;
+  if (totalCoins < hero.price) return;
+  totalCoins -= hero.price;
   ownedSkins.push(id);
   selectedSkin = id;
   saveEconomy();
@@ -1153,14 +1567,16 @@ function buySkin(id) {
 function startGame() {
   initAudio();
   initGame();
-  gameState = 'playing';
+  gameState = 'intro';
+  introTimer = 0;
   lastTime = performance.now();
   document.getElementById('menu').classList.add('hidden');
+  document.getElementById('backstory').classList.add('hidden');
   document.getElementById('gameover').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('skillWrap').classList.remove('hidden');
   if (isMobile()) document.getElementById('mobileControls').classList.remove('hidden');
   updateBoostIcons();
-  startMusic();
 }
 
 function pauseGame() {
@@ -1184,19 +1600,28 @@ function isMobile() {
 }
 
 // ==================== INPUT ====================
+const keysDown = {};
 document.addEventListener('keydown', (e) => {
+  keysDown[e.code] = true;
   if (gameState === 'playing') {
     switch(e.code) {
       case 'ArrowLeft': case 'KeyA': moveLeft(); break;
       case 'ArrowRight': case 'KeyD': moveRight(); break;
-      case 'ArrowUp': case 'KeyW': case 'Space': jump(); e.preventDefault(); break;
+      case 'ArrowUp': case 'KeyW': jump(); e.preventDefault(); break;
+      case 'ArrowDown': case 'KeyS': startDuck(); e.preventDefault(); break;
+      case 'Space': activateSkill(); e.preventDefault(); break;
       case 'Escape': pauseGame(); break;
     }
   } else if (gameState === 'menu') {
-    if (e.code === 'Enter' || e.code === 'Space') { startGame(); e.preventDefault(); }
+    if (e.code === 'Enter') { startGame(); e.preventDefault(); }
   } else if (gameState === 'paused') {
     if (e.code === 'Escape') resumeGame();
   }
+});
+
+document.addEventListener('keyup', (e) => {
+  keysDown[e.code] = false;
+  if (e.code === 'ArrowDown' || e.code === 'KeyS') stopDuck();
 });
 
 let touchStartX = 0, touchStartY = 0;
@@ -1214,15 +1639,29 @@ document.addEventListener('touchend', (e) => {
     if (dx > 30) moveRight(); else if (dx < -30) moveLeft();
   } else {
     if (dy < -30) jump();
+    else if (dy > 30) startDuck();
   }
 }, { passive: true });
 
 document.getElementById('mobLeft').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
 document.getElementById('mobRight').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
 document.getElementById('mobJump').addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+document.getElementById('mobDuck').addEventListener('touchstart', (e) => { e.preventDefault(); startDuck(); });
+document.getElementById('mobDuck').addEventListener('touchend', (e) => { e.preventDefault(); stopDuck(); });
+document.getElementById('skillBtn').addEventListener('click', () => { if (gameState === 'playing') activateSkill(); });
 
 // UI Buttons
-document.getElementById('btnPlay').addEventListener('click', startGame);
+document.getElementById('btnPlay').addEventListener('click', () => {
+  if (!hasSeenBackstory) {
+    hasSeenBackstory = true;
+    saveEconomy();
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('backstory').classList.remove('hidden');
+  } else {
+    startGame();
+  }
+});
+document.getElementById('btnStartAdventure').addEventListener('click', startGame);
 document.getElementById('btnShop').addEventListener('click', openShop);
 document.getElementById('btnShopBack').addEventListener('click', closeShop);
 document.getElementById('btnSettings').addEventListener('click', () => {
@@ -1239,7 +1678,7 @@ document.getElementById('btnToMenu2').addEventListener('click', () => { stopMusi
 document.getElementById('pauseBtn').addEventListener('click', pauseGame);
 document.getElementById('btnResume').addEventListener('click', resumeGame);
 
-// Settings toggles with persistence
+// Settings
 document.getElementById('toggleMusic').classList.toggle('on', musicEnabled);
 document.getElementById('toggleSfx').classList.toggle('on', sfxEnabled);
 
