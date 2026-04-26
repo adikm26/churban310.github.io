@@ -60,15 +60,20 @@ canvas{display:block}
 
 .skill-wrap{position:fixed;bottom:90px;left:16px;z-index:55;pointer-events:auto}
 .skill-wrap.hidden{display:none}
-.skill-button{position:relative;width:68px;height:68px;background:rgba(0,0,0,0.55);border:2.5px solid #ffd54f;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.skill-button{position:relative;width:88px;height:88px;background:rgba(0,0,0,0.55);border:3px solid #ffd54f;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .skill-button.on-cooldown{border-color:#666;opacity:0.5}
 .skill-button.active{border-color:#4caf50;box-shadow:0 0 15px rgba(76,175,80,0.7);animation:skillActive 1s infinite}
 @keyframes skillActive{0%,100%{box-shadow:0 0 10px rgba(76,175,80,0.5)}50%{box-shadow:0 0 22px rgba(76,175,80,0.9)}}
-.skill-icon{font-size:1.4rem;line-height:1}
-.skill-name{color:#fff;font-size:0.5rem;font-weight:700;margin-top:2px}
-.skill-key{color:#aaa;font-size:0.45rem}
-.skill-cd-overlay{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.65);pointer-events:none;border-radius:0 0 13px 13px;transition:height 0.15s}
-.skill-cd-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:0.75rem;font-weight:700;pointer-events:none}
+.skill-icon{font-size:1.8rem;line-height:1}
+.skill-name{color:#fff;font-size:0.65rem;font-weight:700;margin-top:3px}
+.skill-key{color:#aaa;font-size:0.55rem}
+.skill-cd-overlay{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.65);pointer-events:none;border-radius:0 0 15px 15px;transition:height 0.15s}
+.skill-cd-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:0.9rem;font-weight:700;pointer-events:none}
+
+.boost-timers{position:fixed;bottom:185px;left:16px;z-index:55;pointer-events:none;display:flex;flex-direction:column;gap:4px}
+.boost-timers.hidden{display:none}
+.boost-timer-item{background:rgba(0,0,0,0.6);color:#fff;padding:5px 12px;border-radius:10px;font-size:clamp(0.7rem,2vw,0.85rem);font-weight:600;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1.5px solid rgba(76,175,80,0.5);white-space:nowrap}
+.boost-timer-item .bt-icon{font-size:1rem}
 
 #gameover{background:rgba(0,0,0,0.88)}
 #gameover h2{font-size:clamp(1.8rem,5vw,3rem);color:#ff5252;text-shadow:0 0 20px rgba(255,82,82,0.5);margin-bottom:0.5em}
@@ -132,13 +137,16 @@ canvas{display:block}
   <div class="backstory-content">
     <h2>📖 История</h2>
     <div class="backstory-text">
-      <p>🐵 Привет! Я — <b>Обезьянка</b>, самая ловкая в лесу!</p>
-      <p>Наши друзья-зверята заблудились на большой дороге. Впереди много преград — бочки, шипы и ловушки!</p>
-      <p>⬆️ <b>Перепрыгивай</b> препятствия на дороге</p>
-      <p>⬇️ <b>Приседай</b> под дорожными знаками</p>
-      <p>🪙 <b>Собирай монеты</b> и копи на новых героев</p>
-      <p>🐾 <b>Спасай зверей</b> — они побегут за тобой!</p>
-      <p>У каждого героя есть <b>особый навык</b> — используй его с умом! 🌟</p>
+      <p>Где-то далеко в лесу случилась беда — маленькие зверята заблудились на большой дороге! Впереди бочки, шипы, ловушки и дорожные знаки. Кто-то должен их спасти!</p>
+      <p>Ты управляешь <b>героем-спасателем</b>. Беги вперёд, уклоняйся от преград и собирай зверят — они побегут за тобой!</p>
+      <p>🎮 <b>Управление:</b></p>
+      <p>◀ <b>A</b> или <b>←</b> — бежать влево</p>
+      <p>▶ <b>D</b> или <b>→</b> — бежать вправо</p>
+      <p>▲ <b>W</b> или <b>↑</b> — прыгнуть</p>
+      <p>▼ <b>S</b> или <b>↓</b> — присесть (чтобы проехать под знаками)</p>
+      <p>⭐ <b>Пробел</b> — суперспособность (раз в 30 секунд)</p>
+      <p>🦸 У каждого героя своя <b>суперспособность</b>! Обезьянка автоматически перепрыгивает преграды, Олень разбивает их рогами, Лиса притягивает монеты, Тигр становится неуязвимым, а Панда замедляет время.</p>
+      <p>🪙 <b>Собирай монеты</b> — за них можно купить новых героев в магазине!</p>
     </div>
     <button class="btn btn-play" id="btnStartAdventure">Вперёд! 🚀</button>
   </div>
@@ -213,6 +221,8 @@ canvas{display:block}
   </div>
 </div>
 
+<div class="boost-timers hidden" id="boostTimers"></div>
+
 <div id="pause" class="overlay hidden">
   <h2>Пауза</h2>
   <button class="btn btn-resume" id="btnResume">Продолжить</button>
@@ -227,6 +237,8 @@ canvas{display:block}
   <div class="go-animals-rescued" id="goAnimals">Спасено зверей: 0</div>
   <div class="go-animal-icons" id="goAnimalIcons"></div>
   <button class="btn btn-restart" id="btnRestart">Ещё раз</button>
+  <button class="btn btn-settings" id="btnShopGO" style="margin-bottom:12px;background:linear-gradient(135deg,rgba(255,213,79,0.3),rgba(255,143,0,0.3));border-color:rgba(255,213,79,0.5)">🛒 Магазин</button>
+  <button class="btn btn-settings" id="btnSettingsGO" style="margin-bottom:12px">Настройки</button>
   <button class="btn btn-menu" id="btnToMenu2">В меню</button>
 </div>
 
@@ -318,6 +330,7 @@ let gameSpeed = BASE_SPEED;
 let distance = 0;
 let runCoins = 0;
 let introTimer = 0;
+let introStartTime = 0;
 
 let musicEnabled = true;
 let sfxEnabled = true;
@@ -573,28 +586,38 @@ const glowRingMat = new THREE.MeshBasicMaterial({ color: 0xffd54f, transparent: 
 function createBarrierMesh() {
   const group = new THREE.Group();
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
-  const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, 2.2, 6);
+  const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, 3.0, 6);
   const poleL = new THREE.Mesh(poleGeo, poleMat);
-  poleL.position.set(-3.8, 1.1, 0);
+  poleL.position.set(-3.8, 1.5, 0);
   group.add(poleL);
   const poleR = new THREE.Mesh(poleGeo, poleMat);
-  poleR.position.set(3.8, 1.1, 0);
+  poleR.position.set(3.8, 1.5, 0);
   group.add(poleR);
 
   const signMat = new THREE.MeshLambertMaterial({ color: 0xffeb3b, emissive: 0x665500, emissiveIntensity: 0.15 });
-  const signGeo = new THREE.BoxGeometry(8, 0.7, 0.12);
+  const signGeo = new THREE.BoxGeometry(8, 1.0, 0.12);
   const sign = new THREE.Mesh(signGeo, signMat);
-  sign.position.set(0, 1.2, 0);
+  sign.position.set(0, 1.6, 0);
   group.add(sign);
 
   const stripeMat = new THREE.MeshLambertMaterial({ color: 0xf44336 });
   const sGeo = new THREE.BoxGeometry(8, 0.08, 0.14);
   const s1 = new THREE.Mesh(sGeo, stripeMat);
-  s1.position.set(0, 0.9, 0);
+  s1.position.set(0, 1.15, 0);
   group.add(s1);
   const s2 = new THREE.Mesh(sGeo, stripeMat);
-  s2.position.set(0, 1.5, 0);
+  s2.position.set(0, 2.05, 0);
   group.add(s2);
+
+  // Warning stripes on sign
+  const warnMat = new THREE.MeshLambertMaterial({ color: 0x333333 });
+  const wGeo = new THREE.BoxGeometry(0.15, 0.8, 0.13);
+  for (let i = -3; i <= 3; i++) {
+    const w = new THREE.Mesh(wGeo, warnMat);
+    w.position.set(i * 1.0, 1.6, 0.01);
+    w.rotation.z = 0.5;
+    group.add(w);
+  }
 
   return group;
 }
@@ -791,16 +814,28 @@ function createGroundChunk(z, safe) {
       }
     }
 
-    // Barrier (duck obstacle) - every 3-4 chunks
+    // Barrier (duck obstacle) - every 3-4 chunks, with large clear zone
     if (chunkCounter > 2 && chunkCounter % 3 === 0 && Math.random() < 0.6) {
       let bz = z + 20 + Math.random() * (CHUNK_LENGTH - 35);
-      if (!placedObs.some(p => Math.abs(p.z - bz) < 6)) {
+      if (!placedObs.some(p => Math.abs(p.z - bz) < 12)) {
         const barrier = createBarrierMesh();
         barrier.position.set(0, 0, bz);
         barrier.userData = { type: 'barrier' };
         scene.add(barrier);
         chunkObj.obs.push(barrier);
         placedObs.push({ z: bz, lane: -1 });
+      }
+    }
+
+    // Hedge wall (all 3 lanes, jump only) - rare
+    if (chunkCounter > 3 && Math.random() < 0.2) {
+      const hwz = z + 30 + Math.random() * (CHUNK_LENGTH - 40);
+      if (!placedObs.some(p => Math.abs(p.z - hwz) < 8)) {
+        for (let l = 0; l < 3; l++) {
+          const hedgeKeys = obsKeys.filter(k => k === 'obstacle-hedge');
+          placeObstacle(chunkObj, hedgeKeys.length > 0 ? hedgeKeys : obsKeys, hwz, l);
+          placedObs.push({ z: hwz, lane: l });
+        }
       }
     }
 
@@ -1059,6 +1094,40 @@ function updateBoostIcons() {
     icon.textContent = boostIcons[id] || '⚡';
     container.appendChild(icon);
   });
+  updateBoostTimers();
+}
+
+function updateBoostTimers() {
+  const container = document.getElementById('boostTimers');
+  const boostNames = { magnet: '🧲 Магнит', shield: '🛡️ Щит', double: '💰 x2 Монеты', slow: '🐢 Лёгкий старт' };
+  if (activeBoosts.length === 0 || gameState !== 'playing') {
+    container.classList.add('hidden');
+    return;
+  }
+  container.classList.remove('hidden');
+  container.innerHTML = '';
+  activeBoosts.forEach(id => {
+    const item = document.createElement('div');
+    item.className = 'boost-timer-item';
+    const name = boostNames[id] || id;
+    if (id === 'shield' && !hasShield) {
+      item.innerHTML = `<span class="bt-icon">🛡️</span> Использован`;
+      item.style.opacity = '0.5';
+    } else {
+      item.innerHTML = `<span class="bt-icon">${name.split(' ')[0]}</span> ${name.split(' ').slice(1).join(' ')} — активен`;
+    }
+    container.appendChild(item);
+  });
+
+  // Show skill timer if active
+  if (skillActive && currentHero) {
+    const remaining = Math.max(0, Math.ceil((skillEndTime - performance.now()) / 1000));
+    const item = document.createElement('div');
+    item.className = 'boost-timer-item';
+    item.style.borderColor = 'rgba(255,213,79,0.7)';
+    item.innerHTML = `<span class="bt-icon">${currentHero.skillIcon}</span> ${currentHero.skillName} — ${remaining}с`;
+    container.appendChild(item);
+  }
 }
 
 function updateSkillUI() {
@@ -1157,7 +1226,7 @@ function gameLoop(time) {
   requestAnimationFrame(gameLoop);
 
   if (gameState === 'intro') {
-    introTimer += 16.67;
+    introTimer = time - introStartTime;
     const progress = Math.min(introTimer / 1500, 1);
     const eased = 1 - Math.pow(1 - progress, 3);
 
@@ -1168,6 +1237,7 @@ function gameLoop(time) {
       gameState = 'playing';
       playerGroup.rotation.y = 0;
       playerGroup.position.y = PLAYER_Y;
+      lastTime = time;
       startMusic();
     }
     renderer.render(scene, camera);
@@ -1391,6 +1461,7 @@ function gameLoop(time) {
 
   updateHUD();
   updateSkillUI();
+  updateBoostTimers();
   renderer.render(scene, camera);
 }
 
@@ -1432,6 +1503,7 @@ function gameOver() {
 
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('skillWrap').classList.add('hidden');
+  document.getElementById('boostTimers').classList.add('hidden');
   document.getElementById('mobileControls').classList.add('hidden');
   document.getElementById('gameover').classList.remove('hidden');
 
@@ -1455,16 +1527,42 @@ function showMenu() {
 }
 
 // ==================== SHOP ====================
-function openShop() {
+let shopReturnTo = 'menu';
+
+function openShop(returnTo) {
+  shopReturnTo = returnTo || 'menu';
   document.getElementById('menu').classList.add('hidden');
+  document.getElementById('gameover').classList.add('hidden');
   document.getElementById('shop').classList.remove('hidden');
   renderShop();
 }
 
 function closeShop() {
   document.getElementById('shop').classList.add('hidden');
-  document.getElementById('menu').classList.remove('hidden');
+  if (shopReturnTo === 'gameover') {
+    document.getElementById('gameover').classList.remove('hidden');
+  } else {
+    document.getElementById('menu').classList.remove('hidden');
+  }
   document.getElementById('menuCoins').textContent = `Монеты: ${totalCoins} 🪙`;
+}
+
+let settingsReturnTo = 'menu';
+
+function openSettings(returnTo) {
+  settingsReturnTo = returnTo || 'menu';
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('settings').classList.remove('hidden');
+}
+
+function closeSettings() {
+  document.getElementById('settings').classList.add('hidden');
+  if (settingsReturnTo === 'gameover') {
+    document.getElementById('gameover').classList.remove('hidden');
+  } else {
+    document.getElementById('menu').classList.remove('hidden');
+  }
 }
 
 function renderShop() {
@@ -1569,6 +1667,7 @@ function startGame() {
   initGame();
   gameState = 'intro';
   introTimer = 0;
+  introStartTime = performance.now();
   lastTime = performance.now();
   document.getElementById('menu').classList.add('hidden');
   document.getElementById('backstory').classList.add('hidden');
@@ -1662,16 +1761,12 @@ document.getElementById('btnPlay').addEventListener('click', () => {
   }
 });
 document.getElementById('btnStartAdventure').addEventListener('click', startGame);
-document.getElementById('btnShop').addEventListener('click', openShop);
+document.getElementById('btnShop').addEventListener('click', () => openShop('menu'));
 document.getElementById('btnShopBack').addEventListener('click', closeShop);
-document.getElementById('btnSettings').addEventListener('click', () => {
-  document.getElementById('menu').classList.add('hidden');
-  document.getElementById('settings').classList.remove('hidden');
-});
-document.getElementById('btnBack').addEventListener('click', () => {
-  document.getElementById('settings').classList.add('hidden');
-  document.getElementById('menu').classList.remove('hidden');
-});
+document.getElementById('btnShopGO').addEventListener('click', () => openShop('gameover'));
+document.getElementById('btnSettings').addEventListener('click', () => openSettings('menu'));
+document.getElementById('btnSettingsGO').addEventListener('click', () => openSettings('gameover'));
+document.getElementById('btnBack').addEventListener('click', closeSettings);
 document.getElementById('btnRestart').addEventListener('click', startGame);
 document.getElementById('btnToMenu').addEventListener('click', () => { stopMusic(); activeBoosts = []; saveEconomy(); showMenu(); });
 document.getElementById('btnToMenu2').addEventListener('click', () => { stopMusic(); showMenu(); });
