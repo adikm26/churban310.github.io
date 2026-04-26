@@ -1639,7 +1639,7 @@ document.addEventListener('touchend', (e) => {
     if (dx > 30) moveRight(); else if (dx < -30) moveLeft();
   } else {
     if (dy < -30) jump();
-    else if (dy > 30) startDuck();
+    else if (dy > 30) { startDuck(); setTimeout(stopDuck, 500); }
   }
 }, { passive: true });
 
