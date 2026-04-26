@@ -1005,6 +1005,13 @@ function triggerFollowJump() {
   });
 }
 
+function triggerFollowSlam() {
+  followAnimals.forEach(fa => {
+    fa.jumpVel = -0.35;
+    fa.jumping = true;
+  });
+}
+
 function updateFormationPositions(dt) {
   const total = followAnimals.length;
   const targetY = isDucking ? DUCK_Y : PLAYER_Y;
@@ -1109,6 +1116,7 @@ function startDuck() {
   if (!isGrounded) {
     // Fast slam down while airborne
     playerVelY = -0.35;
+    triggerFollowSlam();
     return;
   }
   if (!isDucking) { isDucking = true; playSfx('duck'); }
@@ -1234,8 +1242,7 @@ function applyMonkeySkill(dt) {
   // Auto-dodge: jump over regular, duck under barriers, dodge around trees
   let needJump = false;
   let needDuck = false;
-  let needDodgeTree = false;
-  let treeLane = -1;
+  const treeLanes = new Set();
   chunks.forEach(chunk => {
     chunk.obs.forEach(obs => {
       if (obs.userData.destroyed) return;
@@ -1245,10 +1252,8 @@ function applyMonkeySkill(dt) {
           needDuck = true;
         }
       } else if (obs.userData.type === 'roadTree') {
-        const dx = Math.abs(obs.position.x - playerGroup.position.x);
-        if (dz > 2 && dz < 8 && dx < 1.5) {
-          needDodgeTree = true;
-          treeLane = obs.userData.lane;
+        if (dz > 2 && dz < 8) {
+          treeLanes.add(obs.userData.lane);
         }
       } else {
         const dx = Math.abs(obs.position.x - playerGroup.position.x);
@@ -1259,12 +1264,18 @@ function applyMonkeySkill(dt) {
     });
   });
 
-  if (needDodgeTree && treeLane === targetLane) {
-    if (targetLane > 0) moveLeft();
-    else moveRight();
-  } else if (needDuck && !isDucking && isGrounded) {
-    startDuck();
-    setTimeout(stopDuck, 800);
+  if (treeLanes.has(targetLane)) {
+    // Find a safe lane to dodge to
+    if (targetLane > 0 && !treeLanes.has(targetLane - 1)) moveLeft();
+    else if (targetLane < 2 && !treeLanes.has(targetLane + 1)) moveRight();
+  } else if (needDuck && !isDucking) {
+    if (!isGrounded) {
+      // Slam down first, then duck
+      startDuck();
+    } else {
+      startDuck();
+      setTimeout(stopDuck, 800);
+    }
   } else if (needJump && isGrounded && !isDucking) {
     jump();
   }
