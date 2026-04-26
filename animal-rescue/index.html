@@ -46,6 +46,9 @@ canvas{display:block}
 .toggle::after{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left 0.3s}
 .toggle.on::after{left:29px}
 .btn-back{margin-top:30px;background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
+.volume-slider{-webkit-appearance:none;appearance:none;width:120px;height:8px;background:rgba(255,255,255,0.2);border-radius:4px;outline:none;cursor:pointer}
+.volume-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;background:#4caf50;border-radius:50%;cursor:pointer}
+.volume-slider::-moz-range-thumb{width:20px;height:20px;background:#4caf50;border-radius:50%;cursor:pointer;border:none}
 
 #hud{position:fixed;top:0;left:0;width:100%;padding:12px 20px;display:flex;justify-content:space-between;align-items:flex-start;z-index:50;pointer-events:none}
 #hud.hidden{display:none}
@@ -145,7 +148,7 @@ canvas{display:block}
       <p>▲ <b>W</b> или <b>↑</b> — прыгнуть</p>
       <p>▼ <b>S</b> или <b>↓</b> — присесть (чтобы проехать под знаками)</p>
       <p>⭐ <b>Пробел</b> — суперспособность (раз в 30 секунд)</p>
-      <p>🦸 У каждого героя своя <b>суперспособность</b>! Обезьянка автоматически перепрыгивает преграды, Олень разбивает их рогами, Лиса притягивает монеты, Тигр становится неуязвимым, а Панда замедляет время.</p>
+      <p>🦸 У каждого героя своя <b>суперспособность</b>! Обезьянка автоматически уклоняется от всех преград, Олень разбивает их рогами, Лиса притягивает монеты, Тигр становится неуязвимым, а Панда замедляет время.</p>
       <p>🪙 <b>Собирай монеты</b> — за них можно купить новых героев в магазине!</p>
     </div>
     <button class="btn btn-play" id="btnStartAdventure">Вперёд! 🚀</button>
@@ -178,8 +181,16 @@ canvas{display:block}
     <div class="toggle on" id="toggleMusic"></div>
   </div>
   <div class="setting-row">
+    <span>🔊 Громкость музыки</span>
+    <input type="range" min="0" max="100" value="50" id="volumeMusic" class="volume-slider">
+  </div>
+  <div class="setting-row">
     <span>Звуки</span>
     <div class="toggle on" id="toggleSfx"></div>
+  </div>
+  <div class="setting-row">
+    <span>🔊 Громкость звуков</span>
+    <input type="range" min="0" max="100" value="60" id="volumeSfx" class="volume-slider">
   </div>
   <button class="btn btn-back" id="btnBack">Назад</button>
 </div>
@@ -334,6 +345,8 @@ let introStartTime = 0;
 
 let musicEnabled = true;
 let sfxEnabled = true;
+let musicVolume = 50;
+let sfxVolume = 60;
 
 // Skill state
 let skillActive = false;
@@ -388,11 +401,13 @@ try {
     const s = JSON.parse(saved);
     musicEnabled = s.music !== false;
     sfxEnabled = s.sfx !== false;
+    if (s.musicVol !== undefined) musicVolume = s.musicVol;
+    if (s.sfxVol !== undefined) sfxVolume = s.sfxVol;
   }
 } catch(e) {}
 
 function saveSettings() {
-  try { localStorage.setItem('animalRescueSettings', JSON.stringify({ music: musicEnabled, sfx: sfxEnabled })); } catch(e) {}
+  try { localStorage.setItem('animalRescueSettings', JSON.stringify({ music: musicEnabled, sfx: sfxEnabled, musicVol: musicVolume, sfxVol: sfxVolume })); } catch(e) {}
 }
 
 // ==================== RENDERER ====================
@@ -453,15 +468,15 @@ function initAudio() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   musicGain = audioCtx.createGain();
-  musicGain.gain.value = musicEnabled ? 0.12 : 0;
+  musicGain.gain.value = musicEnabled ? (musicVolume / 100) * 0.25 : 0;
   musicGain.connect(audioCtx.destination);
   sfxGain = audioCtx.createGain();
-  sfxGain.gain.value = sfxEnabled ? 0.3 : 0;
+  sfxGain.gain.value = sfxEnabled ? (sfxVolume / 100) * 0.5 : 0;
   sfxGain.connect(audioCtx.destination);
 }
 
-function updateMusicVolume() { if (musicGain) musicGain.gain.value = musicEnabled ? 0.12 : 0; }
-function updateSfxVolume() { if (sfxGain) sfxGain.gain.value = sfxEnabled ? 0.3 : 0; }
+function updateMusicVolume() { if (musicGain) musicGain.gain.value = musicEnabled ? (musicVolume / 100) * 0.25 : 0; }
+function updateSfxVolume() { if (sfxGain) sfxGain.gain.value = sfxEnabled ? (sfxVolume / 100) * 0.5 : 0; }
 
 let musicInterval = null;
 const MELODY = [
@@ -622,6 +637,28 @@ function createBarrierMesh() {
   return group;
 }
 
+// ==================== ROAD TREE (side-dodge only) ====================
+function createRoadTreeMesh() {
+  const group = new THREE.Group();
+  // Trunk
+  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x6d4c2a });
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.35, 3.5, 8), trunkMat);
+  trunk.position.y = 1.75;
+  group.add(trunk);
+  // Foliage layers
+  const leafMat = new THREE.MeshLambertMaterial({ color: 0x2e7d32 });
+  const leaf1 = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2.0, 8), leafMat);
+  leaf1.position.y = 3.0;
+  group.add(leaf1);
+  const leaf2 = new THREE.Mesh(new THREE.ConeGeometry(1.1, 1.6, 8), leafMat);
+  leaf2.position.y = 4.2;
+  group.add(leaf2);
+  const leaf3 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.2, 8), leafMat);
+  leaf3.position.y = 5.1;
+  group.add(leaf3);
+  return group;
+}
+
 // ==================== POOLS ====================
 const chunks = [];
 const followAnimals = [];
@@ -748,7 +785,8 @@ function createGroundChunk(z, safe) {
       const wrapper = new THREE.Group();
       wrapper.add(clone);
       const isTree = key.includes('tree');
-      const s = isTree ? (0.8 + Math.random() * 1.2) : (0.5 + Math.random() * 0.8);
+      const isFence = key.includes('fence');
+      const s = isTree ? (0.8 + Math.random() * 1.2) : isFence ? (1.5 + Math.random() * 1.0) : (0.5 + Math.random() * 0.8);
       wrapper.scale.setScalar(s);
       wrapper.position.set(tx, 0, tz);
       wrapper.rotation.y = Math.random() * Math.PI * 2;
@@ -835,6 +873,25 @@ function createGroundChunk(z, safe) {
           const hedgeKeys = obsKeys.filter(k => k === 'obstacle-hedge');
           placeObstacle(chunkObj, hedgeKeys.length > 0 ? hedgeKeys : obsKeys, hwz, l);
           placedObs.push({ z: hwz, lane: l });
+        }
+      }
+    }
+
+    // Road tree (tall, must dodge sideways) - occasional
+    if (chunkCounter > 4 && Math.random() < 0.25) {
+      const tz = z + 15 + Math.random() * (CHUNK_LENGTH - 30);
+      if (!placedObs.some(p => Math.abs(p.z - tz) < 10)) {
+        const numTreeLanes = Math.random() < 0.3 ? 2 : 1;
+        const startLane = Math.floor(Math.random() * 3);
+        for (let t = 0; t < numTreeLanes; t++) {
+          const treeLane = (startLane + t) % 3;
+          if (treeLane >= 3) break;
+          const tree = createRoadTreeMesh();
+          tree.position.set(LANES[treeLane], 0, tz);
+          tree.userData = { type: 'roadTree', lane: treeLane };
+          scene.add(tree);
+          chunkObj.obs.push(tree);
+          placedObs.push({ z: tz, lane: treeLane });
         }
       }
     }
@@ -1049,7 +1106,11 @@ function jump() {
   if (isGrounded) { playerVelY = JUMP_FORCE; isGrounded = false; playSfx('jump'); triggerFollowJump(); }
 }
 function startDuck() {
-  if (!isGrounded) return;
+  if (!isGrounded) {
+    // Fast slam down while airborne
+    playerVelY = -0.35;
+    return;
+  }
   if (!isDucking) { isDucking = true; playSfx('duck'); }
 }
 function stopDuck() {
@@ -1170,9 +1231,11 @@ function showCollectNotify(animalName) {
 
 // ==================== SKILL EFFECTS ====================
 function applyMonkeySkill(dt) {
-  // Auto-dodge: detect obstacles ahead — jump over regular, duck under barriers
+  // Auto-dodge: jump over regular, duck under barriers, dodge around trees
   let needJump = false;
   let needDuck = false;
+  let needDodgeTree = false;
+  let treeLane = -1;
   chunks.forEach(chunk => {
     chunk.obs.forEach(obs => {
       if (obs.userData.destroyed) return;
@@ -1180,6 +1243,12 @@ function applyMonkeySkill(dt) {
       if (obs.userData.type === 'barrier') {
         if (dz > 1 && dz < 6) {
           needDuck = true;
+        }
+      } else if (obs.userData.type === 'roadTree') {
+        const dx = Math.abs(obs.position.x - playerGroup.position.x);
+        if (dz > 2 && dz < 8 && dx < 1.5) {
+          needDodgeTree = true;
+          treeLane = obs.userData.lane;
         }
       } else {
         const dx = Math.abs(obs.position.x - playerGroup.position.x);
@@ -1190,7 +1259,10 @@ function applyMonkeySkill(dt) {
     });
   });
 
-  if (needDuck && !isDucking && isGrounded) {
+  if (needDodgeTree && treeLane === targetLane) {
+    if (targetLane > 0) moveLeft();
+    else moveRight();
+  } else if (needDuck && !isDucking && isGrounded) {
     startDuck();
     setTimeout(stopDuck, 800);
   } else if (needJump && isGrounded && !isDucking) {
@@ -1362,6 +1434,28 @@ function gameLoop(time) {
     chunk.obs.forEach(obs => {
       if (gameState !== 'playing') return;
       if (obs.userData.destroyed) return;
+
+      if (obs.userData.type === 'roadTree') {
+        const dx = Math.abs(obs.position.x - playerGroup.position.x);
+        const dz = Math.abs(obs.position.z - playerGroup.position.z);
+        if (dx < 1.0 && dz < 0.8) {
+          if (skillActive && currentHero.id === 'animal-tiger') return;
+          if (skillActive && currentHero.id === 'animal-deer') {
+            applyDeerSkill(obs);
+            return;
+          }
+          if (hasShield) {
+            hasShield = false;
+            obs.userData.destroyed = true;
+            scene.remove(obs);
+            playSfx('collect');
+            updateBoostIcons();
+            return;
+          }
+          gameOver();
+        }
+        return;
+      }
 
       if (obs.userData.type === 'barrier') {
         // Barrier: must duck under
@@ -1819,6 +1913,20 @@ document.getElementById('toggleMusic').addEventListener('click', function() {
 document.getElementById('toggleSfx').addEventListener('click', function() {
   sfxEnabled = !sfxEnabled;
   this.classList.toggle('on', sfxEnabled);
+  updateSfxVolume();
+  saveSettings();
+});
+
+// Volume sliders
+document.getElementById('volumeMusic').value = musicVolume;
+document.getElementById('volumeSfx').value = sfxVolume;
+document.getElementById('volumeMusic').addEventListener('input', function() {
+  musicVolume = parseInt(this.value);
+  updateMusicVolume();
+  saveSettings();
+});
+document.getElementById('volumeSfx').addEventListener('input', function() {
+  sfxVolume = parseInt(this.value);
   updateSfxVolume();
   saveSettings();
 });
