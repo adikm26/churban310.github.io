@@ -55,7 +55,7 @@ canvas{display:block}
 .hud-score{color:#fff;font-size:clamp(1rem,3vw,1.5rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
 .hud-animals{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
 .hud-coins{color:#ffd54f;font-size:clamp(0.9rem,2.5vw,1.3rem);font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8)}
-#pauseBtn{pointer-events:auto;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.4);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#pauseBtn{pointer-events:auto;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.4);color:#fff;width:64px;height:64px;border-radius:50%;font-size:1.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .hud-boosts{display:flex;gap:6px}
 .hud-boost-icon{width:38px;height:38px;background:rgba(0,0,0,0.45);border:2px solid #4caf50;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 0 8px rgba(76,175,80,0.6);animation:boostPulse 2s infinite}
@@ -237,6 +237,7 @@ canvas{display:block}
 <div id="pause" class="overlay hidden">
   <h2>Пауза</h2>
   <button class="btn btn-resume" id="btnResume">Продолжить</button>
+  <button class="btn btn-settings" id="btnSettingsPause" style="margin-bottom:12px">Настройки</button>
   <button class="btn btn-menu" id="btnToMenu">В меню</button>
 </div>
 
@@ -441,47 +442,86 @@ groundPlane.rotation.x = -Math.PI / 2;
 groundPlane.position.y = -0.2;
 scene.add(groundPlane);
 
+function createMountain(x, z, baseScale) {
+  const group = new THREE.Group();
+  const isRocky = Math.random() < 0.35;
+  const segs = 5 + Math.floor(Math.random() * 4);
+  const h = baseScale * (1.2 + Math.random() * 1.5);
+  const w = baseScale * (0.8 + Math.random() * 0.5);
+
+  // Main peak - displaced cone for organic look
+  const peakGeo = new THREE.ConeGeometry(1, 1, segs, 3);
+  const posArr = peakGeo.attributes.position.array;
+  for (let i = 0; i < posArr.length; i += 3) {
+    posArr[i] += (Math.random() - 0.5) * 0.12;
+    posArr[i + 2] += (Math.random() - 0.5) * 0.12;
+  }
+  peakGeo.computeVertexNormals();
+
+  const baseColor = isRocky
+    ? [0x7a6b5a, 0x8a7a6a, 0x6d6050, 0x9a8a7a][Math.floor(Math.random() * 4)]
+    : [0x4a7a3d, 0x5d8a4e, 0x3d6b2f, 0x6b9b5a, 0x527a45][Math.floor(Math.random() * 5)];
+  const peakMat = new THREE.MeshLambertMaterial({ color: baseColor });
+  const peak = new THREE.Mesh(peakGeo, peakMat);
+  peak.scale.set(w, h, w * (0.7 + Math.random() * 0.5));
+  peak.position.y = h * 0.4;
+  group.add(peak);
+
+  // Secondary smaller peaks on sides (ridges)
+  const ridges = 1 + Math.floor(Math.random() * 2);
+  for (let r = 0; r < ridges; r++) {
+    const rGeo = new THREE.ConeGeometry(1, 1, 4 + Math.floor(Math.random() * 3), 2);
+    const rArr = rGeo.attributes.position.array;
+    for (let i = 0; i < rArr.length; i += 3) {
+      rArr[i] += (Math.random() - 0.5) * 0.1;
+      rArr[i + 2] += (Math.random() - 0.5) * 0.1;
+    }
+    rGeo.computeVertexNormals();
+    const darken = isRocky ? 0x050505 : 0x0a1a0a;
+    const rColor = baseColor - darken;
+    const rMat = new THREE.MeshLambertMaterial({ color: rColor > 0 ? rColor : baseColor });
+    const ridge = new THREE.Mesh(rGeo, rMat);
+    const rs = w * (0.5 + Math.random() * 0.4);
+    const rh = h * (0.5 + Math.random() * 0.3);
+    ridge.scale.set(rs, rh, rs * (0.6 + Math.random() * 0.5));
+    ridge.position.set((Math.random() - 0.5) * w * 0.8, rh * 0.35, (Math.random() - 0.5) * w * 0.5);
+    ridge.rotation.y = Math.random() * Math.PI;
+    group.add(ridge);
+  }
+
+  // Snow cap on tall mountains
+  if (h > 8) {
+    const capGeo = new THREE.ConeGeometry(0.35, 0.25, segs);
+    const capMat = new THREE.MeshLambertMaterial({ color: [0xeef5ee, 0xddeedd, 0xf5f5f0][Math.floor(Math.random() * 3)] });
+    const cap = new THREE.Mesh(capGeo, capMat);
+    cap.scale.set(w * 0.45, h * 0.12, w * 0.45);
+    cap.position.y = h * 0.85;
+    group.add(cap);
+  }
+
+  // Foliage base (green skirt) for non-rocky
+  if (!isRocky) {
+    const fGeo = new THREE.ConeGeometry(1, 0.4, 8);
+    const fMat = new THREE.MeshLambertMaterial({ color: 0x3d6b2f });
+    const foliage = new THREE.Mesh(fGeo, fMat);
+    foliage.scale.set(w * 1.2, h * 0.2, w * 1.2);
+    foliage.position.y = h * 0.08;
+    group.add(foliage);
+  }
+
+  group.position.set(x, 0, z);
+  group.rotation.y = Math.random() * Math.PI * 2;
+  return group;
+}
+
 function createMountains() {
   const mtns = new THREE.Group();
-  // Varied mountain shapes
-  const geos = [
-    new THREE.ConeGeometry(1, 1.5, 5),
-    new THREE.ConeGeometry(1, 1, 6),
-    new THREE.ConeGeometry(1, 1.8, 4),
-    new THREE.ConeGeometry(0.8, 1.2, 7)
-  ];
-  const baseColors = [0x5d8a4e, 0x4a7a3d, 0x6b9b5a, 0x3d6b2f, 0x7a9e6d, 0x3a5e2c];
-  const snowColors = [0xddeedd, 0xccddcc, 0xeef5ee];
-  const rockColors = [0x8a7a6a, 0x6d6050, 0x9a8a7a];
-
-  for (let i = 0; i < 40; i++) {
-    const side = i < 20 ? -1 : 1;
-    const geo = geos[Math.floor(Math.random() * geos.length)];
-    const s = 4 + Math.random() * 10;
-    const h = s * (0.8 + Math.random() * 1.0);
+  for (let i = 0; i < 36; i++) {
+    const side = i < 18 ? -1 : 1;
+    const s = 4 + Math.random() * 8;
     const x = side * (22 + Math.random() * 35);
     const z = -40 + Math.random() * 120;
-
-    // Base mountain
-    const isRocky = Math.random() < 0.3;
-    const palette = isRocky ? rockColors : baseColors;
-    const mat = new THREE.MeshLambertMaterial({ color: palette[Math.floor(Math.random() * palette.length)] });
-    const mtn = new THREE.Mesh(geo, mat);
-    mtn.scale.set(s, h, s * (0.7 + Math.random() * 0.6));
-    mtn.position.set(x, h * 0.25, z);
-    mtn.rotation.y = Math.random() * Math.PI * 2;
-    mtns.add(mtn);
-
-    // Snow cap on taller mountains
-    if (h > 8 && Math.random() < 0.6) {
-      const capGeo = new THREE.ConeGeometry(0.4, 0.3, geo.parameters.radialSegments);
-      const capMat = new THREE.MeshLambertMaterial({ color: snowColors[Math.floor(Math.random() * snowColors.length)] });
-      const cap = new THREE.Mesh(capGeo, capMat);
-      cap.scale.set(s * 0.5, h * 0.15, s * 0.5);
-      cap.position.set(x, h * 0.55, z);
-      cap.rotation.y = mtn.rotation.y;
-      mtns.add(cap);
-    }
+    mtns.add(createMountain(x, z, s));
   }
   scene.add(mtns);
   return mtns;
@@ -989,7 +1029,7 @@ function createGroundChunk(z, safe) {
     placedObs.forEach(p => {
       if (p.lane >= 0 && p.lane < 3 && Math.random() < 0.25) {
         const coin = new THREE.Mesh(coinGeo, coinMat);
-        coin.position.set(LANES[p.lane], 1.8, p.z);
+        coin.position.set(LANES[p.lane], 2.4, p.z);
         coin.rotation.x = Math.PI / 2;
         coin.userData = { type: 'coin', collected: false };
         scene.add(coin);
@@ -1758,12 +1798,15 @@ function openSettings(returnTo) {
   settingsReturnTo = returnTo || 'menu';
   document.getElementById('menu').classList.add('hidden');
   document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('pause').classList.add('hidden');
   document.getElementById('settings').classList.remove('hidden');
 }
 
 function closeSettings() {
   document.getElementById('settings').classList.add('hidden');
-  if (settingsReturnTo === 'gameover') {
+  if (settingsReturnTo === 'pause') {
+    document.getElementById('pause').classList.remove('hidden');
+  } else if (settingsReturnTo === 'gameover') {
     document.getElementById('gameover').classList.remove('hidden');
   } else {
     document.getElementById('menu').classList.remove('hidden');
@@ -1971,6 +2014,7 @@ document.getElementById('btnShopBack').addEventListener('click', closeShop);
 document.getElementById('btnShopGO').addEventListener('click', () => openShop('gameover'));
 document.getElementById('btnSettings').addEventListener('click', () => openSettings('menu'));
 document.getElementById('btnSettingsGO').addEventListener('click', () => openSettings('gameover'));
+document.getElementById('btnSettingsPause').addEventListener('click', () => openSettings('pause'));
 document.getElementById('btnBack').addEventListener('click', closeSettings);
 document.getElementById('btnRestart').addEventListener('click', startGame);
 document.getElementById('btnToMenu').addEventListener('click', () => { stopMusic(); activeBoosts = []; saveEconomy(); showMenu(); });
