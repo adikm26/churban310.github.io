@@ -1100,7 +1100,7 @@ function updateBoostIcons() {
 function updateBoostTimers() {
   const container = document.getElementById('boostTimers');
   const boostNames = { magnet: '🧲 Магнит', shield: '🛡️ Щит', double: '💰 x2 Монеты', slow: '🐢 Лёгкий старт' };
-  if (activeBoosts.length === 0 || gameState !== 'playing') {
+  if ((activeBoosts.length === 0 && !skillActive) || gameState !== 'playing') {
     container.classList.add('hidden');
     return;
   }
