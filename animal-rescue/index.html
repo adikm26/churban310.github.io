@@ -301,20 +301,20 @@ const ANIMAL_NAMES_RU = {
 // ==================== HERO CHARACTERS ====================
 const HERO_CHARACTERS = [
   { id: 'animal-monkey', name: 'Обезьянка', emoji: '🐵', price: 0,
-    skillName: 'Ловкач', skillDesc: 'Авто-прыжки 10 сек', skillIcon: '🦘',
+    skillName: 'Ловкач', skillDesc: 'Авто-уклонение 10 сек', skillIcon: '🦘',
     skillDuration: 10000, skillColor: 0x4caf50 },
-  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 300,
-    skillName: 'Рогач', skillDesc: 'Разбивает преграды 5 сек', skillIcon: '💥',
-    skillDuration: 5000, skillColor: 0xff9800 },
-  { id: 'animal-fox', name: 'Лиса', emoji: '🦊', price: 200,
+  { id: 'animal-fox', name: 'Лиса', emoji: '🦊', price: 2000,
     skillName: 'Магнит', skillDesc: 'Притягивает монеты 10 сек', skillIcon: '🧲',
     skillDuration: 10000, skillColor: 0xffd54f },
-  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 500,
-    skillName: 'Ярость', skillDesc: 'Неуязвимость 5 сек', skillIcon: '🔥',
-    skillDuration: 5000, skillColor: 0x2196f3 },
-  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 400,
+  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 3000,
+    skillName: 'Рогач', skillDesc: 'Разбивает преграды 5 сек', skillIcon: '💥',
+    skillDuration: 5000, skillColor: 0xff9800 },
+  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 4000,
     skillName: 'Дзен', skillDesc: 'Замедление 8 сек', skillIcon: '🧘',
-    skillDuration: 8000, skillColor: 0xce93d8 }
+    skillDuration: 8000, skillColor: 0xce93d8 },
+  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 5000,
+    skillName: 'Ярость', skillDesc: 'Неуязвимость 5 сек', skillIcon: '🔥',
+    skillDuration: 5000, skillColor: 0x2196f3 }
 ];
 
 // ==================== STATE ====================
@@ -355,10 +355,10 @@ let highScore = 0;
 let hasSeenBackstory = false;
 
 const BOOST_ITEMS = [
-  { id: 'magnet', name: 'Магнит', desc: 'Притягивает монеты', icon: '🧲', price: 150 },
-  { id: 'shield', name: 'Щит', desc: 'Защита от 1 удара', icon: '🛡️', price: 200 },
-  { id: 'double', name: 'x2 Монеты', desc: 'Двойные монеты', icon: '💰', price: 200 },
-  { id: 'slow', name: 'Лёгкий старт', desc: 'Медленный старт', icon: '🐢', price: 100 }
+  { id: 'slow', name: 'Лёгкий старт', desc: 'Медленный старт', icon: '🐢', price: 1000 },
+  { id: 'magnet', name: 'Магнит', desc: 'Притягивает монеты', icon: '🧲', price: 1500 },
+  { id: 'shield', name: 'Щит', desc: 'Защита от 1 удара', icon: '🛡️', price: 2000 },
+  { id: 'double', name: 'x2 Монеты', desc: 'Двойные монеты', icon: '💰', price: 2000 }
 ];
 
 function loadEconomy() {
@@ -1170,18 +1170,32 @@ function showCollectNotify(animalName) {
 
 // ==================== SKILL EFFECTS ====================
 function applyMonkeySkill(dt) {
-  // Auto-jump: detect obstacles ahead and jump
-  if (!isGrounded || isDucking) return;
+  // Auto-dodge: detect obstacles ahead — jump over regular, duck under barriers
+  let needJump = false;
+  let needDuck = false;
   chunks.forEach(chunk => {
     chunk.obs.forEach(obs => {
-      if (obs.userData.destroyed || obs.userData.type === 'barrier') return;
+      if (obs.userData.destroyed) return;
       const dz = obs.position.z - playerGroup.position.z;
-      const dx = Math.abs(obs.position.x - playerGroup.position.x);
-      if (dz > 1 && dz < 5 && dx < 1.5) {
-        jump();
+      if (obs.userData.type === 'barrier') {
+        if (dz > 1 && dz < 6) {
+          needDuck = true;
+        }
+      } else {
+        const dx = Math.abs(obs.position.x - playerGroup.position.x);
+        if (dz > 1 && dz < 5 && dx < 1.5) {
+          needJump = true;
+        }
       }
     });
   });
+
+  if (needDuck && !isDucking && isGrounded) {
+    startDuck();
+    setTimeout(stopDuck, 800);
+  } else if (needJump && isGrounded && !isDucking) {
+    jump();
+  }
 }
 
 function applyDeerSkill(obs) {
@@ -1231,16 +1245,31 @@ function gameLoop(time) {
 
   if (gameState === 'intro') {
     introTimer = time - introStartTime;
-    const progress = Math.min(introTimer / 1500, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const FACE_TIME = 1200;
+    const DESCEND_TIME = 1800;
+    const TOTAL_INTRO = FACE_TIME + DESCEND_TIME;
 
-    playerGroup.rotation.y = Math.PI * (1 - eased);
-    playerGroup.position.y = 4 + (PLAYER_Y - 4) * eased;
+    if (introTimer < FACE_TIME) {
+      // Phase 1: hero faces camera, big and close
+      playerGroup.rotation.y = Math.PI;
+      playerGroup.position.y = 3.5;
+      playerGroup.position.x = 0;
+      const bob = Math.sin(introTimer / 200) * 0.08;
+      playerGroup.position.y = 3.5 + bob;
+    } else {
+      // Phase 2: rotate and descend to playing position
+      const dp = Math.min((introTimer - FACE_TIME) / DESCEND_TIME, 1);
+      const eased = 1 - Math.pow(1 - dp, 3);
+      playerGroup.rotation.y = Math.PI * (1 - eased);
+      playerGroup.position.y = 3.5 + (PLAYER_Y - 3.5) * eased;
+      playerGroup.position.x = LANES[targetLane] * eased;
+    }
 
-    if (progress >= 1) {
+    if (introTimer >= TOTAL_INTRO) {
       gameState = 'playing';
       playerGroup.rotation.y = 0;
       playerGroup.position.y = PLAYER_Y;
+      playerGroup.position.x = LANES[targetLane];
       lastTime = time;
       startMusic();
     }
