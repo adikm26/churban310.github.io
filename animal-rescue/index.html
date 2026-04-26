@@ -1343,7 +1343,6 @@ function gameLoop(time) {
             }
             if (hasShield) {
               hasShield = false;
-              activeBoosts = activeBoosts.filter(b => b !== 'shield');
               obs.userData.destroyed = true;
               scene.remove(obs);
               playSfx('collect');
@@ -1373,7 +1372,6 @@ function gameLoop(time) {
         }
         if (hasShield) {
           hasShield = false;
-          activeBoosts = activeBoosts.filter(b => b !== 'shield');
           obs.userData.destroyed = true;
           scene.remove(obs);
           playSfx('collect');
