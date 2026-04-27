@@ -1265,7 +1265,7 @@ function initGame() {
   skillEndTime = 0;
   skillCooldownEnd = 0;
   currentHero = getHero();
-  if (skillRing) { scene.remove(skillRing); skillRing = null; }
+  if (skillRing) { if (playerGroup) playerGroup.remove(skillRing); skillRing = null; }
 
   // Player
   if (playerGroup) scene.remove(playerGroup);
