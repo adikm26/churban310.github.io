@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Спасатель Зверей</title>
+<title>Спаси зверушек!</title>
 <script src="https://yandex.ru/games/sdk/v2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -156,7 +156,7 @@ canvas{display:block}
 </div>
 
 <div id="menu" class="overlay hidden">
-  <h1>СПАСАТЕЛЬ<br>ЗВЕРЕЙ</h1>
+  <h1>СПАСИ<br>ЗВЕРУШЕК!</h1>
   <p class="subtitle">Спаси всех животных!</p>
   <div class="menu-animals">
     <div class="menu-animal">🐵</div>
@@ -489,15 +489,6 @@ function createMountain(x, z, baseScale) {
     group.add(ridge);
   }
 
-  // Snow cap on tall mountains
-  if (h > 8) {
-    const capGeo = new THREE.ConeGeometry(0.35, 0.25, segs);
-    const capMat = new THREE.MeshLambertMaterial({ color: [0xeef5ee, 0xddeedd, 0xf5f5f0][Math.floor(Math.random() * 3)] });
-    const cap = new THREE.Mesh(capGeo, capMat);
-    cap.scale.set(w * 0.45, h * 0.12, w * 0.45);
-    cap.position.y = h * 0.85;
-    group.add(cap);
-  }
 
   // Foliage base (green skirt) for non-rocky
   if (!isRocky) {
@@ -1926,15 +1917,21 @@ function startGame() {
   updateBoostIcons();
 }
 
+let pauseStartTime = 0;
+
 function pauseGame() {
   if (gameState !== 'playing') return;
   gameState = 'paused';
+  pauseStartTime = performance.now();
   stopMusic();
   document.getElementById('pause').classList.remove('hidden');
   document.getElementById('mobileControls').classList.add('hidden');
 }
 
 function resumeGame() {
+  const pauseDuration = performance.now() - pauseStartTime;
+  if (skillEndTime > 0) skillEndTime += pauseDuration;
+  if (skillCooldownEnd > 0) skillCooldownEnd += pauseDuration;
   gameState = 'playing';
   lastTime = performance.now();
   document.getElementById('pause').classList.add('hidden');
