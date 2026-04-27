@@ -1251,6 +1251,7 @@ function initGame() {
   targetLane = 1;
   runCoins = 0;
   isDucking = false;
+  if (monkeyDuckTimeout) { clearTimeout(monkeyDuckTimeout); monkeyDuckTimeout = null; }
   introTimer = 0;
   document.getElementById('collectNotify').innerHTML = '';
   playerVelY = 0;
@@ -1434,6 +1435,8 @@ function showCollectNotify(animalName) {
 }
 
 // ==================== SKILL EFFECTS ====================
+let monkeyDuckTimeout = null;
+
 function applyMonkeySkill(dt) {
   // Auto-dodge: jump over regular, duck under barriers, dodge around trees
   let needJump = false;
@@ -1465,12 +1468,12 @@ function applyMonkeySkill(dt) {
     if (targetLane > 0 && !treeLanes.has(targetLane - 1)) moveLeft();
     else if (targetLane < 2 && !treeLanes.has(targetLane + 1)) moveRight();
   } else if (needDuck && !isDucking) {
+    if (monkeyDuckTimeout) { clearTimeout(monkeyDuckTimeout); monkeyDuckTimeout = null; }
     if (!isGrounded) {
-      // Slam down first, then duck
       startDuck();
     } else {
       startDuck();
-      setTimeout(stopDuck, 800);
+      monkeyDuckTimeout = setTimeout(() => { stopDuck(); monkeyDuckTimeout = null; }, 800);
     }
   } else if (needJump && isGrounded && !isDucking) {
     jump();
