@@ -32,7 +32,7 @@ canvas{display:block}
 .btn-settings:hover{background:rgba(255,255,255,0.25)}
 
 #backstory{background:linear-gradient(135deg,#1a4a1a 0%,#0d2d0d 100%)}
-.backstory-content{max-width:420px;padding:20px;text-align:center}
+.backstory-content{max-width:560px;padding:30px 28px;text-align:center;max-height:90vh;overflow-y:auto}
 .backstory-content h2{color:#ffd54f;font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:0.8em}
 .backstory-text{color:#e8f5e9;font-size:clamp(0.85rem,2.5vw,1.05rem);line-height:1.8;margin-bottom:1.5em;text-align:left}
 .backstory-text p{margin-bottom:0.6em}
@@ -315,18 +315,18 @@ const HERO_CHARACTERS = [
   { id: 'animal-monkey', name: 'Обезьянка', emoji: '🐵', price: 0,
     skillName: 'Ловкач', skillDesc: 'Авто-уклонение 10 сек', skillIcon: '🦘',
     skillDuration: 10000, skillColor: 0x4caf50 },
-  { id: 'animal-fox', name: 'Лиса', emoji: '🦊', price: 4000,
+  { id: 'animal-fox', name: 'Лиса', emoji: '🦊', price: 2000,
     skillName: 'Магнит', skillDesc: 'Притягивает монеты 10 сек', skillIcon: '🧲',
     skillDuration: 10000, skillColor: 0xffd54f },
-  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 6000,
-    skillName: 'Рогач', skillDesc: 'Разбивает преграды 10 сек', skillIcon: '💥',
-    skillDuration: 10000, skillColor: 0xff9800 },
-  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 8000,
+  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 3000,
+    skillName: 'Ярость', skillDesc: 'Неуязвимость 10 сек', skillIcon: '🔥',
+    skillDuration: 10000, skillColor: 0x2196f3 },
+  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 4000,
     skillName: 'Дзен', skillDesc: 'Замедление 15 сек', skillIcon: '🧘',
     skillDuration: 15000, skillColor: 0xce93d8 },
-  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 10000,
-    skillName: 'Ярость', skillDesc: 'Неуязвимость 10 сек', skillIcon: '🔥',
-    skillDuration: 10000, skillColor: 0x2196f3 }
+  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 5000,
+    skillName: 'Рогач', skillDesc: 'Разбивает преграды 10 сек', skillIcon: '💥',
+    skillDuration: 10000, skillColor: 0xff9800 }
 ];
 
 // ==================== STATE ====================
@@ -518,6 +518,112 @@ function createMountains() {
   return mtns;
 }
 createMountains();
+
+// ==================== ENVIRONMENT DETAILS ====================
+function createClouds() {
+  const clouds = new THREE.Group();
+  const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+  for (let i = 0; i < 20; i++) {
+    const cloud = new THREE.Group();
+    const numPuffs = 3 + Math.floor(Math.random() * 4);
+    for (let p = 0; p < numPuffs; p++) {
+      const s = 1.5 + Math.random() * 2.5;
+      const puff = new THREE.Mesh(new THREE.SphereGeometry(s, 7, 5), cloudMat);
+      puff.position.set((Math.random() - 0.5) * 4, (Math.random() - 0.3) * 1.5, (Math.random() - 0.5) * 3);
+      puff.scale.y = 0.5 + Math.random() * 0.3;
+      cloud.add(puff);
+    }
+    const side = Math.random() < 0.5 ? -1 : 1;
+    cloud.position.set(side * (10 + Math.random() * 40), 18 + Math.random() * 15, -30 + Math.random() * 130);
+    clouds.add(cloud);
+  }
+  scene.add(clouds);
+  return clouds;
+}
+const cloudsGroup = createClouds();
+
+function createSideTrees() {
+  const trees = new THREE.Group();
+  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
+  const leafColors = [0x2d8a2d, 0x3da03d, 0x228B22, 0x1a6b1a, 0x4CAF50];
+  for (let i = 0; i < 30; i++) {
+    const tree = new THREE.Group();
+    const th = 1.5 + Math.random() * 2;
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.25, th, 6), trunkMat);
+    trunk.position.y = th / 2;
+    tree.add(trunk);
+    const layers = 2 + Math.floor(Math.random() * 2);
+    for (let l = 0; l < layers; l++) {
+      const lr = 1.2 - l * 0.3 + Math.random() * 0.3;
+      const lh = 1.0 + Math.random() * 0.5;
+      const leafMat = new THREE.MeshLambertMaterial({ color: leafColors[Math.floor(Math.random() * leafColors.length)] });
+      const leaf = new THREE.Mesh(new THREE.ConeGeometry(lr, lh, 6 + Math.floor(Math.random() * 3)), leafMat);
+      leaf.position.y = th + l * 0.7 + 0.5;
+      tree.add(leaf);
+    }
+    const side = i < 15 ? -1 : 1;
+    tree.position.set(side * (8 + Math.random() * 5), 0, -20 + Math.random() * 100);
+    const s = 0.8 + Math.random() * 0.6;
+    tree.scale.set(s, s, s);
+    trees.add(tree);
+  }
+  scene.add(trees);
+  return trees;
+}
+const sideTreesGroup = createSideTrees();
+
+function createFlowersAndBushes() {
+  const group = new THREE.Group();
+  const bushMat = new THREE.MeshLambertMaterial({ color: 0x2d7a2d });
+  const flowerColors = [0xff6b6b, 0xffd93d, 0xff85c1, 0xc77dff, 0x74c0fc];
+  for (let i = 0; i < 40; i++) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const x = side * (6 + Math.random() * 8);
+    const z = -20 + Math.random() * 100;
+    if (Math.random() < 0.5) {
+      const bush = new THREE.Mesh(new THREE.SphereGeometry(0.4 + Math.random() * 0.4, 6, 5), bushMat);
+      bush.position.set(x, 0.3, z);
+      bush.scale.y = 0.6 + Math.random() * 0.3;
+      group.add(bush);
+    } else {
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.4, 4), new THREE.MeshLambertMaterial({ color: 0x4a8a3d }));
+      stem.position.set(x, 0.2, z);
+      group.add(stem);
+      const fc = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+      const flower = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 5), new THREE.MeshLambertMaterial({ color: fc }));
+      flower.position.set(x, 0.45, z);
+      group.add(flower);
+    }
+  }
+  scene.add(group);
+  return group;
+}
+const flowersGroup = createFlowersAndBushes();
+
+function createRocks() {
+  const group = new THREE.Group();
+  const rockColors = [0x8a8a8a, 0x7a7a6a, 0x9a9a8a, 0x6a6a5a];
+  for (let i = 0; i < 16; i++) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const s = 0.3 + Math.random() * 0.5;
+    const geo = new THREE.DodecahedronGeometry(s, 0);
+    const posArr = geo.attributes.position.array;
+    for (let j = 0; j < posArr.length; j += 3) {
+      posArr[j] += (Math.random() - 0.5) * 0.15;
+      posArr[j + 1] += (Math.random() - 0.5) * 0.1;
+      posArr[j + 2] += (Math.random() - 0.5) * 0.15;
+    }
+    geo.computeVertexNormals();
+    const mat = new THREE.MeshLambertMaterial({ color: rockColors[Math.floor(Math.random() * rockColors.length)] });
+    const rock = new THREE.Mesh(geo, mat);
+    rock.position.set(side * (7 + Math.random() * 6), s * 0.3, -15 + Math.random() * 90);
+    rock.rotation.set(Math.random(), Math.random(), Math.random());
+    group.add(rock);
+  }
+  scene.add(group);
+  return group;
+}
+const rocksGroup = createRocks();
 
 // ==================== AUDIO ====================
 let audioCtx = null;
