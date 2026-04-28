@@ -24,12 +24,14 @@ canvas{display:block}
 .menu-stats{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:1.5em}
 .menu-highscore{color:#ff9800;font-size:clamp(0.85rem,2.5vw,1.1rem);font-weight:700;text-shadow:1px 1px 3px rgba(0,0,0,0.5)}
 
-.btn{padding:14px 48px;font-size:clamp(1rem,3vw,1.3rem);border:none;border-radius:50px;cursor:pointer;font-weight:700;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+.btn{padding:14px 48px;font-size:clamp(1rem,3vw,1.3rem);border:none;border-radius:16px;cursor:pointer;font-weight:700;letter-spacing:1px;transition:all 0.25s ease;box-shadow:0 4px 15px rgba(0,0,0,0.3);position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.15) 0%,transparent 60%);opacity:0;transition:opacity 0.3s}
+.btn:hover::after{opacity:1}
 .btn:active{transform:scale(0.95)}
-.btn-play{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:15px}
-.btn-play:hover{background:linear-gradient(135deg,#66bb6a,#388e3c);box-shadow:0 6px 20px rgba(76,175,80,0.5)}
-.btn-settings{background:rgba(255,255,255,0.15);color:#fff;border:2px solid rgba(255,255,255,0.3);font-size:clamp(0.85rem,2.5vw,1.1rem);padding:10px 36px}
-.btn-settings:hover{background:rgba(255,255,255,0.25)}
+.btn-play{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:15px;font-size:clamp(1.2rem,3.5vw,1.5rem);padding:16px 56px;border-radius:20px;box-shadow:0 4px 20px rgba(76,175,80,0.4),inset 0 1px 0 rgba(255,255,255,0.2)}
+.btn-play:hover{background:linear-gradient(135deg,#66bb6a,#388e3c);box-shadow:0 6px 25px rgba(76,175,80,0.6);transform:translateY(-2px)}
+.btn-settings{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.25);font-size:clamp(0.85rem,2.5vw,1.1rem);padding:12px 36px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn-settings:hover{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);transform:translateY(-1px)}
 
 #backstory{background:linear-gradient(135deg,#1a4a1a 0%,#0d2d0d 100%)}
 .backstory-content{max-width:560px;padding:30px 28px;text-align:center;max-height:90vh;overflow-y:auto}
@@ -87,6 +89,8 @@ canvas{display:block}
 .go-animal-icon{font-size:1.3rem;background:rgba(255,255,255,0.1);padding:4px;border-radius:6px}
 .go-coins{color:#ffd54f;font-size:clamp(1rem,3vw,1.3rem);margin-bottom:0.5em;font-weight:700}
 .btn-restart{background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;margin-bottom:12px}
+.btn-ad-revive{background:linear-gradient(135deg,#ffd54f,#ff9800);color:#1a1a1a;font-size:clamp(1.1rem,3vw,1.4rem);padding:16px 40px;margin-bottom:16px;border-radius:20px;box-shadow:0 0 20px rgba(255,213,79,0.5),0 4px 15px rgba(0,0,0,0.3);animation:adPulse 1.8s ease-in-out infinite;font-weight:800;letter-spacing:0.5px}
+@keyframes adPulse{0%,100%{transform:scale(1);box-shadow:0 0 20px rgba(255,213,79,0.5)}50%{transform:scale(1.06);box-shadow:0 0 35px rgba(255,213,79,0.8),0 0 60px rgba(255,152,0,0.3)}}
 .btn-menu{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
 
 #pause{background:rgba(0,0,0,0.8)}
@@ -99,10 +103,15 @@ canvas{display:block}
 .loader-bar{height:100%;background:#4caf50;border-radius:4px;width:0%;transition:width 0.3s}
 .loader-text{color:#a5d6a7;font-size:0.9rem;margin-top:0.8em}
 
-#mobileControls{position:fixed;bottom:20px;left:0;width:100%;display:flex;justify-content:center;gap:12px;z-index:60;pointer-events:none}
-#mobileControls.hidden{display:none}
-.mob-btn{pointer-events:auto;width:clamp(48px,11vw,64px);height:clamp(48px,11vw,64px);background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:16px;color:#fff;font-size:clamp(1.1rem,2.8vw,1.6rem);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-.mob-btn:active{background:rgba(255,255,255,0.35);transform:scale(0.9)}
+#mobileControls{display:none!important}
+@media (max-width:768px),(pointer:coarse){
+  .skill-wrap{bottom:20px!important;left:50%!important;transform:translateX(-50%)}
+  .skill-button{width:70px!important;height:70px!important;border-radius:50%!important}
+  .skill-icon{font-size:1.6rem!important}
+  .skill-name{font-size:0.55rem!important}
+  .skill-key{display:none!important}
+  .boost-timers{bottom:100px!important;left:50%!important;transform:translateX(-50%);align-items:center}
+}
 
 #collectNotify{position:fixed;top:80px;right:20px;z-index:55;pointer-events:none}
 .notify-item{background:rgba(0,0,0,0.75);color:#ffd54f;padding:10px 18px;border-radius:12px;font-size:clamp(0.85rem,2.5vw,1.1rem);font-weight:700;margin-bottom:8px;animation:notifyIn 0.3s ease-out,notifyOut 0.5s 2s ease-in forwards;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-shadow:1px 1px 2px rgba(0,0,0,0.5)}
@@ -142,13 +151,13 @@ canvas{display:block}
     <div class="backstory-text">
       <p>Где-то далеко в лесу случилась беда — маленькие зверята заблудились на большой дороге! Впереди бочки, шипы, ловушки и дорожные знаки. Кто-то должен их спасти!</p>
       <p>Ты управляешь <b>героем-спасателем</b>. Беги вперёд, уклоняйся от преград и собирай зверят — они побегут за тобой!</p>
-      <p>🎮 <b>Управление:</b></p>
-      <p>◀ <b>A</b> или <b>←</b> — бежать влево</p>
-      <p>▶ <b>D</b> или <b>→</b> — бежать вправо</p>
-      <p>▲ <b>W</b> или <b>↑</b> — прыгнуть</p>
-      <p>▼ <b>S</b> или <b>↓</b> — присесть (чтобы проехать под знаками)</p>
-      <p>⭐ <b>Пробел</b> — суперспособность (раз в 30 секунд)</p>
-      <p>🦸 У каждого героя своя <b>суперспособность</b>! Обезьянка автоматически уклоняется от всех преград, Олень разбивает их рогами, Лиса притягивает монеты, Тигр становится неуязвимым, а Панда замедляет время.</p>
+      <div id="controlsPC">
+        <p>🎮 <b>WASD</b> / стрелки — управление, <b>Пробел</b> — суперспособность</p>
+      </div>
+      <div id="controlsMobile" style="display:none">
+        <p>🎮 <b>Свайп</b> влево/вправо — смена полосы, вверх — прыжок, вниз — присесть. <b>Кнопка</b> — суперспособность</p>
+      </div>
+      <p>🦸 У каждого героя своя <b>суперспособность</b>! Обезьянка автоматически уклоняется, Лиса притягивает монеты, Панда замедляет время, Тигр проходит сквозь преграды, Олень разбивает их рогами.</p>
       <p>🪙 <b>Собирай монеты</b> — за них можно купить новых героев в магазине!</p>
     </div>
     <button class="btn btn-play" id="btnStartAdventure">Вперёд! 🚀</button>
@@ -160,10 +169,10 @@ canvas{display:block}
   <p class="subtitle">Спаси всех животных!</p>
   <div class="menu-animals">
     <div class="menu-animal">🐵</div>
-    <div class="menu-animal">🦌</div>
     <div class="menu-animal">🦊</div>
-    <div class="menu-animal">🐯</div>
     <div class="menu-animal">🐼</div>
+    <div class="menu-animal">🐯</div>
+    <div class="menu-animal">🦌</div>
   </div>
   <div class="menu-stats">
     <div class="shop-balance" id="menuCoins">Монеты: 0 🪙</div>
@@ -248,6 +257,7 @@ canvas{display:block}
   <div class="go-coins" id="goCoins">+0 🪙</div>
   <div class="go-animals-rescued" id="goAnimals">Спасено зверей: 0</div>
   <div class="go-animal-icons" id="goAnimalIcons"></div>
+  <button class="btn btn-ad-revive" id="btnAdRevive">▶ Продолжить за рекламу</button>
   <button class="btn btn-restart" id="btnRestart">Ещё раз</button>
   <button class="btn btn-settings" id="btnShopGO" style="margin-bottom:12px;background:linear-gradient(135deg,rgba(255,213,79,0.3),rgba(255,143,0,0.3));border-color:rgba(255,213,79,0.5)">🛒 Магазин</button>
   <button class="btn btn-settings" id="btnSettingsGO" style="margin-bottom:12px">Настройки</button>
@@ -312,19 +322,19 @@ const ANIMAL_NAMES_RU = {
 
 // ==================== HERO CHARACTERS ====================
 const HERO_CHARACTERS = [
-  { id: 'animal-monkey', name: 'Обезьянка', emoji: '🐵', price: 0,
+  { id: 'animal-monkey', name: 'Обезьянка', emoji: '🐵', price: 2000,
     skillName: 'Ловкач', skillDesc: 'Авто-уклонение 10 сек', skillIcon: '🦘',
     skillDuration: 10000, skillColor: 0x4caf50 },
   { id: 'animal-fox', name: 'Лиса', emoji: '🦊', price: 2000,
     skillName: 'Магнит', skillDesc: 'Притягивает монеты 10 сек', skillIcon: '🧲',
     skillDuration: 10000, skillColor: 0xffd54f },
-  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 3000,
-    skillName: 'Ярость', skillDesc: 'Неуязвимость 10 сек', skillIcon: '🔥',
-    skillDuration: 10000, skillColor: 0x2196f3 },
-  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 4000,
+  { id: 'animal-panda', name: 'Панда', emoji: '🐼', price: 2000,
     skillName: 'Дзен', skillDesc: 'Замедление 15 сек', skillIcon: '🧘',
     skillDuration: 15000, skillColor: 0xce93d8 },
-  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 5000,
+  { id: 'animal-tiger', name: 'Тигр', emoji: '🐯', price: 2000,
+    skillName: 'Фантом', skillDesc: 'Проходит сквозь преграды 7 сек', skillIcon: '👻',
+    skillDuration: 7000, skillColor: 0x2196f3 },
+  { id: 'animal-deer', name: 'Олень', emoji: '🦌', price: 3000,
     skillName: 'Рогач', skillDesc: 'Разбивает преграды 10 сек', skillIcon: '💥',
     skillDuration: 10000, skillColor: 0xff9800 }
 ];
@@ -517,7 +527,7 @@ function createMountains() {
   scene.add(mtns);
   return mtns;
 }
-createMountains();
+const mountainsGroup = createMountains();
 
 // ==================== ENVIRONMENT DETAILS ====================
 function createClouds() {
@@ -1232,6 +1242,7 @@ function updateFormationPositions(dt) {
 
 // ==================== GAME LOGIC ====================
 let hasShield = false;
+let adReviveUsed = false;
 
 function getHero() {
   const id = selectedSkin || 'animal-monkey';
@@ -1259,6 +1270,10 @@ function initGame() {
   gameSpeed = activeBoosts.includes('slow') ? BASE_SPEED * 0.6 : BASE_SPEED;
   distance = 0;
   hasShield = activeBoosts.includes('shield');
+  adReviveUsed = false;
+
+  // Reset parallax positions
+  [flowersGroup, sideTreesGroup, rocksGroup, mountainsGroup, cloudsGroup].forEach(g => { g.position.z = 0; });
 
   // Skill reset
   skillActive = false;
@@ -1579,6 +1594,15 @@ function gameLoop(time) {
       skillActive = false;
       playSfx('skillEnd');
       if (skillRing) { playerGroup.remove(skillRing); skillRing = null; }
+      // Reset tiger ghost transparency
+      if (currentHero && currentHero.id === 'animal-tiger') {
+        playerGroup.traverse(child => {
+          if (child.isMesh && child.material) {
+            child.material.transparent = false;
+            child.material.opacity = 1.0;
+          }
+        });
+      }
     }
   }
 
@@ -1707,9 +1731,8 @@ function gameLoop(time) {
       const dz = Math.abs(obs.position.z - playerGroup.position.z);
       if (dx < 0.8 && dz < 0.8) {
         if (playerGroup.position.y > obs.position.y + 0.5) return;
-        // Skill: Tiger invincibility
+        // Skill: Tiger phase-through (ghost mode)
         if (skillActive && currentHero.id === 'animal-tiger') {
-          applyDeerSkill(obs);
           return;
         }
         // Skill: Deer antler charge
@@ -1801,6 +1824,29 @@ function gameLoop(time) {
     });
   });
 
+  // Parallax environment movement
+  const parallaxGroups = [
+    { group: flowersGroup, speed: 0.95 },
+    { group: sideTreesGroup, speed: 0.8 },
+    { group: rocksGroup, speed: 0.75 },
+    { group: mountainsGroup, speed: 0.15 },
+    { group: cloudsGroup, speed: 0.05 }
+  ];
+  parallaxGroups.forEach(({ group, speed }) => {
+    group.position.z -= moveZ * speed;
+    if (group.position.z < -100) group.position.z += 200;
+  });
+
+  // Tiger ghost visual effect
+  if (skillActive && currentHero.id === 'animal-tiger') {
+    playerGroup.traverse(child => {
+      if (child.isMesh && child.material) {
+        child.material.transparent = true;
+        child.material.opacity = 0.4 + Math.sin(time * 0.01) * 0.2;
+      }
+    });
+  }
+
   // Camera follow
   camera.position.x += (playerGroup.position.x * 0.3 - camera.position.x) * 0.05 * dt;
 
@@ -1849,7 +1895,7 @@ function gameOver() {
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('skillWrap').classList.add('hidden');
   document.getElementById('boostTimers').classList.add('hidden');
-  document.getElementById('mobileControls').classList.add('hidden');
+  document.getElementById('btnAdRevive').style.display = adReviveUsed ? 'none' : 'inline-block';
   document.getElementById('gameover').classList.remove('hidden');
 
   if (window.ysdk) {
@@ -1951,8 +1997,8 @@ function renderShop() {
   const skinsDiv = document.getElementById('shopSkins');
   skinsDiv.innerHTML = '';
   HERO_CHARACTERS.forEach(hero => {
-    const isFree = hero.price === 0;
-    const isOwned = isFree || ownedSkins.includes(hero.id);
+    const isDefault = hero.id === 'animal-monkey';
+    const isOwned = isDefault || ownedSkins.includes(hero.id);
     const isSelected = selectedSkin === hero.id;
     const canBuy = totalCoins >= hero.price && !isOwned;
     const el = document.createElement('div');
@@ -1966,7 +2012,7 @@ function renderShop() {
         </div>
       </div>
       <button class="btn-buy ${isSelected ? 'owned' : ''}" ${!canBuy && !isOwned ? 'disabled' : ''} data-type="skin" data-id="${hero.id}">
-        ${isSelected ? 'Выбран' : isOwned ? 'Выбрать' : hero.price === 0 ? 'Бесплатно' : hero.price + ' 🪙'}
+        ${isSelected ? 'Выбран' : isOwned ? 'Выбрать' : hero.price + ' 🪙'}
       </button>`;
     skinsDiv.appendChild(el);
   });
@@ -1993,8 +2039,8 @@ function buyBoost(id) {
 function buySkin(id) {
   const hero = HERO_CHARACTERS.find(x => x.id === id);
   if (!hero) return;
-  const isFree = hero.price === 0;
-  const isOwned = isFree || ownedSkins.includes(id);
+  const isDefault = id === 'animal-monkey';
+  const isOwned = isDefault || ownedSkins.includes(id);
 
   if (isOwned) {
     selectedSkin = id;
@@ -2022,7 +2068,6 @@ function startGame() {
   document.getElementById('gameover').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');
   document.getElementById('skillWrap').classList.remove('hidden');
-  if (isMobile()) document.getElementById('mobileControls').classList.remove('hidden');
   updateBoostIcons();
 }
 
@@ -2044,7 +2089,6 @@ function resumeGame() {
   gameState = 'playing';
   lastTime = performance.now();
   document.getElementById('pause').classList.add('hidden');
-  if (isMobile()) document.getElementById('mobileControls').classList.remove('hidden');
   startMusic();
 }
 
@@ -2096,11 +2140,7 @@ document.addEventListener('touchend', (e) => {
   }
 }, { passive: true });
 
-document.getElementById('mobLeft').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
-document.getElementById('mobRight').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
-document.getElementById('mobJump').addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
-document.getElementById('mobDuck').addEventListener('touchstart', (e) => { e.preventDefault(); startDuck(); });
-document.getElementById('mobDuck').addEventListener('touchend', (e) => { e.preventDefault(); stopDuck(); });
+
 document.getElementById('skillBtn').addEventListener('click', () => { if (gameState === 'playing') activateSkill(); });
 
 // UI Buttons
@@ -2110,6 +2150,13 @@ document.getElementById('btnPlay').addEventListener('click', () => {
     saveEconomy();
     document.getElementById('menu').classList.add('hidden');
     document.getElementById('backstory').classList.remove('hidden');
+    if (isMobile()) {
+      document.getElementById('controlsPC').style.display = 'none';
+      document.getElementById('controlsMobile').style.display = 'block';
+    } else {
+      document.getElementById('controlsPC').style.display = 'block';
+      document.getElementById('controlsMobile').style.display = 'none';
+    }
   } else {
     startGame();
   }
@@ -2123,6 +2170,18 @@ document.getElementById('btnSettingsGO').addEventListener('click', () => openSet
 document.getElementById('btnSettingsPause').addEventListener('click', () => openSettings('pause'));
 document.getElementById('btnBack').addEventListener('click', closeSettings);
 document.getElementById('btnRestart').addEventListener('click', startGame);
+document.getElementById('btnAdRevive').addEventListener('click', () => {
+  if (adReviveUsed) return;
+  adReviveUsed = true;
+  // Placeholder: here Yandex Games SDK ad would play
+  // window.ysdk.adv.showRewardedVideo({ callbacks: { onRewarded: () => { ... } } });
+  gameState = 'playing';
+  document.getElementById('gameover').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('skillWrap').classList.remove('hidden');
+  lastTime = performance.now();
+  startMusic();
+});
 document.getElementById('btnToMenu').addEventListener('click', () => { stopMusic(); activeBoosts = []; saveEconomy(); showMenu(); });
 document.getElementById('btnToMenu2').addEventListener('click', () => { stopMusic(); showMenu(); });
 document.getElementById('pauseBtn').addEventListener('click', pauseGame);
