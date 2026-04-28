@@ -1243,6 +1243,7 @@ function updateFormationPositions(dt) {
 // ==================== GAME LOGIC ====================
 let hasShield = false;
 let adReviveUsed = false;
+let reviveInvincibleUntil = 0;
 
 function getHero() {
   const id = selectedSkin || 'animal-monkey';
@@ -1678,6 +1679,7 @@ function gameLoop(time) {
     chunk.obs.forEach(obs => {
       if (gameState !== 'playing') return;
       if (obs.userData.destroyed) return;
+      if (performance.now() < reviveInvincibleUntil) return;
 
       if (obs.userData.type === 'roadTree') {
         const dx = Math.abs(obs.position.x - playerGroup.position.x);
@@ -1845,6 +1847,14 @@ function gameLoop(time) {
         child.material.opacity = 0.4 + Math.sin(time * 0.01) * 0.2;
       }
     });
+  }
+
+  // Revive invincibility flash effect
+  if (performance.now() < reviveInvincibleUntil) {
+    const flash = Math.sin(time * 0.03) > 0;
+    playerGroup.visible = flash;
+  } else if (!playerGroup.visible) {
+    playerGroup.visible = true;
   }
 
   // Camera follow
@@ -2175,6 +2185,7 @@ document.getElementById('btnAdRevive').addEventListener('click', () => {
   adReviveUsed = true;
   // Placeholder: here Yandex Games SDK ad would play
   // window.ysdk.adv.showRewardedVideo({ callbacks: { onRewarded: () => { ... } } });
+  reviveInvincibleUntil = performance.now() + 2000;
   gameState = 'playing';
   document.getElementById('gameover').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');
