@@ -2096,6 +2096,7 @@ function resumeGame() {
   const pauseDuration = performance.now() - pauseStartTime;
   if (skillEndTime > 0) skillEndTime += pauseDuration;
   if (skillCooldownEnd > 0) skillCooldownEnd += pauseDuration;
+  if (reviveInvincibleUntil > 0) reviveInvincibleUntil += pauseDuration;
   gameState = 'playing';
   lastTime = performance.now();
   document.getElementById('pause').classList.add('hidden');
