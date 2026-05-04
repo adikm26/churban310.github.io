@@ -24,14 +24,17 @@ canvas{display:block}
 .menu-stats{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:1.5em}
 .menu-highscore{color:#ff9800;font-size:clamp(0.85rem,2.5vw,1.1rem);font-weight:700;text-shadow:1px 1px 3px rgba(0,0,0,0.5)}
 
-.btn{padding:14px 48px;font-size:clamp(1rem,3vw,1.3rem);border:none;border-radius:16px;cursor:pointer;font-weight:700;letter-spacing:1px;transition:all 0.25s ease;box-shadow:0 4px 15px rgba(0,0,0,0.3);position:relative;overflow:hidden}
+.btn{padding:12px 32px;font-size:clamp(0.9rem,2.8vw,1.2rem);border:none;border-radius:14px;cursor:pointer;font-weight:700;letter-spacing:1px;transition:all 0.2s ease;box-shadow:0 3px 12px rgba(0,0,0,0.3);position:relative;overflow:hidden;max-width:90vw;white-space:nowrap}
 .btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.15) 0%,transparent 60%);opacity:0;transition:opacity 0.3s}
 .btn:hover::after{opacity:1}
 .btn:active{transform:scale(0.95)}
-.btn-play{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:15px;font-size:clamp(1.2rem,3.5vw,1.5rem);padding:16px 56px;border-radius:20px;box-shadow:0 4px 20px rgba(76,175,80,0.4),inset 0 1px 0 rgba(255,255,255,0.2)}
-.btn-play:hover{background:linear-gradient(135deg,#66bb6a,#388e3c);box-shadow:0 6px 25px rgba(76,175,80,0.6);transform:translateY(-2px)}
-.btn-settings{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.25);font-size:clamp(0.85rem,2.5vw,1.1rem);padding:12px 36px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn-play{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:12px;font-size:clamp(1.1rem,3.2vw,1.4rem);padding:14px 44px;border-radius:18px;box-shadow:0 4px 18px rgba(76,175,80,0.4),inset 0 1px 0 rgba(255,255,255,0.2)}
+.btn-play:hover{background:linear-gradient(135deg,#66bb6a,#388e3c);box-shadow:0 6px 22px rgba(76,175,80,0.6);transform:translateY(-2px)}
+.btn-settings{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.25);font-size:clamp(0.8rem,2.3vw,1rem);padding:10px 28px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .btn-settings:hover{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);transform:translateY(-1px)}
+.btn-restart{background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;margin-bottom:10px}
+.btn-resume{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:10px}
+.btn-menu{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
 
 #backstory{background:linear-gradient(135deg,#1a4a1a 0%,#0d2d0d 100%)}
 .backstory-content{max-width:560px;padding:30px 28px;text-align:center;max-height:90vh;overflow-y:auto}
@@ -88,14 +91,11 @@ canvas{display:block}
 .go-animal-icons{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:450px;margin-bottom:1em}
 .go-animal-icon{font-size:1.3rem;background:rgba(255,255,255,0.1);padding:4px;border-radius:6px}
 .go-coins{color:#ffd54f;font-size:clamp(1rem,3vw,1.3rem);margin-bottom:0.5em;font-weight:700}
-.btn-restart{background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;margin-bottom:12px}
 .btn-ad-revive{background:linear-gradient(135deg,#ffd54f,#ff9800);color:#1a1a1a;font-size:clamp(1.1rem,3vw,1.4rem);padding:16px 40px;margin-bottom:16px;border-radius:20px;box-shadow:0 0 20px rgba(255,213,79,0.5),0 4px 15px rgba(0,0,0,0.3);animation:adPulse 1.8s ease-in-out infinite;font-weight:800;letter-spacing:0.5px}
 @keyframes adPulse{0%,100%{transform:scale(1);box-shadow:0 0 20px rgba(255,213,79,0.5)}50%{transform:scale(1.06);box-shadow:0 0 35px rgba(255,213,79,0.8),0 0 60px rgba(255,152,0,0.3)}}
-.btn-menu{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,255,255,0.3)}
 
 #pause{background:rgba(0,0,0,0.8)}
 #pause h2{font-size:clamp(1.5rem,4vw,2.5rem);color:#fff;margin-bottom:1em}
-.btn-resume{background:linear-gradient(135deg,#4caf50,#2e7d32);color:#fff;margin-bottom:12px}
 
 #loading{background:#0d3d0d;z-index:200}
 #loading h2{color:#fff;font-size:clamp(1.2rem,3vw,1.8rem);margin-bottom:1em}
@@ -356,7 +356,7 @@ let introStartTime = 0;
 
 let musicEnabled = true;
 let sfxEnabled = true;
-let musicVolume = 50;
+let musicVolume = 75;
 let sfxVolume = 60;
 
 // Skill state
@@ -382,7 +382,6 @@ let hasSeenBackstory = false;
 const BOOST_ITEMS = [
   { id: 'slow', name: 'Лёгкий старт', desc: 'Медленный старт', icon: '🐢', price: 1000 },
   { id: 'magnet', name: 'Магнит', desc: 'Притягивает монеты', icon: '🧲', price: 1500 },
-  { id: 'shield', name: 'Щит', desc: 'Защита от 1 удара', icon: '🛡️', price: 2000 },
   { id: 'double', name: 'x2 Монеты', desc: 'Двойные монеты', icon: '💰', price: 2000 }
 ];
 
@@ -657,14 +656,14 @@ function initAudio() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   musicGain = audioCtx.createGain();
-  musicGain.gain.value = musicEnabled ? (musicVolume / 100) * 0.25 : 0;
+  musicGain.gain.value = musicEnabled ? (musicVolume / 100) * 0.5 : 0;
   musicGain.connect(audioCtx.destination);
   sfxGain = audioCtx.createGain();
   sfxGain.gain.value = sfxEnabled ? (sfxVolume / 100) * 0.5 : 0;
   sfxGain.connect(audioCtx.destination);
 }
 
-function updateMusicVolume() { if (musicGain) musicGain.gain.value = musicEnabled ? (musicVolume / 100) * 0.25 : 0; }
+function updateMusicVolume() { if (musicGain) musicGain.gain.value = musicEnabled ? (musicVolume / 100) * 0.5 : 0; }
 function updateSfxVolume() { if (sfxGain) sfxGain.gain.value = sfxEnabled ? (sfxVolume / 100) * 0.5 : 0; }
 
 let musicInterval = null;
@@ -739,7 +738,7 @@ function playSfx(type) {
       osc.frequency.setValueAtTime(523, audioCtx.currentTime);
       osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.08);
       osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.16);
-      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.22, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
       osc.start(); osc.stop(audioCtx.currentTime + 0.3);
       break;
@@ -1169,7 +1168,7 @@ function createGroundChunk(z, safe) {
     }
 
     // Fallen log — 1 lane, can't jump over, nothing nearby
-    if (chunkCounter > 4 && Math.random() < 0.3) {
+    if (chunkCounter > 2 && Math.random() < 0.35) {
       const lz = z + 25 + Math.random() * (CHUNK_LENGTH - 40);
       if (!placedObs.some(p => Math.abs(p.z - lz) < 14)) {
         const logLane = Math.floor(Math.random() * 3);
@@ -1407,8 +1406,9 @@ function jump() {
 }
 function startDuck() {
   if (!isGrounded) {
-    // Fast slam down while airborne
-    playerVelY = -0.35;
+    // Fast slam down while airborne — go directly to duck
+    playerVelY = -0.5;
+    isDucking = true;
     triggerFollowSlam();
     return;
   }
@@ -1450,7 +1450,7 @@ function updateHUD() {
 function updateBoostIcons() {
   const container = document.getElementById('hudBoosts');
   container.innerHTML = '';
-  const boostIcons = { magnet: '🧲', shield: '🛡️', double: '💰', slow: '🐢' };
+  const boostIcons = { magnet: '🧲', double: '💰', slow: '🐢' };
   activeBoosts.forEach(id => {
     const icon = document.createElement('div');
     icon.className = 'hud-boost-icon';
@@ -1462,7 +1462,7 @@ function updateBoostIcons() {
 
 function updateBoostTimers() {
   const container = document.getElementById('boostTimers');
-  const boostNames = { magnet: '🧲 Магнит', shield: '🛡️ Щит', double: '💰 x2 Монеты', slow: '🐢 Лёгкий старт' };
+  const boostNames = { magnet: '🧲 Магнит', double: '💰 x2 Монеты', slow: '🐢 Лёгкий старт' };
   if ((activeBoosts.length === 0 && !skillActive) || gameState !== 'playing') {
     container.classList.add('hidden');
     return;
@@ -1473,22 +1473,16 @@ function updateBoostTimers() {
     const item = document.createElement('div');
     item.className = 'boost-timer-item';
     const name = boostNames[id] || id;
-    if (id === 'shield' && !hasShield) {
-      item.innerHTML = `<span class="bt-icon">🛡️</span> Использован`;
-      item.style.opacity = '0.5';
-    } else {
-      item.innerHTML = `<span class="bt-icon">${name.split(' ')[0]}</span> ${name.split(' ').slice(1).join(' ')} — активен`;
-    }
+    item.innerHTML = `<span class="bt-icon">${name.split(' ')[0]}</span> ${name.split(' ').slice(1).join(' ')} — активен`;
     container.appendChild(item);
   });
 
-  // Show skill timer if active
+  // Show skill indicator if active (no countdown, just name)
   if (skillActive && currentHero) {
-    const remaining = Math.max(0, Math.ceil((skillEndTime - performance.now()) / 1000));
     const item = document.createElement('div');
     item.className = 'boost-timer-item';
     item.style.borderColor = 'rgba(255,213,79,0.7)';
-    item.innerHTML = `<span class="bt-icon">${currentHero.skillIcon}</span> ${currentHero.skillName} — ${remaining}с`;
+    item.innerHTML = `<span class="bt-icon">${currentHero.skillIcon}</span> ${currentHero.skillName}`;
     container.appendChild(item);
   }
 }
@@ -1708,8 +1702,9 @@ function gameLoop(time) {
   } else if (!isGrounded) {
     playerVelY -= GRAVITY * dt;
     playerGroup.position.y += playerVelY * dt;
-    if (playerGroup.position.y <= PLAYER_Y) {
-      playerGroup.position.y = PLAYER_Y;
+    const landY = isDucking ? DUCK_Y : PLAYER_Y;
+    if (playerGroup.position.y <= landY) {
+      playerGroup.position.y = landY;
       playerVelY = 0;
       isGrounded = true;
     }
@@ -1886,6 +1881,8 @@ function gameLoop(time) {
             followAnimals.push({ mesh: wrapper, name: col.userData.name, jumping: false, jumpVel: 0, jumpY: 0 });
           }
         } else if (col.userData.type === 'coin') {
+          const dy = Math.abs(col.position.y - playerGroup.position.y);
+          if (dy > 1.2) { col.userData.collected = false; return; }
           const coinVal = activeBoosts.includes('double') ? COIN_PER_PICKUP * 2 : COIN_PER_PICKUP;
           runCoins += coinVal;
           score += 10;
